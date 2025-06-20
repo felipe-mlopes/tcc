@@ -1,11 +1,10 @@
 import { UniqueEntityID } from "@/core/entities/unique-entity-id"
-import { Email } from "../value-objects/email"
-import { Name } from "../value-objects/name"
-import { CPF } from "../value-objects/cpf"
-import { DateOfBirth } from "../value-objects/date-of-birth"
+import { Email } from "../../value-objects/email"
+import { Name } from "../../value-objects/name"
+import { CPF } from "../../value-objects/cpf"
+import { DateOfBirth } from "../../value-objects/date-of-birth"
 import { Entity } from "@/core/entities/entity"
 import { Optional } from "@/core/types/optional"
-
 
 enum InvestorProfile {
     Conservative = "Conservative",

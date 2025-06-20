@@ -1,9 +1,9 @@
 import { Entity } from "@/core/entities/entity";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
-import { Quantity } from "../value-objects/quantity";
-import { Money } from "../value-objects/money";
+import { Quantity } from "../../value-objects/quantity";
+import { Money } from "../../value-objects/money";
 import { Optional } from "@/core/types/optional";
-import { Percentage } from "../value-objects/percentage";
+import { Percentage } from "../../value-objects/percentage";
 
 export interface InvestmentProps {
     investmentId: UniqueEntityID,
