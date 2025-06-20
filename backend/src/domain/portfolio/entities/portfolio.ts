@@ -1,7 +1,7 @@
-import { Entity } from "@/core/entities/entity";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { Optional } from "@/core/types/optional";
-import { TotalValue } from "../value-objects/total-value";
+import { TotalValue } from "../../value-objects/total-value";
+import { AggregateRoot } from "@/core/entities/aggregate-root";
 
 interface PortfolioProps {
     portfolioId: UniqueEntityID,
@@ -14,7 +14,7 @@ interface PortfolioProps {
     allocations: Array<string>
 }
 
-export class Portfolio extends Entity<PortfolioProps> {
+export class Portfolio extends AggregateRoot<PortfolioProps> {
     
     public get portfolioId() {
         return this.props.portfolioId
