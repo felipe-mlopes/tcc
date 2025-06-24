@@ -15,7 +15,7 @@ enum Status {
 }
 
 interface GoalProps {
-    GoalId: UniqueEntityID,
+    goalId: UniqueEntityID,
     userId: UniqueEntityID,
     name: string,
     description: string,
