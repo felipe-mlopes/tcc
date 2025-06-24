@@ -6,7 +6,7 @@ import { DateOfBirth } from "../../value-objects/date-of-birth"
 import { Entity } from "@/core/entities/entity"
 import { Optional } from "@/core/types/optional"
 
-enum InvestorProfile {
+export enum InvestorProfile {
     Conservative = "Conservative",
     Moderate = "Moderate",
     Aggressive = "Aggressive"
@@ -61,14 +61,34 @@ export class Investor extends Entity<InvestorProps> {
         return this.props.isActive
     }
 
-    set riskProfile(riskProfile: string) {
-        this.props.riskProfile == riskProfile
-        this.touch()
+    set email(newEmail: string) {
+        const newEmailVerified = Email.create(newEmail)
+
+        if(!this.props.email.equals(newEmailVerified)) {
+            this.props.email.getValue() == newEmail
+        }
     }
 
-    set isActive(isActive: boolean) {
-        this.props.isActive == isActive
-        this.touch()
+    set name(newName: string) {
+        const newNameVerified = Name.create(newName)
+
+        if(!this.props.name.equals(newNameVerified)) {
+            this.props.name.getValue() == newName
+        }
+    }
+
+    set riskProfile(newRiskProfile: InvestorProfile) {
+        if(this.props.riskProfile !== newRiskProfile) {
+            this.props.riskProfile == newRiskProfile
+            this.touch()
+        }
+    }
+
+    set isActive(active: boolean) {
+        if (this.props.isActive !== active) {
+            this.props.isActive == active
+            this.touch()
+        }
     }
 
     private touch() {
@@ -85,7 +105,7 @@ export class Investor extends Entity<InvestorProps> {
         this.touch()
     }
 
-    static create(props: Optional<InvestorProps, 'createdAt' | 'isActive'>, id?: UniqueEntityID) {
+    public static create(props: Optional<InvestorProps, 'createdAt' | 'isActive'>, id?: UniqueEntityID) {
         const investor = new Investor(
             {
                 ...props,
