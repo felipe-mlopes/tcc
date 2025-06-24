@@ -15,7 +15,7 @@ export class DateOfBirth {
         return this.dateOfBirth.getTime() === date.getValue().getTime()
     }
 
-    private static isValid(date: Date): boolean {
+    public static isValid(date: Date): boolean {
         const today = new Date()
         
         if (date > today) return false
@@ -24,7 +24,7 @@ export class DateOfBirth {
         return age >= 18
     }
 
-    private static calculateAge(date: Date): number {
+    public static calculateAge(date: Date): number {
         const today = new Date()
         let age = today.getFullYear() - date.getFullYear()
         const monthDiff = today.getMonth() - date.getMonth()
