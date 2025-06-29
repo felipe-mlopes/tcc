@@ -5,7 +5,7 @@ import { Money } from "@/core/value-objects/money";
 import { Percentage } from "@/core/value-objects/percentage";
 import { Quantity } from "@/core/value-objects/quantity";
 
-interface InvestmentTransaction {
+export interface InvestmentTransaction {
     quantity: Quantity;
     price: Money;
     date: Date;
@@ -13,10 +13,11 @@ interface InvestmentTransaction {
 
 export interface InvestmentProps {
     investmentId: UniqueEntityID,
-    assetId: UniqueEntityID;
-    quantity: Quantity;
+    portfolioId: UniqueEntityID,
+    assetId: UniqueEntityID,
+    quantity: Quantity,
     currentPrice: Money,
-    transactions: InvestmentTransaction[];
+    transactions: InvestmentTransaction[],
     createdAt: Date,
     updatedAt?: Date,
 }
@@ -24,6 +25,10 @@ export interface InvestmentProps {
 export class Investment extends Entity<InvestmentProps> {
     public get investmentId() {
         return this.props.investmentId
+    }
+
+    public get portfolioId() {
+        return this.props.portfolioId
     }
 
     public get assetId() {
@@ -97,22 +102,12 @@ export class Investment extends Entity<InvestmentProps> {
         return Percentage.fromDecimal(percentageDecimal)
     }
 
-    public updateCurrentPrice(newPrice: Money): void {
-        // if (!newPrice || newPrice.getAmount() <= 0) throw new Error('Current price must be positive.')
-
-        // if (newPrice.getCurrency() !== this.props.currentPrice.getCurrency()) throw new Error('New price must have the same currency as current price.')
-        
+    public updateCurrentPrice(newPrice: Money): void {       
         this.props.currentPrice = newPrice
         this.touch()
     }
 
     public addQuantity(additionalQuantity: Quantity, purchasePrice: Money): void {
-        // if (additionalQuantity.isZero()) throw new Error('Cannot add zero quantity.')
-
-        // if (!purchasePrice || purchasePrice.getAmount() <= 0) throw new Error('Purchase price must be positive.')
-
-        // if (purchasePrice.getCurrency() !== this.props.currentPrice.getCurrency()) throw new Error('Purchase price must have the same currency as current price.')
-
         // Adiciona a transação
         this.props.transactions.push({
             quantity: additionalQuantity,
@@ -127,10 +122,6 @@ export class Investment extends Entity<InvestmentProps> {
     }
 
     public reduceQuantity(quantityToReduce: Quantity): void {
-        // if (quantityToReduce.isZero()) throw new Error('Cannot reduce zero quantity.')
-
-        // if (quantityToReduce.isGreaterThan(this.props.quantity)) throw new Error('Cannot reduce more quantity than available.')
-
         this.props.quantity = this.props.quantity.subtract(quantityToReduce)
         this.touch()
     }
@@ -145,6 +136,10 @@ export class Investment extends Entity<InvestmentProps> {
 
     public isInLoss(): boolean {
         return this.getProfitLoss().getAmount() < 0
+    }
+
+    public belongsToPortfolio(portfolioId: UniqueEntityID): boolean {
+        return this.props.portfolioId.equals(portfolioId)
     }
 
     public equals(other: Investment): boolean {
