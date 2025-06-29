@@ -6,10 +6,10 @@ import { Either, left, right } from "@/core/either";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { Investment } from "../entities/investment";
 import { UpdateInvestmentService, UpdateInvestmentServiceResponse } from "./update-investment";
-import { Asset } from "@/domain/asset/entities/asset";
+import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 
 type UpdateInvestmentAfterTransactionServiceResponse = Either<NotAllowedError, {
-    investmet: Investment
+    updatedInvestment: Investment
 }>
 
 export class UpdateInvestmentAfterTransactionService {
@@ -67,7 +67,64 @@ export class UpdateInvestmentAfterTransactionService {
 
         const { newQuantity, newAveragePrice, newTotalInvested, newCurrentValue, newProfitLoss } = calculationResult.value
 
-        
-        
+        let updatedInvestment: Investment
+
+        if (currentInvestment) {
+            updatedInvestment = Investment.create({
+                investmentId: currentInvestment.investmentId,
+                assetId: currentInvestment.assetId,
+                quantity: newQuantity,
+                currentPrice: transaction.price,
+                createdAt: currentInvestment.createdAt,
+                updatedAt: new Date()
+            }, currentInvestment.id)
+
+            const allTransactions = await this.transactionRepository.findByPortfolioAndAsset(
+                portfolioId,
+                assetId
+            )
+
+            const sortedTransactions = allTransactions.sort(
+                (a: Transaction, b: Transaction) => a.dateAt.getTime() - b.dateAt.getTime()
+            )
+
+            for (const t of sortedTransactions) {
+                if (t.isBuyTransaction()) {
+
+                    if (t.quantity.isZero()) throw new NotAllowedError()
+                    if (!t.price || t.price.getAmount() <= 0) throw new NotAllowedError()
+                    if (t.price.getCurrency() !== currentInvestment.currentPrice.getCurrency()) throw new NotAllowedError()
+                    
+                    updatedInvestment.addQuantity(t.quantity, t.price)
+                }
+            }
+
+            await this.investmentRepository.update(updatedInvestment)
+        } else {
+            if (!transaction.isBuyTransaction()) return left(new NotAllowedError())
+
+            updatedInvestment = Investment.create({
+                investmentId: new UniqueEntityID(),
+                assetId: transaction.assetId,
+                quantity: newQuantity,
+                currentPrice: transaction.price,
+                initialQuantity: transaction.quantity,
+                initialPrice: transaction.price
+            })
+
+            await this.investmentRepository.create(updatedInvestment)
+        }
+
+        const investimentId = String(currentInvestment.id)
+
+        if (updatedInvestment.quantity.isZero()) {
+            if (currentInvestment) {
+                await this.investmentRepository.delete(investimentId)
+            }
+        }
+
+        return right({
+            updatedInvestment
+        })
     }
 }
