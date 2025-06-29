@@ -8,5 +8,5 @@ export interface InvestmentRepository {
     findByAssetName(assetName: string, params: PaginationParams): Promise<Investment[]>
     create(investiment: Investment): Promise<void>
     update(investiment: Investment): Promise<void>
-    delete(investiment: Investment): Promise<void>
+    delete(investimentId: string): Promise<void>
 }
