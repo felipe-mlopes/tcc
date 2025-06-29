@@ -39,13 +39,15 @@ export class AddInvestmentToPortfolioService {
         const assetVerified = await this.assetRepository.findById(assetId)
         if (!assetVerified) return left(new ResourceNotFoundError())
 
-        const portfolioVerified = await this.portfolioRepository.findByUserId(investorId)
+        const portfolioVerified = await this.portfolioRepository.findByInvestorId(investorId)
         if (!portfolioVerified) return left(new ResourceNotFoundError())
 
         const investmentId = new UniqueEntityID()
+        const portfolioId = String(portfolioVerified.id)
 
         const newInvestment = Investment.create({
             investmentId,
+            portfolioId: new UniqueEntityID(portfolioId),
             assetId: new UniqueEntityID(assetId),
             quantity: Quantity.create(quantity),
             currentPrice: Money.create(currentPrice)
