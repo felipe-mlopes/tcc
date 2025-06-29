@@ -4,32 +4,39 @@ import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { Transaction } from "../entities/transaction";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { TransactionRepository } from "../repositories/transaction-repository";
+import { PortfolioRepository } from "@/domain/portfolio/repositories/portfolio-repository";
 
-interface FetchTransactionsHistoryByInvestorIdServiceRequest {
+interface FetchTransactionsHistoryByPorfolioIdServiceRequest {
     investorId: string,
     page: number
 }
 
-type FetchTransactionsHistoryByInvestorIdServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
+type FetchTransactionsHistoryByPorfolioIdServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
     transactions: Transaction[]
 }>
 
-export class FetchTransactionsHistoryByInvestorIdService {
+export class FetchTransactionsHistoryByPorfolioIdService {
     constructor(
         private investorRepository: InvestorRepository,
+        private portfolioRepository: PortfolioRepository,
         private transactionRepository: TransactionRepository
     ) {}
 
     async execute({
         investorId,
         page
-    }: FetchTransactionsHistoryByInvestorIdServiceRequest): Promise<FetchTransactionsHistoryByInvestorIdServiceResponse> {
+    }: FetchTransactionsHistoryByPorfolioIdServiceRequest): Promise<FetchTransactionsHistoryByPorfolioIdServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError())
 
-        const id = String(investor.investorId)
+        const id = String(investor.id)
 
-        const transactions = await this.transactionRepository.findManyByUserId(id, {
+        const portfolio = await this.portfolioRepository.findByInvestorId(id)
+        if (!portfolio) return left(new ResourceNotFoundError())
+
+        const portfolioId = String(portfolio.id)
+
+        const transactions = await this.transactionRepository.findManyByPortfolioId(portfolioId, {
             page
         })
 
