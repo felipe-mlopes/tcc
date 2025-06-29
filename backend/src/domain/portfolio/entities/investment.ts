@@ -1,51 +1,82 @@
 import { Entity } from "@/core/entities/entity";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
-import { Quantity } from "../../value-objects/quantity";
-import { Money } from "../../value-objects/money";
 import { Optional } from "@/core/types/optional";
-import { Percentage } from "../../value-objects/percentage";
+import { Money } from "@/core/value-objects/money";
+import { Percentage } from "@/core/value-objects/percentage";
+import { Quantity } from "@/core/value-objects/quantity";
+
+interface InvestmentTransaction {
+    quantity: Quantity;
+    price: Money;
+    date: Date;
+}
 
 export interface InvestmentProps {
     investmentId: UniqueEntityID,
     assetId: UniqueEntityID;
     quantity: Quantity;
-    averagePrice: Money,
-    currentPrice: Money
+    currentPrice: Money,
+    transactions: InvestmentTransaction[];
     createdAt: Date,
     updatedAt?: Date,
 }
 
 export class Investment extends Entity<InvestmentProps> {
-    get investmentId() {
+    public get investmentId() {
         return this.props.investmentId
     }
 
-    get assetId() {
+    public get assetId() {
         return this.props.assetId
     }
 
-    get quantity() {
-        return this.props.quantity.getValue()
+    public get quantity() {
+        return this.props.quantity
     }
 
-    get averagePrice() {
-        return this.props.averagePrice
+    public get averagePrice() {
+        return this.calculateAveragePrice()
     }
 
-    get currentPrice() {
+    public get currentPrice() {
         return this.props.currentPrice
     }
 
-    get createdAt() {
+    public get createdAt() {
         return this.props.createdAt
     }
 
-    get updateAt() {
+    public get updatedAt() {
         return this.props.updatedAt
     }
 
+    public get transactions() {
+        return [...this.props.transactions] // Retorna uma cópia para manter imutabilidade
+    }
+
+    private calculateAveragePrice(): Money {
+        if (this.props.transactions.length === 0) {
+            return this.props.currentPrice
+        }
+
+        const totalValue = this.props.transactions.reduce((acc, transaction) => {
+            const transactionValue = transaction.price.multiply(transaction.quantity.getValue())
+            return acc.add(transactionValue)
+        }, Money.zero(this.props.currentPrice.getCurrency()))
+
+        const totalQuantity = this.props.transactions.reduce((acc, transaction) => {
+            return acc + transaction.quantity.getValue()
+        }, 0)
+
+        if (totalQuantity === 0) {
+            return this.props.currentPrice
+        }
+
+        return totalValue.divide(totalQuantity)
+    }
+
     public getTotalInvested(): Money {
-        return this.props.averagePrice.multiply(this.props.quantity.getValue())
+        return this.averagePrice.multiply(this.props.quantity.getValue())
     }
 
     public getCurrentValue(): Money {
@@ -66,30 +97,42 @@ export class Investment extends Entity<InvestmentProps> {
         return Percentage.fromDecimal(percentageDecimal)
     }
 
-    public addQuantity(additionalQuantity: Quantity, purchasePrice: Money): void {
-        if (additionalQuantity.isZero()) throw new Error('Cannot add zero quantity.')
+    public updateCurrentPrice(newPrice: Money): void {
+        // if (!newPrice || newPrice.getAmount() <= 0) throw new Error('Current price must be positive.')
 
-        const currentTotalValue = this.getTotalInvested()
-        const additionalValue = purchasePrice.multiply(additionalQuantity.getValue())
-        const newTotalValue = currentTotalValue.add(additionalValue)
-
-        this.props.quantity = this.props.quantity.add(additionalQuantity)
-
-        this.props.averagePrice = newTotalValue.divide(this.props.quantity.getValue())
+        // if (newPrice.getCurrency() !== this.props.currentPrice.getCurrency()) throw new Error('New price must have the same currency as current price.')
+        
+        this.props.currentPrice = newPrice
         this.touch()
+    }
 
-        this.validateInvariant()
+    public addQuantity(additionalQuantity: Quantity, purchasePrice: Money): void {
+        // if (additionalQuantity.isZero()) throw new Error('Cannot add zero quantity.')
+
+        // if (!purchasePrice || purchasePrice.getAmount() <= 0) throw new Error('Purchase price must be positive.')
+
+        // if (purchasePrice.getCurrency() !== this.props.currentPrice.getCurrency()) throw new Error('Purchase price must have the same currency as current price.')
+
+        // Adiciona a transação
+        this.props.transactions.push({
+            quantity: additionalQuantity,
+            price: purchasePrice,
+            date: new Date()
+        })
+
+        // Atualiza a quantidade total
+        this.props.quantity = this.props.quantity.add(additionalQuantity)
+        
+        this.touch()
     }
 
     public reduceQuantity(quantityToReduce: Quantity): void {
-        if (quantityToReduce.isZero()) throw new Error('Cannot reduce zero quantity.')
+        // if (quantityToReduce.isZero()) throw new Error('Cannot reduce zero quantity.')
 
-        if (quantityToReduce.isGreaterThan(this.props.quantity)) throw new Error('Cannot reduce more quantity than available.')
-            
+        // if (quantityToReduce.isGreaterThan(this.props.quantity)) throw new Error('Cannot reduce more quantity than available.')
+
         this.props.quantity = this.props.quantity.subtract(quantityToReduce)
         this.touch()
-
-        this.validateInvariant()
     }
 
     public hasQuantity(): boolean {
@@ -112,25 +155,33 @@ export class Investment extends Entity<InvestmentProps> {
         this.props.updatedAt = new Date()
     }
 
-    private validateInvariant(): void {
-        if(!this.props.quantity || this.props.quantity.getValue() < 0) throw new Error('Investment quantity must be non-negative.')
+    public static create(
+        props: Optional<Omit<InvestmentProps, 'transactions'>, 'createdAt'> & {
+            initialQuantity?: Quantity;
+            initialPrice?: Money;
+        }, 
+        id?: UniqueEntityID
+    ) {
+        const transactions: InvestmentTransaction[] = []
         
-        if(!this.props.averagePrice || this.props.averagePrice.getAmount() <= 0) throw new Error('Investment average price must be positive.')
+        // Se houver quantidade e preço inicial, cria a primeira transação
+        if (props.initialQuantity && props.initialPrice) {
+            transactions.push({
+                quantity: props.initialQuantity,
+                price: props.initialPrice,
+                date: props.createdAt ?? new Date()
+            })
+        }
 
-        if(!this.props.currentPrice || this.props.currentPrice.getAmount() <= 0) throw new Error('Investment current price must be positive.')
-
-        if(this.props.averagePrice.getCurrency() !== this.props.currentPrice.getCurrency()) throw new Error('Average price and current price must have the same currency.')
-    }
-
-    public static create(props: Optional<InvestmentProps, 'createdAt'>, id?: UniqueEntityID) {
-        const investiment = new Investment(
+        const investment = new Investment(
             {
                 ...props,
+                transactions,
                 createdAt: props.createdAt ?? new Date()
             },
             id
         )
 
-        return investiment
+        return investment
     }
 }
