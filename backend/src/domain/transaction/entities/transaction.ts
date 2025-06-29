@@ -10,7 +10,7 @@ export enum TransactionType {
     Dividend = "Dividend"
 }
 
-interface TransactionProps {
+export interface TransactionProps {
     transactionId: UniqueEntityID,
     portfolioId: UniqueEntityID,
     assetId: UniqueEntityID,
