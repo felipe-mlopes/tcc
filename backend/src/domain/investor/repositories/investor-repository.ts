@@ -6,5 +6,4 @@ export interface InvestorRepository {
     findByCpf(cpf: string): Promise<Investor | null>
     create(investor: Investor): Promise<void>
     update(investor: Investor): Promise<void>
-    delete(investor: Investor): Promise<void>
 }
