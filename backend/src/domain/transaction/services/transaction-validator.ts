@@ -47,7 +47,7 @@ export class TransactionValidatorService {
         const asset = await this.assetRepository.findByName(assetName)
         if (!asset) return left(new ResourceNotFoundError())
 
-        const portfolio = await this.portfolioRepository.findByUserId(investorId)
+        const portfolio = await this.portfolioRepository.findByInvestorId(investorId)
         if (!portfolio) return left(new ResourceNotFoundError())
 
         let quantityFormatted = Quantity.create(quantity)
