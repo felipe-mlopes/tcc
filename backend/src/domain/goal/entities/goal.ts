@@ -1,6 +1,6 @@
 import { Entity } from "@/core/entities/entity";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
-import { Money } from "@/domain/value-objects/money";
+import { Money } from "@/core/value-objects/money";
 
 enum Priority {
     High = "High",

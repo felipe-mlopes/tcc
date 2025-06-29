@@ -1,12 +1,13 @@
 import { Investor, InvestorProfile } from "../entities/investor";
 import { Either, left, right } from "@/core/either";
-import { Email } from "@/domain/value-objects/email";
-import { Name } from "@/domain/value-objects/name";
-import { CPF } from "@/domain/value-objects/cpf";
-import { DateOfBirth } from "@/domain/value-objects/date-of-birth";
+
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { InvestorRepository } from "../repositories/investor-repository";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { DateOfBirth } from "@/core/value-objects/date-of-birth";
+import { Email } from "@/core/value-objects/email";
+import { Name } from "@/core/value-objects/name";
+import { CPF } from "@/core/value-objects/cpf";
 
 interface RegisterInvestorServiceRequest {
     email: string
@@ -44,8 +45,7 @@ export class RegisterInvestorService {
             name: Name.create(name),
             cpf: CPF.create(cpf),
             dateOfBirth: DateOfBirth.create(dateOfBirth),
-            riskProfile,
-
+            riskProfile
         })
 
         await this.investorRepository.create(newInvestor)
