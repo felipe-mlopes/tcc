@@ -1,11 +1,11 @@
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { Optional } from "@/core/types/optional";
-import { TotalValue } from "../../value-objects/total-value";
 import { AggregateRoot } from "@/core/entities/aggregate-root";
+import { TotalValue } from "@/core/value-objects/total-value";
 
 interface PortfolioProps {
     portfolioId: UniqueEntityID,
-    userId: UniqueEntityID,
+    investorId: UniqueEntityID,
     name: string,
     description?: string,
     createdAt: Date,
@@ -20,8 +20,8 @@ export class Portfolio extends AggregateRoot<PortfolioProps> {
         return this.props.portfolioId
     }
     
-    public get userId() {
-        return this.props.userId
+    public get investorId() {
+        return this.props.investorId
     }
 
     public get name() {
@@ -57,30 +57,37 @@ export class Portfolio extends AggregateRoot<PortfolioProps> {
         this.props.updatedAt = new Date()
     }
 
-    // private updateTotalValue() {
-    //     const total = this.props.allocations.reduce((sum, investment) => {
-    //         return sum + investment.quantity * investment.currentValue;
-    //       }, 0);
-      
-    //       this.props.totalValue = new TotalValue(total);
-    // }
+    public increaseTotalValue(quantity: number, price: number) {
+        const newInvestment = quantity * price
+        new TotalValue(newInvestment)
+        const totalValue = this.props.totalValue.getValue() + newInvestment
 
-    // private updateAllocations(newAllocations: Investment[]) {
-    //     this.props.allocations = newAllocations;
-    //     this.updateTotalValue();
-    //     this.touch();
-    // }
+        this.props.totalValue = new TotalValue(totalValue)
+    }
+
+    public decreaseTotalValue(quantity: number, price: number) {
+        const newInvestment = quantity * price
+        new TotalValue(newInvestment)
+        const totalValue = this.props.totalValue.getValue() - newInvestment
+
+        this.props.totalValue = new TotalValue(totalValue)
+    }
+
+    public updateAllocation(newAllocation: string) {
+        this.props.allocations.push(newAllocation);
+        this.touch();
+    }
 
     static create(props: Optional<PortfolioProps, 'createdAt' | 'totalValue'>, id?: UniqueEntityID) {
-            const portfolio = new Portfolio(
-                {
-                    ...props,
-                    createdAt: props.createdAt ?? new Date(),
-                    totalValue: props.totalValue ?? TotalValue.zero()
-                }, 
-                id
+        const portfolio = new Portfolio(
+            {
+                ...props,
+                createdAt: props.createdAt ?? new Date(),
+                totalValue: props.totalValue ?? TotalValue.zero()
+            }, 
+            id
         )
     
-            return portfolio
+        return portfolio
     }
 }
