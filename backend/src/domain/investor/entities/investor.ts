@@ -12,7 +12,7 @@ export enum InvestorProfile {
     Aggressive = "Aggressive"
 }
 
-interface InvestorProps {
+export interface InvestorProps {
     investorId: UniqueEntityID,
     email: Email,
     name: Name,
