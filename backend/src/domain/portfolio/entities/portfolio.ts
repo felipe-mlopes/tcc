@@ -3,7 +3,7 @@ import { Optional } from "@/core/types/optional";
 import { AggregateRoot } from "@/core/entities/aggregate-root";
 import { TotalValue } from "@/core/value-objects/total-value";
 
-interface PortfolioProps {
+export interface PortfolioProps {
     portfolioId: UniqueEntityID,
     investorId: UniqueEntityID,
     name: string,
