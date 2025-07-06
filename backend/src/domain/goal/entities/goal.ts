@@ -20,7 +20,7 @@ export interface GoalProps {
     goalId: UniqueEntityID,
     userId: UniqueEntityID,
     name: string,
-    description: string,
+    description: string | null,
     targetAmount: Money,
     currentAmount: Money,
     targetDate: Date,
@@ -32,7 +32,6 @@ export interface GoalProps {
 
 export class Goal extends Entity<GoalProps> {
     
-    // Getters
     public get goalId() {
         return this.props.goalId
     }
@@ -77,7 +76,6 @@ export class Goal extends Entity<GoalProps> {
         return this.props.updatedAt
     }
 
-    // Computed Properties
     public get progress(): Percentage {
         if (this.props.targetAmount.getAmount() === 0) {
             return Percentage.zero()
@@ -108,23 +106,10 @@ export class Goal extends Entity<GoalProps> {
         return this.props.status === Status.Achieved || this.progress.getValue() >= 100
     }
 
-    // Business Methods
     public addToCurrentAmount(amount: Money): void {
-/*         if (amount.getAmount() <= 0) {
-            throw new Error('Amount to add must be positive')
-        }
-
-        if (amount.getCurrency() !== this.props.currentAmount.getCurrency()) {
-            throw new Error('Currency must match the goal currency')
-        }
-
-        if (this.props.status !== Status.Active) {
-            throw new Error('Cannot add amount to inactive goal')
-        } */
-
         this.props.currentAmount = this.props.currentAmount.add(amount)
 
-        // Auto-achieve goal if target is reached
+        // Verifica se automaticamente se a meta foi atingida
         if (this.props.currentAmount.getAmount() >= this.props.targetAmount.getAmount()) {
             this.markAsAchieved()
         }
@@ -133,27 +118,11 @@ export class Goal extends Entity<GoalProps> {
     }
 
     public subtractFromCurrentAmount(amount: Money): void {
-/*         if (amount.getAmount() <= 0) {
-            throw new Error('Amount to subtract must be positive')
-        }
-
-        if (amount.getCurrency() !== this.props.currentAmount.getCurrency()) {
-            throw new Error('Currency must match the goal currency')
-        }
-
-        if (this.props.status !== Status.Active) {
-            throw new Error('Cannot subtract amount from inactive goal')
-        } */
-
         const newAmount = this.props.currentAmount.subtract(amount)
-        
-/*         if (newAmount.getAmount() < 0) {
-            throw new Error('Current amount cannot be negative')
-        } */
 
         this.props.currentAmount = newAmount
         
-        // If was achieved and now is below target, reactivate
+        // Verifica se foi alcançado e agora está abaixo da meta
         if (this.props.status === Status.Achieved && 
             this.props.currentAmount.getAmount() < this.props.targetAmount.getAmount()) {
             this.props.status = Status.Active
@@ -163,10 +132,6 @@ export class Goal extends Entity<GoalProps> {
     }
 
     public updateName(newName: string): void {
-/*         if (!newName || newName.trim().length === 0) {
-            throw new Error('Goal name cannot be empty')
-        } */
-
         this.props.name = newName.trim()
         this.touch()
     }
@@ -177,21 +142,9 @@ export class Goal extends Entity<GoalProps> {
     }
 
     public updateTargetAmount(newTargetAmount: Money): void {
-/*         if (newTargetAmount.getAmount() <= 0) {
-            throw new Error('Target amount must be positive')
-        }
-
-        if (newTargetAmount.getCurrency() !== this.props.targetAmount.getCurrency()) {
-            throw new Error('Currency must match the goal currency')
-        }
-
-        if (this.props.status !== Status.Active) {
-            throw new Error('Cannot update target amount of inactive goal')
-        } */
-
         this.props.targetAmount = newTargetAmount
 
-        // Check if goal should be marked as achieved
+        // Verifica se a meta deveria ser marcada como alcançada
         if (this.props.currentAmount.getAmount() >= newTargetAmount.getAmount()) {
             this.markAsAchieved()
         }
@@ -200,14 +153,6 @@ export class Goal extends Entity<GoalProps> {
     }
 
     public updateTargetDate(newTargetDate: Date): void {
-/*         if (newTargetDate <= new Date()) {
-            throw new Error('Target date must be in the future')
-        }
-
-        if (this.props.status !== Status.Active) {
-            throw new Error('Cannot update target date of inactive goal')
-        } */
-
         this.props.targetDate = newTargetDate
         this.touch()
     }
@@ -218,39 +163,20 @@ export class Goal extends Entity<GoalProps> {
     }
 
     public markAsAchieved(): void {
-/*         if (this.props.status === Status.Cancelled) {
-            throw new Error('Cannot achieve a cancelled goal')
-        } */
-
         this.props.status = Status.Achieved
         this.touch()
     }
 
     public cancel(): void {
-/*         if (this.props.status === Status.Achieved) {
-            throw new Error('Cannot cancel an achieved goal')
-        } */
-
         this.props.status = Status.Cancelled
         this.touch()
     }
 
     public reactivate(): void {
-/*         if (this.props.status === Status.Active) {
-            throw new Error('Goal is already active')
-        } */
-
-        // Only allow reactivation if not achieved or if achieved but below target
-/*         if (this.props.status === Status.Achieved && 
-            this.props.currentAmount.getAmount() >= this.props.targetAmount.getAmount()) {
-            throw new Error('Cannot reactivate a fully achieved goal')
-        } */
-
         this.props.status = Status.Active
         this.touch()
     }
 
-    // Utility Methods
     public belongsToUser(userId: UniqueEntityID): boolean {
         return this.props.userId.equals(userId)
     }
@@ -288,33 +214,19 @@ export class Goal extends Entity<GoalProps> {
         this.props.updatedAt = new Date()
     }
 
-    // Factory Method
     public static create(
-        props: Optional<GoalProps, 'createdAt' | 'currentAmount'> & {
+        props: Optional<GoalProps, 'createdAt' | 'currentAmount' | 'status'> & {
             status?: Status // Tornar status opcional sem valor padrão
         },
         id?: UniqueEntityID
     ): Goal {
-
-/*         if (!props.name || props.name.trim().length === 0) {
-            throw new Error('Goal name is required')
-        }
-
-        if (props.targetAmount.getAmount() <= 0) {
-            throw new Error('Target amount must be positive')
-        }
-
-        if (props.targetDate <= new Date()) {
-            throw new Error('Target date must be in the future')
-        } */
-
         const goal = new Goal(
             {
                 ...props,
                 name: props.name.trim(),
                 description: props.description?.trim() || '',
                 currentAmount: props.currentAmount || Money.zero(props.targetAmount.getCurrency()),
-                status: props.status ?? Status.Active, // Usar nullish coalescing
+                status: props.status ?? Status.Active,
                 createdAt: props.createdAt || new Date()
             },
             id
