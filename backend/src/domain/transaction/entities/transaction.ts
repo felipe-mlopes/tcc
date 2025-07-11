@@ -21,7 +21,7 @@ export interface TransactionProps {
     fees: Money,
     dateAt: Date,
     createdAt: Date
-    updatedAt?: Date | null,
+    updatedAt?: Date,
     notes?: string
 }
 
