@@ -3,7 +3,10 @@ import { Transaction } from "../entities/transaction"
 
 export interface TransactionRepository {
     findById(id: string): Promise<Transaction | null>
-    findManyByPortfolioId(portfolioId: string, params: PaginationParams): Promise<Transaction[]>
+    findManyByPortfolioId(
+        portfolioId: string, 
+        params: PaginationParams
+    ): Promise<Transaction[]>
     findByManyPortfolioAndAsset(
         portfolioId: string, 
         assetId: string, 
