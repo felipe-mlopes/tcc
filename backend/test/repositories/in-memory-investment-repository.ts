@@ -9,12 +9,37 @@ export class InMemoryInvestmentRepository implements InvestmentRepository {
         const investment = this.items.find(
             item => item.id.toString() === id
         )
-
+        
         if (!investment) return null
-
+        
+        return investment
+    }
+    
+    async findByPortfolioIdAndAssetId(
+        portfolioId: string, 
+        assetId: string
+    ): Promise<Investment | null> {
+        const investment = this.items.find(
+            item => item.portfolioId.toString() === portfolioId && 
+            item.assetId.toString() === assetId
+        )
+        
+        if (!investment) return null
+        
         return investment
     }
 
+    async findManyByPortfolio(
+        portfolioId: string, 
+        { page }: PaginationParams
+    ): Promise<Investment[]> {
+        const investments = this.items
+            .filter(item => item.portfolioId.toString() === portfolioId)
+            .slice((page - 1) * 20, page * 20)
+
+        return investments
+    }
+    
     async findManyByPortfolioAndAsset(
         portfolioId: string, 
         assetId: string, 
