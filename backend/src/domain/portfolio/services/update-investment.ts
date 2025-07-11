@@ -27,6 +27,7 @@ export class UpdateInvestmentService {
         if (currentInvestment) {
             const clonedInvestment = Investment.create({
                 investmentId: currentInvestment.investmentId,
+                portfolioId: currentInvestment.portfolioId,
                 assetId: currentInvestment.assetId,
                 quantity: currentInvestment.quantity,
                 currentPrice: currentInvestment.currentPrice,
@@ -51,6 +52,7 @@ export class UpdateInvestmentService {
         } else {
             investment = Investment.create({
                 investmentId: new UniqueEntityID(),
+                portfolioId: transaction.portfolioId,
                 assetId: transaction.assetId,
                 quantity: transaction.quantity,
                 currentPrice: transaction.price,
@@ -82,6 +84,7 @@ export class UpdateInvestmentService {
 
         const clonedInvestment = Investment.create({
             investmentId: currentInvestment.investmentId,
+            portfolioId: currentInvestment.portfolioId,
             assetId: currentInvestment.assetId,
             quantity: currentInvestment.quantity,
             currentPrice: currentInvestment.currentPrice,
@@ -152,6 +155,7 @@ export class UpdateInvestmentService {
                     // Cria o investimento inicial
                     investment = Investment.create({
                         investmentId: new UniqueEntityID(),
+                        portfolioId: transaction.portfolioId,
                         assetId: transaction.assetId,
                         quantity: transaction.quantity,
                         currentPrice: currentPrice,
