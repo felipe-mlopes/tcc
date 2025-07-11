@@ -1,0 +1,268 @@
+@startuml Diagrama de Classes
+!theme plain
+skinparam Linetype ortho
+skinparam PackageStyle rectangle
+
+' Investor Management Domain
+package "Investor Management" {
+
+    class Investor {
+        - investorId: uuid
+        - email: Email
+        - name: Name
+        - cpf: CPF
+        - dateOfBirth: Date
+        - riskProfile: RiskProfile
+        - createdAt: Datetime
+        - updatedAt: Datetime
+        - isActive: boolean
+
+        touch(): void
+        + updateName(): void
+        + updateEmail(): void
+        + desactive(): void
+        + create(): Investor
+    }
+
+    class Email <<ValueObject>> {
+        - value: String
+        + getValue(): String
+    }
+
+    class CPF <<ValueObject>> {
+        - value: String
+        + isValid(): boolean
+        + getValue(): String
+    }
+
+    class Name <<ValueObject>> {
+        - value: String
+        + isValid(): boolean
+        + getValue(): String
+    }
+
+    enum RiskProfile {
+        CONSERVATIVE
+        MODERATE
+        AGGRESSIVE
+    }
+}
+
+'Portfolio Management Domain
+package "Porfolio Management" {
+    class Portfolio {
+        - portfolioId: uuid
+        - investorId: uuid
+        - name: String
+        - description: String
+        - createdAt: Datetime
+        - updatedAt: Datetime
+        - totalValue: TotalValue
+        - allocations: List<Invesment>
+
+        touch(): void
+        + increaseTotalValue(): void
+        + decreaseTotalValue(): void
+        + updateAllocation(): void
+        + create(): Portfolio
+    }
+
+    class Investment {
+        - investmentId: uuid
+        - portfolioId: uuid
+        - assetId: uuid
+        - quantity: Quantity
+        - currentPrice: Money
+        - transactions: List<InvestmentTransaction>
+        - createdAt: Datetime
+        - updatedAt: Datetime
+
+        calculateAveragePrice(): Money
+        touch(): void
+        + getTotalInvested(): Money
+        + getCurrentValue(): Money
+        + getProfitLoss(): Money
+        + getProfitLossPercentage(): Percentage
+        + updateCurrentPrice(): void
+        + addQuantity(): void
+        + reduceQuantity(): void
+        + hasQuantity(): boolean
+        + isInProfit(): boolean
+        + isInLoss(): boolean
+        + belongsToPortfolio(): boolean
+        + equals(): boolean
+        + create(): Investment
+    }
+
+    class Money <<ValueObject>> {
+        - amount: decimal
+        - currency: Currency
+        + add(Money): Money
+        + subtract(Money): Money
+        + multiply(decimal): Money
+    }
+
+    class Quantity <<ValueObject>> {
+        - value: decimal
+        + getValue(): decimal
+        + add(Quantity): Quantity
+        + subtract(Quantity): Quantity
+    }
+
+    class Percentage <<ValueObject>> {
+        - value: decimal
+        + getValue(): decimal
+    }
+}
+
+' Transaction Management Domain
+package "Transaction Management" {
+    class Transaction {
+        - transactionId: uuid
+        - portfolioId: uuid
+        - assetId: uuid
+        - transactionType: TransactionType
+        - quantity: Quantity
+        - price: Money
+        - totalAmount: Money
+        - fees: Money
+        - dateAt: Date
+        - createdAt: Datetime
+        - updatedAt: Datetime
+        - notes: String
+
+        touch(): void
+        + isBuyTransaction(): boolean
+        + isSellTransaction(): boolean
+        + isDividendTransaction(): boolean
+        + updateTransactionType(): void
+        + updateQuantity(): void
+        + updatePrice(): void
+        + updateFees(): void
+        + updateTotalAmount(): void
+        + getTotalGrossAmount(): Money
+        + getTotalNetAmount(): Money
+        + create(): Transaction
+    }
+
+    enum TransactionType {
+        BUY
+        SELL
+        DIVIDEND
+        SPLIT
+    }
+}
+
+' Asset Management Domain
+package "Asset Management" {
+    class Asset {
+        - asserId: uuid
+        - symbol: Symbol
+        - name: String
+        - assetType: AssetType
+        - sector: String
+        - exchange: String
+        - currency: String
+        - createdAt: Datetime
+        - updatedAt: Datetime
+        - isActive: boolean
+
+        touch(): void
+        + desactive(): void
+        + create(): Asset
+    }
+
+    class Symbol <<ValueObject>> {
+        - value: String
+        + getValue(): String
+    }
+
+    enum AssetType {
+        STOCK
+        ETF
+        FII
+        BOND
+        CRYPTO
+    }
+}
+
+' Goal Management Domain
+package "Goal Management" {
+    class Goal {
+        - goalId: uuid
+        - userId: uuid
+        - name: String
+        - description: String
+        - targetAmount: Money
+        - currentAmount: Money
+        - targetDate: Date
+        - priority: Priority
+        - status: Status
+        - createdAt: Datetime
+        - updatedAt: Datetime
+
+        touch(): void
+        + progress(): Percentage
+        + remainingAmount(): Money
+        + daysUntilTarget(): number
+        + addToCurrentAmount(): void
+        + subtractFromCurrentAmount(): void
+        + updateName(): void
+        + updateTargetDate(): void
+        + updatePriority(): void
+        + markAsAchieved(): void
+        + cancel(): void
+        + reactivate(): void
+        + belongsToUser(): boolean
+        + isHighPriority(): boolean
+        + isMediumPriority(): boolean
+        + isLowPriority(): boolean
+        + isActive(): boolean
+        + isCancelled(): boolean
+        + requiresImmediateAttention(): boolean
+        + equals(): boolean
+        + create(): Goal
+    }
+
+    enum Priority {
+        HIGH
+        MEDIUM
+        LOW
+    }
+
+    enum GoalStatus {
+        ACTIVE
+        ACHIEVED
+        CANCELLED
+    }
+}
+
+' Relationships
+Investor ||--o{ Portfolio : owns
+Investor ||--o{ InvestmentGoal : has
+Investor ||--|| RiskProfile : has
+Investor ||--|| Email : has
+Investor ||--|| CPF : has
+Investor ||--|| Name : has
+
+Portfolio ||--o{ Investment : contains
+Portfolio ||--|| Investor : belongs_to
+Portfolio ||--o{ Transaction : has
+
+Investment ||--|| Asset : references
+Investment ||--|| Money : priced_in
+Investment ||--|| Quantity : measured_in
+
+Asset ||--|| AssetType : categorized_as
+Asset ||--|| Symbol : identified_by
+Asset ||--o{ Transaction : involved_in
+
+Transaction ||--|| TransactionType : classified_as
+Transaction ||--|| Portfolio : belongs_to
+Transaction ||--|| Asset : involves
+
+InvestmentGoal ||--|| Priority : prioritized_as
+InvestmentGoal ||--|| GoalStatus : has_status
+InvestmentGoal ||--|| Investor : belongs_to
+
+@enduml

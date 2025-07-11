@@ -1,0 +1,166 @@
+@startuml Diagrama de ComponentBorderThickness
+!theme plain
+skinparam componentStyle rectangle
+
+package "Presentation Layer" {
+    [Web Interface] as WEB
+    [Mobile App] as MOBILE
+    [REST API] as API
+}
+
+package "Application Layer" {
+    [Use Cases] as UC
+    [Application Services] as AS
+    [Interfaces] as INT
+}
+
+package "Domain Layer" {
+    package "User Management" {
+        [User Aggregate] as UA
+        [User Repository Interface] as URI
+        [User Domain Service] as UDS
+    }
+    
+    package "Portfolio Management" {
+        [Portfolio Aggregate] as PA
+        [Portfolio Repository Interface] as PRI
+        [Portfolio Domain Service] as PDS
+    }
+    
+    package "Asset Management" {
+        [Asset Aggregate] as AA
+        [Asset Repository Interface] as ARI
+        [Asset Domain Service] as ADS
+    }
+    
+    package "Transaction Management" {
+        [Transaction Aggregate] as TA
+        [Transaction Repository Interface] as TRI
+        [Transaction Domain Service] as TDS
+    }
+    
+    package "Goal Management" {
+        [Goal Aggregate] as GA
+        [Goal Repository Interface] as GRI
+        [Goal Domain Service] as GDS
+    }
+    
+    package "Analytics" {
+        [Analytics Aggregate] as ANA
+        [Analytics Repository Interface] as ANRI
+        [Analytics Domain Service] as ANDS
+    }
+    
+    package "Notification" {
+        [Notification Aggregate] as NA
+        [Notification Repository Interface] as NRI
+        [Notification Domain Service] as NDS
+    }
+    
+    [Domain Events Bus] as DEB
+}
+
+package "Infrastructure Layer" {
+    package "Repositories" {
+        [User Repository Impl] as UR
+        [Portfolio Repository Impl] as PR
+        [Asset Repository Impl] as AR
+        [Transaction Repository Impl] as TR
+        [Goal Repository Impl] as GR
+        [Analytics Repository Impl] as ANR
+        [Notification Repository Impl] as NR
+    }
+    
+    package "External Services" {
+        [Market Data Service] as MDS
+        [Email Service] as ES
+        [Push Notification Service] as PNS
+        [Authentication Service] as AUTHS
+    }
+    
+    package "Data" {
+        database "PostgreSQL" as DB
+        database "Redis Cache" as CACHE
+    }
+}
+
+package "External Systems" {
+    [Market Data Provider] as MDP
+    [Email Provider] as EP
+    [Push Provider] as PP
+    [Identity Provider] as IP
+}
+
+' Presentation Layer connections
+WEB --> API
+MOBILE --> API
+API --> UC
+
+' Application Layer connections
+UC --> AS
+AS --> INT
+
+' Domain Layer connections
+INT --> UA
+INT --> PA
+INT --> AA
+INT --> TA
+INT --> GA
+INT --> ANA
+INT --> NA
+
+UA --> URI
+PA --> PRI
+AA --> ARI
+TA --> TRI
+GA --> GRI
+ANA --> ANRI
+NA --> NRI
+
+UA --> DEB
+PA --> DEB
+AA --> DEB
+TA --> DEB
+GA --> DEB
+ANA --> DEB
+NA --> DEB
+
+' Infrastructure Layer connections
+URI <|-- UR
+PRI <|-- PR
+ARI <|-- AR
+TRI <|-- TR
+GRI <|-- GR
+ANRI <|-- ANR
+NRI <|-- NR
+
+UR --> DB
+PR --> DB
+AR --> DB
+TR --> DB
+GR --> DB
+ANR --> DB
+NR --> DB
+
+AS --> CACHE
+ADS --> MDS
+NDS --> ES
+NDS --> PNS
+API --> AUTHS
+
+' External connections
+MDS --> MDP
+ES --> EP
+PNS --> PP
+AUTHS --> IP
+
+' Domain Services
+UA --> UDS
+PA --> PDS
+AA --> ADS
+TA --> TDS
+GA --> GDS
+ANA --> ANDS
+NA --> NDS
+
+@enduml

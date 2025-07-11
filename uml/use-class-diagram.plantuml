@@ -1,0 +1,139 @@
+@startuml Diagrama de Casos de Uso
+!theme plain
+skinparam packageStyle rectangle
+
+left to right direction
+
+actor "Investidor" as Investor
+actor "Administrador" as Admin
+actor "Sistema" as System
+actor "Provedor de Dados" as MarketData
+
+rectangle "Sistema de Gerenciamento de Investimentos" {
+    package "Gerenciamento de Usuários" {
+        usecase "Registrar Usuário" as UC1
+        usecase "Atualizar Perfil" as UC2
+        usecase "Atualizar Perfil de Risco" as UC3
+        usecase "Desativar Usuário" as UC4
+    }
+
+    package "Gerenciamento de Portfólio" {
+        usecase "Criar Portfólio" as UC5
+        usecase "Adicionar Investimento" as UC6
+        usecase "Atualizar Quantidade" as UC7
+        usecase "Remover Investimento" as UC8
+        usecase "Calcular Performance" as UC9
+        usecase "Rebalancear Portfólio" as UC10
+    }
+
+    package "Gerenciamento de Ativos" {
+        usecase "Registrar Ativo" as UC11
+        usecase "Atualizar Preço" as UC12
+        usecase "Obter Preço Atual" as UC13
+        usecase "Histórico de Preços" as UC14
+    }
+
+    package "Gerenciamento de Transações" {
+        usecase "Registrar Compra" as UC15
+        usecase "Registrar Venda" as UC16
+        usecase "Registrar Dividendo" as UC17
+        usecase "Histórico de Transações" as UC18
+        usecase "Calcular Ganhos Realizados" as UC19
+    }
+
+    package "Gerenciamento de Metas" {
+        usecase "Criar Meta de Investimento" as UC20
+        usecase "Atualizar Progresso" as UC21
+        usecase "Calcular Projeção" as UC22
+        usecase "Marcar como Alcançada" as UC23
+    }
+
+    package "Análises e Relatórios" {
+        usecase "Gerar Relatório Performance" as UC24
+        usecase "Calcular Métricas" as UC25
+        usecase "Comparar com Benchmark" as UC26
+        usecase "Relatório de Alocação" as UC27
+    }
+
+    package "Notificações" {
+        usecase "Criar Alerta de Preço" as UC28
+        usecase "Enviar Notificação" as UC29
+        usecase "Marcar como Lida" as UC30
+        usecase "Disparar Alerta" as UC31
+    }
+}
+
+' Relacionamentos do Investidor
+Investor --> UC1
+Investor --> UC2
+Investor --> UC3
+Investor --> UC5
+Investor --> UC6
+Investor --> UC7
+Investor --> UC8
+Investor --> UC9
+Investor --> UC10
+Investor --> UC13
+Investor --> UC14
+Investor --> UC15
+Investor --> UC16
+Investor --> UC17
+Investor --> UC18
+Investor --> UC19
+Investor --> UC20
+Investor --> UC21
+Investor --> UC22
+Investor --> UC23
+Investor --> UC24
+Investor --> UC25
+Investor --> UC26
+Investor --> UC27
+Investor --> UC28
+Investor --> UC30
+
+' Relacionamentos do Administrador
+Admin --> UC4
+Admin --> UC11
+Admin --> UC12
+Admin --> UC24
+Admin --> UC25
+Admin --> UC26
+Admin --> UC27
+
+' Relacionamentos do Sistema
+System --> UC9
+System --> UC10
+System --> UC12
+System --> UC19
+System --> UC21
+System --> UC22
+System --> UC24
+System --> UC25
+System --> UC26
+System --> UC29
+System --> UC31
+
+' Relacionamentos do Provedor de Dados
+MarketData --> UC12
+MarketData --> UC13
+MarketData --> UC14
+
+' Relacionamentos extend
+UC6 .> UC15 : <<extend>>
+UC7 .> UC15 : <<extend>>
+UC7 .> UC16 : <<extend>>
+UC8 .> UC16 : <<extend>>
+UC31 .> UC29 : <<extend>>
+UC21 .> UC29 : <<extend>>
+UC10 .> UC29 : <<extend>>
+
+' Relacionamentos include
+UC5 .> UC1 : <<include>>
+UC6 .> UC5 : <<include>>
+UC15 .> UC6 : <<include>>
+UC16 .> UC6 : <<include>>
+UC24 .> UC9 : <<include>>
+UC25 .> UC9 : <<include>>
+UC28 .> UC13 : <<include>>
+
+@enduml
