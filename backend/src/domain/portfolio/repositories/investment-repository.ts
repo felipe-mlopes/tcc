@@ -6,7 +6,7 @@ export interface InvestmentRepository {
     findByPortfolioIdAndAssetId(
         portfolioId: string, 
         assetId: string
-    ): Promise<Investment>
+    ): Promise<Investment | null>
     findManyByPortfolio(
         portfolioId: string,
         params: PaginationParams 
