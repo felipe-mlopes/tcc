@@ -25,7 +25,7 @@ export class RegisterInvestmentGoalService {
         private goalRepository: GoalRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         name,
         description,

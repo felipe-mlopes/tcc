@@ -23,7 +23,7 @@ type RegisterInvestorServiceResponse = Either<NotAllowedError, {
 export class RegisterInvestorService {
     constructor(private investorRepository: InvestorRepository) {}
 
-    async execute({
+    public async execute({
         email,
         name,
         cpf,
@@ -33,7 +33,6 @@ export class RegisterInvestorService {
         const cpfInvestorVerified = await this.investorRepository.findByCpf(cpf)
 
         if (!emailInvestorVerified || !cpfInvestorVerified) return left(new NotAllowedError())
-
         if (!DateOfBirth.isValid(dateOfBirth)) return left(new NotAllowedError())
         
         const age = DateOfBirth.calculateAge(dateOfBirth) 
@@ -55,7 +54,7 @@ export class RegisterInvestorService {
         })
     }
     
-    async getRiskProfileSuggestion(
+    private async getRiskProfileSuggestion(
         userAge: number
     ): Promise<InvestorProfile> {
         if (userAge < 25) return InvestorProfile.Aggressive

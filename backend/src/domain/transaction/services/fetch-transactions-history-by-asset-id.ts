@@ -23,7 +23,7 @@ export class FetchTransactionsHistoryByAssetIdService {
         private transactionRepository: TransactionRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         assetId,
         page

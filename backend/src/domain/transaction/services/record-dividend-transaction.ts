@@ -26,7 +26,7 @@ export class RecordDividendTransactionService {
         private validator: TransactionValidatorService
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         assetName,
         transactionType,

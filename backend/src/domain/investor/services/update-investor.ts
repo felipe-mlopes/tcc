@@ -17,14 +17,13 @@ type UpdateInvestorServiceResponse = Either<ResourceNotFoundError | NotAllowedEr
 export class UpdateInvestorService {
     constructor(private investorRepository: InvestorRepository) {}
 
-    async execute({
+    public async execute({
         investorId,
         name,
         email
     }: UpdateInvestorServiceRequest): Promise<UpdateInvestorServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError())
-
         if(name == undefined && email == undefined) return left(new NotAllowedError())
 
         if(!!name) {

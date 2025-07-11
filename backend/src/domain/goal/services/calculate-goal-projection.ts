@@ -56,7 +56,7 @@ export class CalculateGoalProjectionService {
         private goalRepository: GoalRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         goalId,
         scenarios

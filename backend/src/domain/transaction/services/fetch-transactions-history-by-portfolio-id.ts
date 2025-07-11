@@ -22,7 +22,7 @@ export class FetchTransactionsHistoryByPorfolioIdService {
         private transactionRepository: TransactionRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         page
     }: FetchTransactionsHistoryByPorfolioIdServiceRequest): Promise<FetchTransactionsHistoryByPorfolioIdServiceResponse> {

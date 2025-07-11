@@ -20,7 +20,7 @@ type RegisterAssetServiceResponse = Either<ResourceNotFoundError, {
 export class RegisterAssetService {
     constructor(private assetRepository: AssetRepository) {}
 
-    async execute({
+    public async execute({
         symbol,
         name,
         assetType,

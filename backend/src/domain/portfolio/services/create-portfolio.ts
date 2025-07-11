@@ -19,13 +19,12 @@ export class CreatePortfolioService {
         private investorRepository: InvestorRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         name,
         description
     }: CreatePortfolioServiceRequest): Promise<CreatePortfolioServiceResponse> {
         const investVerified = await this.investorRepository.findById(investorId)
-
         if (!investVerified) return left(new ResourceNotFoundError())
 
         const newPortfolio = Portfolio.create({

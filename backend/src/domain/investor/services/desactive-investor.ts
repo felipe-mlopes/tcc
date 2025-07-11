@@ -13,11 +13,10 @@ type DesactiveInvestorServiceResponse = Either<ResourceNotFoundError, {
 export class DesactiveInvestorService {
     constructor(private investorRepository: InvestorRepository) {}
 
-    async execute({
+    public async execute({
         investorId
     }: DesactiveInvestorServiceRequest): Promise<DesactiveInvestorServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        
         if (!investor) return left(new ResourceNotFoundError())
 
         investor.desactive()

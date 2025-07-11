@@ -20,7 +20,7 @@ export class UpdateGoalProgressService {
         private goalRepository: GoalRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         goalId
     }: UpdateGoalProgressServiceRequest): Promise<UpdateGoalProgressServiceResponse> {
