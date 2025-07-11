@@ -7,31 +7,43 @@ import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { Investment } from "../entities/investment";
 import { UpdateInvestmentService, UpdateInvestmentServiceResponse } from "./update-investment";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
+import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
+
+export interface UpdateInvestmentAfterTransactionServiceRequest {
+    investorId: string,
+    transactionId: string,
+    page: number
+}
 
 type UpdateInvestmentAfterTransactionServiceResponse = Either<NotAllowedError, {
     updatedInvestment: Investment
 }>
 
+type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
+    currentInvestment: Investment,
+    transaction: Transaction,
+    portfolioId: string,
+    assetId: string
+}>
+
 export class UpdateInvestmentAfterTransactionService {
     constructor(
+        private investorRepository: InvestorRepository,
         private investmentRepository: InvestmentRepository,
         private transactionRepository: TransactionRepository,
         private assetRepository: AssetRepository
     ) {}
 
-    async execute(
-        transaction: Transaction
-    ): Promise<UpdateInvestmentAfterTransactionServiceResponse> {
-        const portfolioId = String(transaction.portfolioId)
-        const assetId = String(transaction.assetId)
+    public async execute({
+        investorId,
+        transactionId,
+        page
+    }: UpdateInvestmentAfterTransactionServiceRequest): Promise<UpdateInvestmentAfterTransactionServiceResponse> {
+        const investimentValidate = await this.validateRequests({investorId, transactionId, page})
+        if (investimentValidate.isLeft()) return left(investimentValidate.value)
 
-        const asset = await this.assetRepository.findById(assetId)
-        if (!asset) return left(new NotAllowedError())
-
-        const currentInvestment = await this.investmentRepository.findByPortfolioAndAsset(
-            portfolioId,
-            assetId
-        )     
+        const { currentInvestment, transaction, assetId, portfolioId } = investimentValidate.value
 
         let calculationResult: UpdateInvestmentServiceResponse
 
@@ -65,13 +77,14 @@ export class UpdateInvestmentAfterTransactionService {
 
         if (calculationResult.isLeft()) return left(calculationResult.value)
 
-        const { newQuantity, newAveragePrice, newTotalInvested, newCurrentValue, newProfitLoss } = calculationResult.value
+        const { newQuantity } = calculationResult.value
 
         let updatedInvestment: Investment
 
         if (currentInvestment) {
             updatedInvestment = Investment.create({
                 investmentId: currentInvestment.investmentId,
+                portfolioId: currentInvestment.portfolioId,
                 assetId: currentInvestment.assetId,
                 quantity: newQuantity,
                 currentPrice: transaction.price,
@@ -79,9 +92,12 @@ export class UpdateInvestmentAfterTransactionService {
                 updatedAt: new Date()
             }, currentInvestment.id)
 
-            const allTransactions = await this.transactionRepository.findByPortfolioAndAsset(
+            const allTransactions = await this.transactionRepository.findByManyPortfolioAndAsset(
                 portfolioId,
-                assetId
+                assetId,
+                {
+                    page
+                }
             )
 
             const sortedTransactions = allTransactions.sort(
@@ -105,6 +121,7 @@ export class UpdateInvestmentAfterTransactionService {
 
             updatedInvestment = Investment.create({
                 investmentId: new UniqueEntityID(),
+                portfolioId: transaction.portfolioId,
                 assetId: transaction.assetId,
                 quantity: newQuantity,
                 currentPrice: transaction.price,
@@ -125,6 +142,37 @@ export class UpdateInvestmentAfterTransactionService {
 
         return right({
             updatedInvestment
+        })
+    }
+
+    private async validateRequests({
+        investorId,
+        transactionId        
+    }: UpdateInvestmentAfterTransactionServiceRequest): Promise<ValidateServiceResponse> {
+        const investor = await this.investorRepository.findById(investorId)
+        if (!investor) return left(new ResourceNotFoundError())
+        
+        const transaction = await this.transactionRepository.findById(transactionId)
+        if (!transaction) return left(new ResourceNotFoundError())
+        
+        const portfolioId = String(transaction.portfolioId)
+        const assetId = String(transaction.assetId)
+
+        const asset = await this.assetRepository.findById(assetId)
+        if (!asset) return left(new NotAllowedError())
+
+        const currentInvestment = await this.investmentRepository.findByPortfolioIdAndAssetId(
+            portfolioId,
+            assetId
+        )     
+
+        if (!currentInvestment) return left(new ResourceNotFoundError())
+        
+        return right({
+            currentInvestment,
+            transaction,
+            assetId,
+            portfolioId
         })
     }
 }
