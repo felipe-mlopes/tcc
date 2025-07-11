@@ -21,13 +21,17 @@ type EditInvestmentGoalServiceResponse = Either<ResourceNotFoundError | NotAllow
     goal: Goal
 }>
 
+type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
+    goal: Goal
+}>
+
 export class EditInvestmentGoalService {
     constructor(
         private investorRepository: InvestorRepository,
         private goalRepository: GoalRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         goalId,
         name,
@@ -37,6 +41,41 @@ export class EditInvestmentGoalService {
         priority,
         status
     }: EditInvestmentGoalServiceRequest): Promise<EditInvestmentGoalServiceResponse> {
+        const goalValidate = await this.validateRequests({investorId, goalId})
+        if (goalValidate.isLeft()) return left(goalValidate.value)
+
+        const { goal  } = goalValidate.value
+
+        if (name !== undefined) goal.updateName(name)
+        if (description !== undefined) goal.updateDescription(description)
+        if (targetAmount !== undefined) goal.updateTargetAmount(Money.create(targetAmount))
+        if (targetDate !== undefined) goal.updateTargetDate(targetDate)
+        
+        if (priority !== undefined) {
+            if (priority !== goal.priority) goal.updatePriority(priority)
+        }
+
+        if (status !== goal.status) {
+            if (status === Status.Achieved) goal.markAsAchieved()
+            if (status === Status.Cancelled) goal.cancel()
+            if (status === Status.Active) goal.reactivate()
+        }
+
+        return right({
+            goal
+        })
+    }
+
+    private async validateRequests({
+        investorId,
+        goalId,
+        name,
+        description,
+        targetAmount,
+        targetDate,
+        priority,
+        status
+    }: EditInvestmentGoalServiceRequest): Promise<ValidateServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError())
 
@@ -51,23 +90,6 @@ export class EditInvestmentGoalService {
             priority === undefined ||
             status === undefined
         ) return left(new NotAllowedError())
-
-        const newTargetAmount = Money.create(targetAmount)
-
-        if (name !== undefined) goal.updateName(name)
-        if (description !== undefined) goal.updateDescription(description)
-        if (targetAmount !== undefined) goal.updateTargetAmount(newTargetAmount)
-        if (targetDate !== undefined) goal.updateTargetDate(targetDate)
-        
-        if (priority !== undefined ||
-            priority !== goal.priority
-        ) goal.updatePriority(priority)
-
-        if (status !== goal.status) {
-            if (status === Status.Achieved) goal.markAsAchieved()
-            if (status === Status.Cancelled) goal.cancel()
-            if (status === Status.Active) goal.reactivate()
-        }
 
         return right({
             goal

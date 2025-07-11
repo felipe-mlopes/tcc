@@ -20,13 +20,17 @@ type UpdateTransactionServiceResponse = Either<ResourceNotFoundError | NotAllowe
     transactionEdited: Transaction
 }>
 
+type ValidateServiceResponse = Either<ResourceNotFoundError, {
+    transaction: Transaction
+}>
+
 export class UpdateTransactionService {
     constructor(
         private investorRepository: InvestorRepository,
         private transactionRepository: TransactionRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         transactionId,
         transactionType,
@@ -34,17 +38,17 @@ export class UpdateTransactionService {
         price,
         fees
     }: UpdateTransactionServiceRequest): Promise<UpdateTransactionServiceResponse> {
-        const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
+        const validate = await this.validateRequests({
+            investorId,
+            transactionId,
+            transactionType,
+            quantity,
+            price,
+            fees
+        })
+        if (validate.isLeft()) return left(validate.value)
 
-        if (transactionType == undefined &&
-            quantity == undefined &&
-            price == undefined &&
-            fees == undefined
-        ) return left(new NotAllowedError())
-    
-        const transaction = await this.transactionRepository.findById(transactionId)
-        if (!transaction) return left(new ResourceNotFoundError())
+        const { transaction } = validate.value
       
         if (!!transactionType) {
             transaction.updateTransactionType(transactionType)
@@ -81,6 +85,31 @@ export class UpdateTransactionService {
 
         return right({
             transactionEdited: transaction
+        })
+    }
+
+    private async validateRequests({    
+        investorId,
+        transactionId,
+        transactionType,
+        quantity,
+        price,
+        fees
+    }: UpdateTransactionServiceRequest): Promise<ValidateServiceResponse> {
+        const investor = await this.investorRepository.findById(investorId)
+        if (!investor) return left(new ResourceNotFoundError())
+
+        if (transactionType == undefined &&
+            quantity == undefined &&
+            price == undefined &&
+            fees == undefined
+        ) return left(new NotAllowedError())
+    
+        const transaction = await this.transactionRepository.findById(transactionId)
+        if (!transaction) return left(new ResourceNotFoundError())
+
+        return right({
+            transaction
         })
     }
 }

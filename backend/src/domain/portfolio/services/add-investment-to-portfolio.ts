@@ -8,6 +8,9 @@ import { Investment } from "../entities/investment";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { Quantity } from "@/core/value-objects/quantity";
 import { Money } from "@/core/value-objects/money";
+import { Investor } from "@/domain/investor/entities/investor";
+import { Asset } from "@/domain/asset/entities/asset";
+import { Portfolio } from "../entities/portfolio";
 
 
 interface AddInvestmentToPortfolioServiceRequest {
@@ -19,6 +22,14 @@ interface AddInvestmentToPortfolioServiceRequest {
 
 type AddInvestmentToPortfolioServiceResponse = Either<ResourceNotFoundError, {}>
 
+type ValidateServiceResponse = Either<ResourceNotFoundError, {
+    investorVerified: Investor,
+    assetVerified: Asset,
+    portfolioVerified: Portfolio,
+    quantityFormatted: Quantity,
+    currentPriceFormatted: Money
+}>
+
 export class AddInvestmentToPortfolioService {
     constructor(
         private portfolioRepository: PortfolioRepository,
@@ -27,20 +38,21 @@ export class AddInvestmentToPortfolioService {
         private investorRepository: InvestorRepository
     ) {}
 
-    async execute({
+    public async execute({
         investorId,
         assetId,
         currentPrice,
         quantity
     }: AddInvestmentToPortfolioServiceRequest): Promise<AddInvestmentToPortfolioServiceResponse> {
-        const investVerified = await this.investorRepository.findById(investorId)      
-        if (!investVerified) return left(new ResourceNotFoundError())
+        const validate = await this.validateRequests({
+            investorId,
+            assetId,
+            currentPrice,
+            quantity
+        })
+        if (validate.isLeft()) return left(validate.value)
 
-        const assetVerified = await this.assetRepository.findById(assetId)
-        if (!assetVerified) return left(new ResourceNotFoundError())
-
-        const portfolioVerified = await this.portfolioRepository.findByInvestorId(investorId)
-        if (!portfolioVerified) return left(new ResourceNotFoundError())
+        const { assetVerified, portfolioVerified, quantityFormatted, currentPriceFormatted } = validate.value
 
         const investmentId = new UniqueEntityID()
         const portfolioId = String(portfolioVerified.id)
@@ -48,9 +60,9 @@ export class AddInvestmentToPortfolioService {
         const newInvestment = Investment.create({
             investmentId,
             portfolioId: new UniqueEntityID(portfolioId),
-            assetId: new UniqueEntityID(assetId),
-            quantity: Quantity.create(quantity),
-            currentPrice: Money.create(currentPrice)
+            assetId: assetVerified.assedId,
+            quantity: quantityFormatted,
+            currentPrice: currentPriceFormatted
         })
         await this.investmentRepository.create(newInvestment)
         
@@ -61,6 +73,33 @@ export class AddInvestmentToPortfolioService {
 
         return right({
             newInvestment
+        })
+    }
+
+    private async validateRequests({
+        investorId,
+        assetId,
+        quantity,
+        currentPrice
+    }: AddInvestmentToPortfolioServiceRequest): Promise<ValidateServiceResponse> {
+        const investorVerified = await this.investorRepository.findById(investorId)      
+        if (!investorVerified) return left(new ResourceNotFoundError())
+
+        const assetVerified = await this.assetRepository.findById(assetId)
+        if (!assetVerified) return left(new ResourceNotFoundError())
+
+        const portfolioVerified = await this.portfolioRepository.findByInvestorId(investorId)
+        if (!portfolioVerified) return left(new ResourceNotFoundError())
+
+        const quantityFormatted = Quantity.create(quantity)
+        const currentPriceFormatted = Money.create(currentPrice)
+
+        return right({
+            investorVerified,
+            assetVerified,
+            portfolioVerified,
+            quantityFormatted,
+            currentPriceFormatted
         })
     }
 
