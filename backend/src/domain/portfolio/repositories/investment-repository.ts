@@ -3,10 +3,13 @@ import { Investment } from "../entities/investment"
 
 export interface InvestmentRepository {
     findById(id: string): Promise<Investment | null>
-    findManyByPortfolioAndAsset(
+    findByPortfolioIdAndAssetId(
         portfolioId: string, 
-        assetId: string, 
-        params: PaginationParams
+        assetId: string
+    ): Promise<Investment>
+    findManyByPortfolio(
+        portfolioId: string,
+        params: PaginationParams 
     ): Promise<Investment[]>
     create(investiment: Investment): Promise<void>
     update(investiment: Investment): Promise<void>
