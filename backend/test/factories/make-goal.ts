@@ -15,8 +15,7 @@ export function makeGoal(
 
     const goal = Goal.create(
         {
-            goalId: new UniqueEntityID(),
-            userId: new UniqueEntityID(),
+            investorId: new UniqueEntityID(),
             name: fakerName,
             description: fakerDescription,
             targetAmount: fakerTargetAmount,
