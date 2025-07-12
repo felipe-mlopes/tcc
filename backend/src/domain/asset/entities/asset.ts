@@ -35,6 +35,10 @@ export class Asset extends AggregateRoot<AssetProps> {
     public get name() {
         return this.props.name
     }
+
+    public get assetType() {
+        return this.props.assetType
+    }
     
     public get sector() {
         return this.props.sector
