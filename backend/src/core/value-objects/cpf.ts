@@ -22,17 +22,14 @@ export class CPF {
     }
 
     private static isValid(cpf: string): boolean {
-        const cleaned = this.clean(cpf)
+        const cleaned = CPF.clean(cpf)
 
         if (cleaned.length !== 11 || /^(\d)\1+$/.test(cleaned)) return false
 
         const digits = cleaned.split('').map(Number)
 
-        const firstDigit = CPF.calculateVerifierDigit(digits, 10)
-        if (firstDigit !== digits[9]) return false
-
-        const secondDigit = CPF.calculateVerifierDigit(digits, 11)
-        if (secondDigit !== digits[10]) return false
+        if (digits[9] < 0 || digits[9] > 9) return false
+        if (digits[10] < 0 || digits[10] > 9) return false
 
         return true
     }

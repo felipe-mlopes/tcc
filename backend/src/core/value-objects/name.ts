@@ -20,6 +20,6 @@ export class Name {
     private static isValid(name: string): boolean {
         if (!name || name.length < 2) return false
 
-        return /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(name)
+        return /^[A-Za-zÀ-ÖØ-öø-ÿ\s\-'\.0-9º°ª]+$/.test(name)
     }
 }
