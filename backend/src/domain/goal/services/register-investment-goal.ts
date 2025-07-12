@@ -39,8 +39,7 @@ export class RegisterInvestmentGoalService {
         const targetAmountFormatted = Money.create(targetAmount)
 
         const goal = Goal.create({
-            goalId: new UniqueEntityID(),
-            userId: new UniqueEntityID(investorId),
+            investorId: new UniqueEntityID(investorId),
             name,
             description: description || null,
             targetAmount: targetAmountFormatted,
