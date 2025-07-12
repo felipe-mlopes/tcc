@@ -132,7 +132,7 @@ export class UpdateInvestmentAfterTransactionService {
             await this.investmentRepository.create(updatedInvestment)
         }
 
-        const investimentId = String(currentInvestment.id)
+        const investimentId = currentInvestment.investmentId.toValue().toString()
 
         if (updatedInvestment.quantity.isZero()) {
             if (currentInvestment) {
@@ -155,8 +155,8 @@ export class UpdateInvestmentAfterTransactionService {
         const transaction = await this.transactionRepository.findById(transactionId)
         if (!transaction) return left(new ResourceNotFoundError())
         
-        const portfolioId = String(transaction.portfolioId)
-        const assetId = String(transaction.assetId)
+        const portfolioId = transaction.portfolioId.toValue().toString()
+        const assetId = transaction.assetId.toValue().toString()
 
         const asset = await this.assetRepository.findById(assetId)
         if (!asset) return left(new NotAllowedError())

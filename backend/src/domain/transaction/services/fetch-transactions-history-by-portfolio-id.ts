@@ -29,12 +29,12 @@ export class FetchTransactionsHistoryByPorfolioIdService {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError())
 
-        const id = String(investor.id)
+        const id = investor.investorId.toValue().toString()
 
         const portfolio = await this.portfolioRepository.findByInvestorId(id)
         if (!portfolio) return left(new ResourceNotFoundError())
 
-        const portfolioId = String(portfolio.id)
+        const portfolioId = portfolio.portfolioId.toValue().toString()
 
         const transactions = await this.transactionRepository.findManyByPortfolioId(portfolioId, {
             page

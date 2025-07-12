@@ -55,7 +55,7 @@ export class AddInvestmentToPortfolioService {
         const { assetVerified, portfolioVerified, quantityFormatted, currentPriceFormatted } = validate.value
 
         const investmentId = new UniqueEntityID()
-        const portfolioId = String(portfolioVerified.id)
+        const portfolioId = portfolioVerified.portfolioId.toValue().toString()
 
         const newInvestment = Investment.create({
             investmentId,
@@ -67,7 +67,7 @@ export class AddInvestmentToPortfolioService {
         await this.investmentRepository.create(newInvestment)
         
         // Adiciona o investmentId no Allocations do Portfolio
-        portfolioVerified.updateAllocation(String(investmentId))
+        portfolioVerified.updateAllocation(investmentId.toValue().toString())
         portfolioVerified.increaseTotalValue(quantity, currentPrice)
         await this.portfolioRepository.update(portfolioVerified)
 
