@@ -17,8 +17,7 @@ export enum Status {
 }
 
 export interface GoalProps {
-    goalId: UniqueEntityID,
-    userId: UniqueEntityID,
+    investorId: UniqueEntityID,
     name: string,
     description: string | null,
     targetAmount: Money,
@@ -32,12 +31,8 @@ export interface GoalProps {
 
 export class Goal extends Entity<GoalProps> {
     
-    public get goalId() {
-        return this.props.goalId
-    }
-
-    public get userId() {
-        return this.props.userId
+    public get investorId() {
+        return this.props.investorId
     }
 
     public get name() {
@@ -177,8 +172,8 @@ export class Goal extends Entity<GoalProps> {
         this.touch()
     }
 
-    public belongsToUser(userId: UniqueEntityID): boolean {
-        return this.props.userId.equals(userId)
+    public belongsToUser(investorId: UniqueEntityID): boolean {
+        return this.props.investorId.equals(investorId)
     }
 
     public isHighPriority(): boolean {
