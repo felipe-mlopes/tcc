@@ -1,7 +1,7 @@
 import { ServiceError } from "./service-errors";
 
 export class NotAllowedError extends Error implements ServiceError {
-    constructor() {
-      super('Not allowed.')
+    constructor(message?: string) {
+      super(message || 'Not allowed.')
     }
   }
