@@ -41,7 +41,16 @@ export class EditInvestmentGoalService {
         priority,
         status
     }: EditInvestmentGoalServiceRequest): Promise<EditInvestmentGoalServiceResponse> {
-        const goalValidate = await this.validateRequests({investorId, goalId})
+        const goalValidate = await this.validateRequests({
+            investorId, 
+            goalId,
+            name,
+            description,
+            targetAmount,
+            targetDate,
+            priority,
+            status
+        })
         if (goalValidate.isLeft()) return left(goalValidate.value)
 
         const { goal  } = goalValidate.value
@@ -55,7 +64,7 @@ export class EditInvestmentGoalService {
             if (priority !== goal.priority) goal.updatePriority(priority)
         }
 
-        if (status !== goal.status) {
+        if (status !== undefined && status !== goal.status) {
             if (status === Status.Achieved) goal.markAsAchieved()
             if (status === Status.Cancelled) goal.cancel()
             if (status === Status.Active) goal.reactivate()
@@ -77,19 +86,16 @@ export class EditInvestmentGoalService {
         status
     }: EditInvestmentGoalServiceRequest): Promise<ValidateServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
+        if (!investor) return left(new ResourceNotFoundError("Investor not found."))
 
         const goal = await this.goalRepository.findById(goalId)
-        if (!goal) return left(new NotAllowedError())
+        if (!goal) return left(new ResourceNotFoundError("Goal not found."))
 
-        if (
-            name === undefined ||
-            description === undefined ||
-            targetAmount === undefined ||
-            targetDate === undefined ||
-            priority === undefined ||
-            status === undefined
-        ) return left(new NotAllowedError())
+        if (goal.investorId.toValue() !== investorId) return left(new NotAllowedError("The goal does not belong to that investor."))
+
+        const hasAtLeastOneField = [name, description, targetAmount, targetDate, priority, status]
+            .some(field => field !== undefined)
+        if (!hasAtLeastOneField) return left(new NotAllowedError("It is necessary to inform some change field."))
 
         return right({
             goal
