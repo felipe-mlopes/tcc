@@ -3,8 +3,6 @@ export class Money {
         private readonly amount: number,
         private readonly currency: string
     ) {
-        if (amount < 0) throw new Error('Money amount cannot be negative.')
-
         if (!currency || currency.length !== 3) throw new Error('Currency must be a 3-letter code.')
     }
 
@@ -32,8 +30,6 @@ export class Money {
 
     public subtract(value: Money): Money {
         this.validadeSameCurrency(value)
-
-        if (this.amount < value.amount) throw new Error('Cannot subtract a larger amount.')
 
         return new Money(this.amount - value.amount, this.currency)
     }
