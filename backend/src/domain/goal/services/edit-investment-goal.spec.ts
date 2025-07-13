@@ -234,7 +234,10 @@ describe('Edit Investment Goal', () => {
 
         // Assert
         expect(result.isLeft()).toBe(true)
-        expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+            expect(result.value.message).toBe('Investor not found.')
+        }
     })
 
     it('should not be able to edit a non-existent goal', async () => {
@@ -248,7 +251,10 @@ describe('Edit Investment Goal', () => {
 
         // Assert
         expect(result.isLeft()).toBe(true)
-        expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+            expect(result.value.message).toBe('Goal not found.')
+        }
     })
 
     it('should not be able to edit a goal without providing any field', async () => {
@@ -261,7 +267,10 @@ describe('Edit Investment Goal', () => {
 
         // Assert
         expect(result.isLeft()).toBe(true)
-        expect(result.value).toBeInstanceOf(NotAllowedError)
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(NotAllowedError)
+            expect(result.value.message).toBe('It is necessary to inform some change field.')
+        }
     })
 
     it('should not update priority if it is the same as current', async () => {
