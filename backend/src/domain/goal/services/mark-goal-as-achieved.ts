@@ -49,14 +49,18 @@ export class MarkGoalAsAchievedService {
         investorId
     }: MarkGoalAsAchievedServiceRequest): Promise<ValidateServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if(!investor) return left(new ResourceNotFoundError())
+        if(!investor) return left(new ResourceNotFoundError('Investor not found.'))
 
         const goal = await this.goalRepository.findById(goalId)
-        if (!goal) return left(new ResourceNotFoundError())
-        if (goal.status !== Status.Active) return left(new NotAllowedError())
+        if (!goal) return left(new ResourceNotFoundError('Goal not found.'))
+        if (goal.status !== Status.Active) return left(new NotAllowedError(
+            'Goal cannot be modified because it is not active.'
+        ))
 
         const id = new UniqueEntityID(investorId)
-        if (goal.belongsToUser(id)) return left(new ResourceNotFoundError())
+        if (!goal.belongsToUser(id)) return left(new NotAllowedError(
+            'You are not allowed to access this goal.'
+        ))
         
         return right({
             goal

@@ -10,7 +10,7 @@ export interface UpdateGoalProgressServiceRequest {
     goalId: string
 }
 
-type UpdateGoalProgressServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
+type UpdateGoalProgressServiceResponse = Either<ResourceNotFoundError, {
     progress: Percentage
 }>
 
@@ -25,10 +25,10 @@ export class UpdateGoalProgressService {
         goalId
     }: UpdateGoalProgressServiceRequest): Promise<UpdateGoalProgressServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
+        if (!investor) return left(new ResourceNotFoundError("Investor not found."))
 
         const goal = await this.goalRepository.findById(goalId)
-        if (!goal) return left(new NotAllowedError())
+        if (!goal) return left(new ResourceNotFoundError("Goal not found."))
 
         const progress = goal.progress
 

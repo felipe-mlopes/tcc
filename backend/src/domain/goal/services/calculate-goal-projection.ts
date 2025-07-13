@@ -81,22 +81,34 @@ export class CalculateGoalProjectionService {
     }: CalculateGoalProjectionServiceRequest): Promise<ValidateServiceResponse>
      {
         const investor = await this.investorRepository.findById(investorId)
-        if(!investor) return left(new ResourceNotFoundError())
+        if(!investor) return left(new ResourceNotFoundError('Investor not found.'))
 
         const goal = await this.goalRepository.findById(goalId)
-        if (!goal) return left(new ResourceNotFoundError())
-        if (goal.status !== Status.Active) return left(new NotAllowedError())
+        if (!goal) return left(new ResourceNotFoundError('Goal not found.'))
+        if (goal.status !== Status.Active) return left(new NotAllowedError(
+            'Goal cannot be modified because it is not active.'
+        ))
         
-        if (!scenarios || scenarios.length === 0) return left(new NotAllowedError())
+        if (!scenarios || scenarios.length === 0) return left(new NotAllowedError(
+            'No scenarios available to proceed.'
+        ))
 
         for (const [idx, scenario] of scenarios.entries()) {
-            if (!scenario.monthlyContribution) return left(new NotAllowedError())
-            if (scenario.monthlyContribution.getAmount() < 0) return left(new NotAllowedError())
-            if (scenario.monthlyContribution.getCurrency() !== goal.targetAmount.getCurrency()) return left(new NotAllowedError())
+            if (!scenario.monthlyContribution) return left(new NotAllowedError(
+                'You must provide at least one scenario to continue.'
+            ))
+            if (scenario.monthlyContribution.getAmount() < 0) return left(new NotAllowedError(
+                'Monthly contribution cannot be negative.'
+            ))
+            if (scenario.monthlyContribution.getCurrency() !== goal.targetAmount.getCurrency()) return left(new NotAllowedError(
+                'Monthly contribution currency must match the target amount currency.'
+            ))
         }
 
         const id = new UniqueEntityID(investorId)
-        if(!goal.belongsToUser(id)) return left(new NotAllowedError())
+        if(!goal.belongsToUser(id)) return left(new NotAllowedError(
+            'You are not allowed to access this goal.'
+        ))
 
         return right({
             goal
