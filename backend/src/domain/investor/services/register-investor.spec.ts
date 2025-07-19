@@ -29,7 +29,7 @@ describe('Register Investor', () => {
             dateOfBirth: newInvestor.dateOfBirth
         })
 
-        // Asset
+        // Assert
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
