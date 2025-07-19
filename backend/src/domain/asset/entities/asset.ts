@@ -11,7 +11,6 @@ export enum AssetType {
 }
 
 export interface AssetProps {
-    asserId: UniqueEntityID,
     symbol: string,
     name: string,
     assetType: AssetType,
@@ -24,10 +23,6 @@ export interface AssetProps {
 }
 
 export class Asset extends AggregateRoot<AssetProps> {
-    public get assedId() {
-        return this.props.asserId
-    }
-
     public get symbol() {
         return this.props.symbol
     }
