@@ -5,6 +5,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:debug": "node --inspect-brk -r ts-node/register vitest run --threads false",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   },
@@ -19,7 +21,10 @@
     "@faker-js/faker": "^9.8.0",
     "@rocketseat/eslint-config": "^2.2.2",
     "@types/node": "^22.15.30",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^8.57.1",
+    "ts-node": "^10.9.2",
     "vitest": "^3.2.4",
     "vitest-tsconfig-paths": "^3.4.1"
   }
