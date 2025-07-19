@@ -32,14 +32,17 @@ export class RegisterInvestorService {
         const emailInvestorVerified = await this.investorRepository.findByEmail(email)
         const cpfInvestorVerified = await this.investorRepository.findByCpf(cpf)
 
-        if (!emailInvestorVerified || !cpfInvestorVerified) return left(new NotAllowedError())
-        if (!DateOfBirth.isValid(dateOfBirth)) return left(new NotAllowedError())
+        if (emailInvestorVerified || cpfInvestorVerified) return left(new NotAllowedError(
+            'Email or CPF is already in use.'
+        ))
+        if (!DateOfBirth.isValid(dateOfBirth)) return left(new NotAllowedError(
+            'Invalid date of birth.'
+        ))
         
         const age = DateOfBirth.calculateAge(dateOfBirth) 
         const riskProfile = await this.getRiskProfileSuggestion(age)
 
         const newInvestor = Investor.create({
-            investorId: new UniqueEntityID(),
             email: Email.create(email),
             name: Name.create(name),
             cpf: CPF.create(cpf),
