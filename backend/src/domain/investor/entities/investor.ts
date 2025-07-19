@@ -13,7 +13,6 @@ export enum InvestorProfile {
 }
 
 export interface InvestorProps {
-    investorId: UniqueEntityID,
     email: Email,
     name: Name,
     cpf: CPF,
@@ -25,10 +24,6 @@ export interface InvestorProps {
 }
 
 export class Investor extends Entity<InvestorProps> {
-    public get investorId() {
-        return this.props.investorId
-    }
-
     public get email() {
         return this.props.email.getValue()
     }
