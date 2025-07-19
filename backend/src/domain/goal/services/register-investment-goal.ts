@@ -34,7 +34,9 @@ export class RegisterInvestmentGoalService {
         priority
     }: RegisterInvestmentGoalServiceRequest): Promise<RegisterInvestmentGoalServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
+        if (!investor) return left(new ResourceNotFoundError(
+            'Investor not found.'
+        ))
 
         const targetAmountFormatted = Money.create(targetAmount)
 
