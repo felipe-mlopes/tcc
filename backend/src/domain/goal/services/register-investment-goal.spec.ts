@@ -78,6 +78,10 @@ describe('Register Goal', () => {
 
         // Assert
         expect(result.isLeft()).toBe(true)
-        expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+
+        if(result.isLeft()) {
+            expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+            expect(result.value.message).toBe('Investor not found.')
+        }
     })
 })
