@@ -21,7 +21,6 @@ export function makeInvestor(
 
     const investor = Investor.create(
         {
-            investorId: new UniqueEntityID(),
             name: fakerName,
             email: fakerEmail,
             cpf: fakerCpf,
