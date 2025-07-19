@@ -1,6 +1,5 @@
 export class DateOfBirth {
     private constructor(private readonly dateOfBirth: Date) {
-        if (!DateOfBirth.isValid(dateOfBirth)) throw new Error("Invalid date of birth")
     }
 
     public static create(date: Date): DateOfBirth {
