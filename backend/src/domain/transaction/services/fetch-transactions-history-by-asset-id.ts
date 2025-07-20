@@ -29,14 +29,18 @@ export class FetchTransactionsHistoryByAssetIdService {
         page
     }: FetchTransactionsHistoryByAssetIdServiceRequest): Promise<FetchTransactionsHistoryByAssetIdServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
+        if (!investor) return left(new ResourceNotFoundError(
+            'Investor not found'
+        ))
 
-        const id = investor.investorId.toValue().toString()
+        const id = investor.id.toValue().toString()
 
         const portfolio = await this.portfolioRepository.findByInvestorId(id)
-        if (!portfolio) return left(new ResourceNotFoundError())
+        if (!portfolio) return left(new ResourceNotFoundError(
+            'Portfolio not found'
+        ))
 
-        const portfolioId = portfolio.portfolioId.toValue().toString()
+        const portfolioId = portfolio.id.toValue().toString()
         
         const transactions = await this.transactionRepository.findByManyPortfolioAndAsset(
             portfolioId,
