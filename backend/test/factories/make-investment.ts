@@ -2,7 +2,7 @@ import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { Money } from "@/core/value-objects/money"
 import { Quantity } from "@/core/value-objects/quantity"
 import { Investment, InvestmentProps } from "@/domain/portfolio/entities/investment"
-import { faker } from "@faker-js/faker/."
+import { faker } from "@faker-js/faker"
 
 export function makeInvestment(
     override: Partial<InvestmentProps> = {},
@@ -13,7 +13,6 @@ export function makeInvestment(
 
     const investment = Investment.create(
         {
-            investmentId: new UniqueEntityID(),
             portfolioId: new UniqueEntityID(),
             assetId: new UniqueEntityID(),
             quantity: fakerQuantity,
