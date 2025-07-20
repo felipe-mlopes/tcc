@@ -12,7 +12,6 @@ export interface InvestmentTransaction {
 }
 
 export interface InvestmentProps {
-    investmentId: UniqueEntityID,
     portfolioId: UniqueEntityID,
     assetId: UniqueEntityID,
     quantity: Quantity,
@@ -23,10 +22,6 @@ export interface InvestmentProps {
 }
 
 export class Investment extends Entity<InvestmentProps> {
-    public get investmentId() {
-        return this.props.investmentId
-    }
-
     public get portfolioId() {
         return this.props.portfolioId
     }
@@ -60,6 +55,11 @@ export class Investment extends Entity<InvestmentProps> {
     }
 
     private calculateAveragePrice(): Money {
+        // Filtrar apenas transações de compra para o cálculo do preço médio
+        const buyTransactions = this.props.transactions.filter(
+            t => t.quantity.getValue() > 0
+        )
+
         if (this.props.transactions.length === 0) {
             return this.props.currentPrice
         }
@@ -158,13 +158,14 @@ export class Investment extends Entity<InvestmentProps> {
         id?: UniqueEntityID
     ) {
         const transactions: InvestmentTransaction[] = []
+        const createdAt = props.createdAt ?? new Date()
         
         // Se houver quantidade e preço inicial, cria a primeira transação
         if (props.initialQuantity && props.initialPrice) {
             transactions.push({
                 quantity: props.initialQuantity,
                 price: props.initialPrice,
-                date: props.createdAt ?? new Date()
+                date: createdAt
             })
         }
 
@@ -172,7 +173,7 @@ export class Investment extends Entity<InvestmentProps> {
             {
                 ...props,
                 transactions,
-                createdAt: props.createdAt ?? new Date()
+                createdAt
             },
             id
         )
