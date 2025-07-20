@@ -20,7 +20,9 @@ interface AddInvestmentToPortfolioServiceRequest {
     currentPrice: number
 }
 
-type AddInvestmentToPortfolioServiceResponse = Either<ResourceNotFoundError, {}>
+type AddInvestmentToPortfolioServiceResponse = Either<ResourceNotFoundError, {
+    newInvestment: Investment
+}>
 
 type ValidateServiceResponse = Either<ResourceNotFoundError, {
     investorVerified: Investor,
@@ -54,20 +56,18 @@ export class AddInvestmentToPortfolioService {
 
         const { assetVerified, portfolioVerified, quantityFormatted, currentPriceFormatted } = validate.value
 
-        const investmentId = new UniqueEntityID()
-        const portfolioId = portfolioVerified.portfolioId.toValue().toString()
+        const portfolioId = portfolioVerified.id.toValue().toString()
 
         const newInvestment = Investment.create({
-            investmentId,
             portfolioId: new UniqueEntityID(portfolioId),
-            assetId: assetVerified.assedId,
+            assetId: assetVerified.id,
             quantity: quantityFormatted,
             currentPrice: currentPriceFormatted
         })
         await this.investmentRepository.create(newInvestment)
         
         // Adiciona o investmentId no Allocations do Portfolio
-        portfolioVerified.updateAllocation(investmentId.toValue().toString())
+        portfolioVerified.updateAllocation(newInvestment.id.toValue().toString())
         portfolioVerified.increaseTotalValue(quantity, currentPrice)
         await this.portfolioRepository.update(portfolioVerified)
 
@@ -83,13 +83,19 @@ export class AddInvestmentToPortfolioService {
         currentPrice
     }: AddInvestmentToPortfolioServiceRequest): Promise<ValidateServiceResponse> {
         const investorVerified = await this.investorRepository.findById(investorId)      
-        if (!investorVerified) return left(new ResourceNotFoundError())
+        if (!investorVerified) return left(new ResourceNotFoundError(
+            'Investor not found.'
+        ))
 
         const assetVerified = await this.assetRepository.findById(assetId)
-        if (!assetVerified) return left(new ResourceNotFoundError())
+        if (!assetVerified) return left(new ResourceNotFoundError(
+            'Asset not found.'
+        ))
 
         const portfolioVerified = await this.portfolioRepository.findByInvestorId(investorId)
-        if (!portfolioVerified) return left(new ResourceNotFoundError())
+        if (!portfolioVerified) return left(new ResourceNotFoundError(
+            'Portfolio not found.'
+        ))
 
         const quantityFormatted = Quantity.create(quantity)
         const currentPriceFormatted = Money.create(currentPrice)
