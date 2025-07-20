@@ -11,7 +11,9 @@ interface CreatePortfolioServiceRequest {
     description?: string
 }
 
-type CreatePortfolioServiceResponse = Either<ResourceNotFoundError, {}>
+type CreatePortfolioServiceResponse = Either<ResourceNotFoundError, {
+    newPortfolio: Portfolio
+}>
 
 export class CreatePortfolioService {
     constructor(
@@ -25,10 +27,11 @@ export class CreatePortfolioService {
         description
     }: CreatePortfolioServiceRequest): Promise<CreatePortfolioServiceResponse> {
         const investVerified = await this.investorRepository.findById(investorId)
-        if (!investVerified) return left(new ResourceNotFoundError())
+        if (!investVerified) return left(new ResourceNotFoundError(
+            'Investor not found.'
+        ))
 
         const newPortfolio = Portfolio.create({
-            portfolioId: new UniqueEntityID(),
             investorId: new UniqueEntityID(investorId),
             name,
             description: description || '',
