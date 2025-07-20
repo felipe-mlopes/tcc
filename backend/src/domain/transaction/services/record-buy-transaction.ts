@@ -3,7 +3,6 @@ import { Either, left, right } from "@/core/either"
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
 import { Transaction, TransactionType } from "../entities/transaction"
 import { NotAllowedError } from "@/core/errors/not-allowed-error"
-import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { TransactionValidatorService } from "./transaction-validator"
 
 interface RecordBuyTransactionServiceRequest {
@@ -35,7 +34,9 @@ export class RecordBuyTransactionService {
         fees,
         dateAt
     }: RecordBuyTransactionServiceRequest): Promise<RecordBuyTransactionServiceResponse> {
-        if(transactionType != TransactionType.Buy) return left(new NotAllowedError())
+        if(transactionType != TransactionType.Buy) return left(new NotAllowedError(
+            'Only buy transactions are allowed for this operation.'
+        ))
 
         const validationResult = await this.validator.validate({
             investorId,
@@ -53,7 +54,7 @@ export class RecordBuyTransactionService {
 
         const newBuyTransaction = Transaction.create({
             assetId: asset.id,
-            portfolioId: portfolio.portfolioId,
+            portfolioId: portfolio.id,
             transactionType,
             quantity: quantityFormatted,
             price: priceFormatted,

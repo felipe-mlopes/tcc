@@ -35,7 +35,9 @@ export class RecordDividendTransactionService {
         fees,
         dateAt
     }: RecordDividendTransactionServiceRequest): Promise<RecordDividendTransactionServiceResponse> {
-        if(transactionType != TransactionType.Dividend) return left(new NotAllowedError())
+        if(transactionType != TransactionType.Dividend) return left(new NotAllowedError(
+            'Only dividend transactions are allowed for this operation.'
+        ))
 
         const validationResult = await this.validator.validate({
             investorId,
@@ -53,7 +55,7 @@ export class RecordDividendTransactionService {
 
         const newDividendTransaction = Transaction.create({
             assetId: asset.id,
-            portfolioId: portfolio.portfolioId,
+            portfolioId: portfolio.id,
             transactionType,
             quantity: quantityFormatted,
             price: priceFormatted,

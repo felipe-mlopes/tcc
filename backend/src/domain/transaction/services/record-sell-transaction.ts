@@ -35,7 +35,9 @@ export class RecordSellTransactionService {
         fees,
         dateAt
     }: RecordSellTransactionServiceRequest): Promise<RecordSellTransactionServiceResponse> {
-        if(transactionType != TransactionType.Sell) return left(new NotAllowedError())
+        if(transactionType != TransactionType.Sell) return left(new NotAllowedError(
+            'Only sell transactions are allowed for this operation.'
+        ))
 
         const validationResult = await this.validator.validate({
             investorId,
@@ -53,7 +55,7 @@ export class RecordSellTransactionService {
 
         const newSellTransaction = Transaction.create({
             assetId: asset.id,
-            portfolioId: portfolio.portfolioId,
+            portfolioId: portfolio.id,
             transactionType,
             quantity: quantityFormatted,
             price: priceFormatted,
