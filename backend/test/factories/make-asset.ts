@@ -14,7 +14,6 @@ export function makeAsset(
 
     const asset = Asset.create(
         {
-            asserId: new UniqueEntityID(),
             symbol: fakerSymbol,
             name: fakerName,
             assetType: AssetType.Stock,
