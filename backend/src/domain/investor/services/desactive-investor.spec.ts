@@ -6,7 +6,7 @@ import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
 let inMemoryInvestorRepository: InMemoryInvestorRepository
 let sut: DesactiveInvestorService
 
-describe('Register Investor', () => {
+describe('Desactive Investor', () => {
     beforeEach(() => {
         inMemoryInvestorRepository = new InMemoryInvestorRepository()
         sut = new DesactiveInvestorService(inMemoryInvestorRepository)
@@ -32,7 +32,7 @@ describe('Register Investor', () => {
         }
     })
 
-    it('should be not able to rdesactive investor without recorded investor', async () => {
+    it('should be not able to desactive investor without recorded investor', async () => {
         
         // Arrange
         const investor = makeInvestor()
