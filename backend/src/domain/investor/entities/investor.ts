@@ -58,7 +58,7 @@ export class Investor extends Entity<InvestorProps> {
 
     public set riskProfile(newRiskProfile: InvestorProfile) {
         if(this.props.riskProfile !== newRiskProfile) {
-            this.props.riskProfile == newRiskProfile
+            this.props.riskProfile = newRiskProfile
             this.touch()
         }
     }
@@ -71,20 +71,20 @@ export class Investor extends Entity<InvestorProps> {
         const newNameVerified = Name.create(newName)
 
         if(!this.props.name.equals(newNameVerified)) {
-            this.props.name.getValue() == newName
+            this.props.name = newNameVerified
+            this.touch()
         }
 
-        this.touch()
     }
 
     public updateEmail(newEmail: string) {
         const newEmailVerified = Email.create(newEmail)
 
         if(!this.props.email.equals(newEmailVerified)) {
-            this.props.email.getValue() == newEmail
+            this.props.email = newEmailVerified
+            this.touch()
         }
 
-        this.touch()
     }
 
     public desactive() {
