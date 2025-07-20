@@ -11,7 +11,6 @@ export enum TransactionType {
 }
 
 export interface TransactionProps {
-    transactionId: UniqueEntityID,
     portfolioId: UniqueEntityID,
     assetId: UniqueEntityID,
     transactionType: TransactionType,
@@ -26,10 +25,6 @@ export interface TransactionProps {
 }
 
 export class Transaction extends Entity<TransactionProps> {
-    public get transactionId() {
-        return this.props.transactionId
-    }
-
     public get portfolioId() {
         return this.props.portfolioId
     }
@@ -136,12 +131,12 @@ export class Transaction extends Entity<TransactionProps> {
     }
     
     public static create(props: Optional<TransactionProps, 'createdAt' | 'totalAmount'>, id?: UniqueEntityID) {
-        const totalGrossAmount = props.price.multiply(props.quantity.getValue())
-        const totalNetAmount = totalGrossAmount.subtract(props.fees)
-        let totalAmount = totalNetAmount
+        const totalGrossAmount = props.price.getAmount() * props.quantity.getValue()
+        const totalNetAmount = totalGrossAmount - props.fees.getAmount()
+        let totalAmount = Money.create(totalNetAmount)
 
         if (props.transactionType == TransactionType.Sell) {
-            totalAmount = totalNetAmount.multiply(-1)
+            totalAmount = totalAmount.multiply(-1)
         }
 
         const asset = new Transaction(
