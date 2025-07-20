@@ -4,7 +4,6 @@ import { AggregateRoot } from "@/core/entities/aggregate-root";
 import { TotalValue } from "@/core/value-objects/total-value";
 
 export interface PortfolioProps {
-    portfolioId: UniqueEntityID,
     investorId: UniqueEntityID,
     name: string,
     description?: string,
@@ -14,12 +13,7 @@ export interface PortfolioProps {
     allocations: Array<string>
 }
 
-export class Portfolio extends AggregateRoot<PortfolioProps> {
-    
-    public get portfolioId() {
-        return this.props.portfolioId
-    }
-    
+export class Portfolio extends AggregateRoot<PortfolioProps> {    
     public get investorId() {
         return this.props.investorId
     }
