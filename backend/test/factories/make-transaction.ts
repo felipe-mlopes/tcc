@@ -2,10 +2,11 @@ import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { Money } from "@/core/value-objects/money"
 import { Quantity } from "@/core/value-objects/quantity"
 import { Transaction, TransactionProps, TransactionType } from "@/domain/transaction/entities/transaction"
-import { faker } from "@faker-js/faker/."
+import { faker } from "@faker-js/faker"
 
 export function makeTransaction(
     override: Partial<TransactionProps> = {},
+    transactionType: TransactionType,
     id?: UniqueEntityID
 ) {
     const fakerQuantity = Quantity.create(faker.number.int())
@@ -14,10 +15,9 @@ export function makeTransaction(
 
     const transaction = Transaction.create(
         {
-            transactionId: new UniqueEntityID(),
             portfolioId: new UniqueEntityID(),
             assetId: new UniqueEntityID(),
-            transactionType: TransactionType.Buy,
+            transactionType: transactionType,
             quantity: fakerQuantity,
             price: fakerPrice,
             totalAmount: fakerPrice.multiply(fakerPrice.getAmount()),
