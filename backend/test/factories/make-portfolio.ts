@@ -1,9 +1,9 @@
 import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { TotalValue } from "@/core/value-objects/total-value"
 import { Portfolio, PortfolioProps } from "@/domain/portfolio/entities/portfolio"
-import { faker } from "@faker-js/faker/."
+import { faker } from '@faker-js/faker'
 
-export function makePorfolio(
+export function makePortfolio(
     override: Partial<PortfolioProps> = {},
     id?: UniqueEntityID
 ) {
