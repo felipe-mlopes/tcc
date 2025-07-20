@@ -50,35 +50,44 @@ export class UpdateTransactionService {
 
         const { transaction } = validate.value
       
-        if (!!transactionType) {
+        if (transactionType && transactionType.trim().length > 0) {
             transaction.updateTransactionType(transactionType)
         }
 
-        if (!!quantity) {
-            if (quantity < 0) quantity * -1
+        if (quantity !== undefined) {
+            quantity = Math.abs(quantity)
 
             const newQuantity = Quantity.create(quantity)
-            if (newQuantity.isZero()) return left(new NotAllowedError())
+            if (newQuantity.isZero()) return left(new NotAllowedError(
+                'Quantity must be greater than zero.'
+            ))
 
             transaction.updateQuantity(newQuantity)
+            transaction.updateTotalAmount()
         }
 
-        if (!!price) {
-            if (price < 0) price * -1
+        if (price !== undefined) {
+            price = Math.abs(price)
 
             const newPrice = Money.create(price)
-            if (newPrice.getAmount() == 0) return left(new NotAllowedError())
+            if (newPrice.getAmount() == 0) return left(new NotAllowedError(
+                'Price must be greater than zero.'
+            ))
 
             transaction.updatePrice(newPrice)
+            transaction.updateTotalAmount()
         }
 
-        if (!!fees) {
-            if (fees < 0) fees * -1
+        if (fees !== undefined) {
+            fees = Math.abs(fees)
 
             const newFees = Money.create(fees)
-            if (newFees.getAmount() == 0) return left(new NotAllowedError())
+            if (newFees.getAmount() == 0) return left(new NotAllowedError(
+                'Fees must be greater than zero.'
+            ))
 
             transaction.updateFees(newFees)
+            transaction.updateTotalAmount()
         }
 
         await this.transactionRepository.update(transaction)
@@ -97,16 +106,22 @@ export class UpdateTransactionService {
         fees
     }: UpdateTransactionServiceRequest): Promise<ValidateServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
+        if (!investor) return left(new ResourceNotFoundError(
+            'Investor not found.'
+        ))
 
         if (transactionType == undefined &&
             quantity == undefined &&
             price == undefined &&
             fees == undefined
-        ) return left(new NotAllowedError())
+        ) return left(new NotAllowedError(
+            'At least one transaction field must be provided.'
+        ))
     
         const transaction = await this.transactionRepository.findById(transactionId)
-        if (!transaction) return left(new ResourceNotFoundError())
+        if (!transaction) return left(new ResourceNotFoundError(
+            'Transaction not found.'
+        ))
 
         return right({
             transaction
