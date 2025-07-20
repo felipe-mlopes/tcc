@@ -52,8 +52,7 @@ export class RecordSellTransactionService {
         const { asset, portfolio, quantityFormatted, priceFormatted, feesFormatted } = validationResult.value
 
         const newSellTransaction = Transaction.create({
-            transactionId: new UniqueEntityID(),
-            assetId: asset.assedId,
+            assetId: asset.id,
             portfolioId: portfolio.portfolioId,
             transactionType,
             quantity: quantityFormatted,
