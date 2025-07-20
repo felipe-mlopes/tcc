@@ -23,14 +23,21 @@ export class UpdateInvestorService {
         email
     }: UpdateInvestorServiceRequest): Promise<UpdateInvestorServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
-        if(name == undefined && email == undefined) return left(new NotAllowedError())
+        if (!investor) return left(new ResourceNotFoundError(
+            'Investor not found.'
+        ))
+        if(
+            (name === undefined || name.trim().length === 0) &&
+            (email === undefined || email.trim().length === 0)
+        ) return left(new NotAllowedError(
+            'Name or email are required.'
+        ))
 
-        if(!!name) {
+        if(name && name.trim().length > 0) {
             investor.updateName(name)
         }
 
-        if(!!email) {
+        if(email && email.trim().length > 0) {
             investor.updateEmail(email)
         }
 
