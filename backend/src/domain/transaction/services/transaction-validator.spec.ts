@@ -26,6 +26,8 @@ describe('Transaction Validator Service', () => {
     })
 
     it('should be able to validate transaction with positive quantity, price and fees', async () => {
+        
+        // Arrange
         const investor = makeInvestor()
         const asset = makeAsset({ name: "AAPL34" })
         const portfolio = makePortfolio({ investorId: investor.id })
@@ -34,6 +36,7 @@ describe('Transaction Validator Service', () => {
         await inMemoryAssetRepository.create(asset)
         await inMemoryPortfolioRepository.create(portfolio)
 
+        // Act
         const result = await sut.validate({
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
@@ -42,6 +45,7 @@ describe('Transaction Validator Service', () => {
             fees: 1.5
         })
 
+        // Assert
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
@@ -55,6 +59,8 @@ describe('Transaction Validator Service', () => {
     })
 
     it('should be not able to validate transaction if investor does not exist', async () => {
+        
+        // Act
         const result = await sut.validate({
             investorId: 'non-existent',
             assetName: 'AAPL34',
@@ -63,6 +69,7 @@ describe('Transaction Validator Service', () => {
             fees: 1
         })
 
+        // Assert
         expect(result.isLeft()).toBe(true)
 
         if (result.isLeft()) {
@@ -72,9 +79,12 @@ describe('Transaction Validator Service', () => {
     })
 
     it('should be not able to validate transaction if asset does not exist', async () => {
+        
+        // Arrange
         const investor = makeInvestor()
         await inMemoryInvestorRepository.create(investor)
 
+        // Act
         const result = await sut.validate({
             investorId: investor.id.toValue().toString(),
             assetName: 'non-existent',
@@ -83,6 +93,7 @@ describe('Transaction Validator Service', () => {
             fees: 1
         })
 
+        // Assert
         expect(result.isLeft()).toBe(true)
 
         if (result.isLeft()) {
@@ -92,12 +103,15 @@ describe('Transaction Validator Service', () => {
     })
 
     it('should be not able to validate transaction if portfolio does not exist', async () => {
+        
+        // Arrange
         const investor = makeInvestor()
         const asset = makeAsset({ name: 'AAPL34' })
 
         await inMemoryInvestorRepository.create(investor)
         await inMemoryAssetRepository.create(asset)
 
+        // Act
         const result = await sut.validate({
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
@@ -106,6 +120,7 @@ describe('Transaction Validator Service', () => {
             fees: 1
         })
 
+        // Assert
         expect(result.isLeft()).toBe(true)
 
         if (result.isLeft()) {
@@ -114,7 +129,9 @@ describe('Transaction Validator Service', () => {
         }
     })
 
-    it('should be not able to validate transaction if quantity is zero or negative', async () => {
+    it('should be not able to validate transaction if quantity is zero', async () => {
+        
+        // Arrange
         const investor = makeInvestor()
         const asset = makeAsset({ name: 'AAPL34' })
         const portfolio = makePortfolio({ investorId: investor.id })
@@ -123,6 +140,7 @@ describe('Transaction Validator Service', () => {
         await inMemoryAssetRepository.create(asset)
         await inMemoryPortfolioRepository.create(portfolio)
 
+        // Act
         const result = await sut.validate({
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
@@ -131,6 +149,7 @@ describe('Transaction Validator Service', () => {
             fees: 1
         })
 
+        // Assert
         expect(result.isLeft()).toBe(true)
         if (result.isLeft()) {
             expect(result.value).toBeInstanceOf(NotAllowedError)
@@ -138,7 +157,9 @@ describe('Transaction Validator Service', () => {
         }
     })
 
-    it('should be not able to validate transaction if price is zero or negative', async () => {
+    it('should be not able to validate transaction if price is zero', async () => {
+        
+        // Arrange
         const investor = makeInvestor()
         const asset = makeAsset({ name: 'AAPL34' })
         const portfolio = makePortfolio({ investorId: investor.id })
@@ -147,6 +168,7 @@ describe('Transaction Validator Service', () => {
         await inMemoryAssetRepository.create(asset)
         await inMemoryPortfolioRepository.create(portfolio)
 
+        // Act
         const result = await sut.validate({
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
@@ -155,6 +177,7 @@ describe('Transaction Validator Service', () => {
             fees: 1
         })
 
+        // Assert
         expect(result.isLeft()).toBe(true)
         if (result.isLeft()) {
             expect(result.value).toBeInstanceOf(NotAllowedError)
@@ -162,7 +185,9 @@ describe('Transaction Validator Service', () => {
         }
     })
 
-    it('should be not able to validate transaction if fees is zero or negative', async () => {
+    it('should be not able to validate transaction if fees is zero', async () => {
+        
+        // Arrange
         const investor = makeInvestor()
         const asset = makeAsset({ name: 'AAPL34' })
         const portfolio = makePortfolio({ investorId: investor.id })
@@ -171,6 +196,7 @@ describe('Transaction Validator Service', () => {
         await inMemoryAssetRepository.create(asset)
         await inMemoryPortfolioRepository.create(portfolio)
 
+        // Act
         const result = await sut.validate({
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
@@ -179,6 +205,7 @@ describe('Transaction Validator Service', () => {
             fees: 0
         })
 
+        // Assert
         expect(result.isLeft()).toBe(true)
         if (result.isLeft()) {
             expect(result.value).toBeInstanceOf(NotAllowedError)
