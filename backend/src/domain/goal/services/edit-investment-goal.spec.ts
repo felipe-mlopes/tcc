@@ -37,14 +37,7 @@ describe('Edit Investment Goal', () => {
         goalId = newGoal.id.toValue().toString()
     })
 
-    it('should be able to edit a investment goal with all fields', async () => {
-                
-        // Verify investor and goal was created
-        const investorVerified = await inMemoryInvestorRepository.findById(investorId)
-        const goalVerified = await inMemoryGoalRepository.findById(goalId)
-
-        expect(investorVerified).not.toBeNull()
-        expect(goalVerified).not.toBeNull()     
+    it('should be able to edit a investment goal with all fields', async () => {    
 
         // Act
         const result = await sut.execute({
@@ -129,7 +122,9 @@ describe('Edit Investment Goal', () => {
 
     it('should be able to edit only target date', async () => {
         
+        // Arrange
         const newDate = new Date('2055-01-01')
+        
         // Act
         const result = await sut.execute({
             goalId,
@@ -147,7 +142,6 @@ describe('Edit Investment Goal', () => {
     })
 
     it('should be able to edit only priority', async () => {
-        
         
         // Act
         const result = await sut.execute({
@@ -167,7 +161,6 @@ describe('Edit Investment Goal', () => {
 
     it('should be able to mark goal as achieved', async () => {
         
-        
         // Act
         const result = await sut.execute({
             goalId,
@@ -185,7 +178,6 @@ describe('Edit Investment Goal', () => {
     })
 
     it('should be able to cancel a goal', async () => {
-        
         
         // Act
         const result = await sut.execute({
@@ -205,8 +197,9 @@ describe('Edit Investment Goal', () => {
 
     it('should be able to reactivate a goal', async () => {
 
-        // Primeiro cancelar o goal
+        // Arrange
         newGoal.cancel()
+
         // Act
         const result = await sut.execute({
             goalId,
@@ -275,6 +268,7 @@ describe('Edit Investment Goal', () => {
 
     it('should not update priority if it is the same as current', async () => {
         
+        // Arrange
         const currentPriority = newGoal.priority
 
         // Act
@@ -295,6 +289,7 @@ describe('Edit Investment Goal', () => {
 
     it('should not update status if it is the same as current', async () => {
         
+        // Arrange
         const currentStatus = newGoal.status
         
         // Act
