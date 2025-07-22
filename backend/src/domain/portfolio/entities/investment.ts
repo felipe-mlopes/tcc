@@ -121,8 +121,17 @@ export class Investment extends Entity<InvestmentProps> {
         this.touch()
     }
 
-    public reduceQuantity(quantityToReduce: Quantity): void {
+    public reduceQuantity(quantityToReduce: Quantity, purchasePrice: Money): void {
+        // Adiciona a transação
+        this.props.transactions.push({
+            quantity: quantityToReduce,
+            price: purchasePrice,
+            date: new Date()
+        })
+
+        // Atualiza a quantidade total
         this.props.quantity = this.props.quantity.subtract(quantityToReduce)
+        
         this.touch()
     }
 
