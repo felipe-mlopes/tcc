@@ -5,15 +5,17 @@ import { Transaction, TransactionType } from "@/domain/transaction/entities/tran
 import { Either, left, right } from "@/core/either";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { Investment } from "../entities/investment";
-import { UpdateInvestmentService, UpdateInvestmentServiceResponse } from "./update-investment";
-import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 
 export interface UpdateInvestmentAfterTransactionServiceRequest {
     investorId: string,
-    transactionId: string,
-    page: number
+    transactionId: string
+}
+
+interface CalculateImpactRequest {
+    currentInvestment: Investment,
+    transaction: Transaction
 }
 
 type UpdateInvestmentAfterTransactionServiceResponse = Either<NotAllowedError, {
@@ -21,10 +23,12 @@ type UpdateInvestmentAfterTransactionServiceResponse = Either<NotAllowedError, {
 }>
 
 type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
-    currentInvestment: Investment,
-    transaction: Transaction,
-    portfolioId: string,
-    assetId: string
+    currentInvestment: Investment | null,
+    transaction: Transaction
+}>
+
+type CalculateImpactResponse = Either<NotAllowedError, {
+    updatedInvestment: Investment
 }>
 
 export class UpdateInvestmentAfterTransactionService {
@@ -37,111 +41,40 @@ export class UpdateInvestmentAfterTransactionService {
 
     public async execute({
         investorId,
-        transactionId,
-        page
+        transactionId
     }: UpdateInvestmentAfterTransactionServiceRequest): Promise<UpdateInvestmentAfterTransactionServiceResponse> {
-        const investimentValidate = await this.validateRequests({investorId, transactionId, page})
+        const investimentValidate = await this.validateRequests({investorId, transactionId})
         if (investimentValidate.isLeft()) return left(investimentValidate.value)
 
-        const { currentInvestment, transaction, assetId, portfolioId } = investimentValidate.value
+        const { currentInvestment, transaction } = investimentValidate.value
 
-        let calculationResult: UpdateInvestmentServiceResponse
+        let calculationResult: CalculateImpactResponse
 
-        switch(transaction.transactionType) {
-            case TransactionType.Buy:
-                calculationResult = await UpdateInvestmentService.calculateBuyImpact(
-                    currentInvestment,
-                    transaction
-                )
-                break
-            
-            case TransactionType.Sell:
-                if(!currentInvestment) return left(new NotAllowedError())
-                calculationResult = await UpdateInvestmentService.calculateSellImpact(
-                    currentInvestment,
-                    transaction
-                )
-                break
-            
-            case TransactionType.Dividend:
-                if(!currentInvestment) return left(new NotAllowedError())
-                calculationResult = await UpdateInvestmentService.calculateDividendImpact(
-                    currentInvestment,
-                    transaction
-                )
-                break
-            
-            default:
-                return left(new NotAllowedError())
+        if (currentInvestment !== null) {
+            switch(transaction.transactionType) {
+                case TransactionType.Buy:
+                    calculationResult = await this.calculateBuyImpact({ currentInvestment, transaction })
+                    break
+                
+                case TransactionType.Sell:
+                    calculationResult = await this.calculateSellImpact({ currentInvestment, transaction })
+                    break
+                
+                case TransactionType.Dividend:
+                    calculationResult = await this.calculateDividendImpact({ currentInvestment, transaction })
+                    break
+                
+                default:
+                    return left(new NotAllowedError())
+            }
+        } else {
+            calculationResult = await this.createNewInvestment(transaction)
         }
 
         if (calculationResult.isLeft()) return left(calculationResult.value)
 
-        const { newQuantity } = calculationResult.value
-
-        let updatedInvestment: Investment
-
-        if (currentInvestment) {
-            updatedInvestment = Investment.create({
-                investmentId: currentInvestment.investmentId,
-                portfolioId: currentInvestment.portfolioId,
-                assetId: currentInvestment.assetId,
-                quantity: newQuantity,
-                currentPrice: transaction.price,
-                createdAt: currentInvestment.createdAt,
-                updatedAt: new Date()
-            }, currentInvestment.id)
-
-            const allTransactions = await this.transactionRepository.findByManyPortfolioAndAsset(
-                portfolioId,
-                assetId,
-                {
-                    page
-                }
-            )
-
-            const sortedTransactions = allTransactions.sort(
-                (a: Transaction, b: Transaction) => a.dateAt.getTime() - b.dateAt.getTime()
-            )
-
-            for (const t of sortedTransactions) {
-                if (t.isBuyTransaction()) {
-
-                    if (t.quantity.isZero()) throw new NotAllowedError()
-                    if (!t.price || t.price.getAmount() <= 0) throw new NotAllowedError()
-                    if (t.price.getCurrency() !== currentInvestment.currentPrice.getCurrency()) throw new NotAllowedError()
-                    
-                    updatedInvestment.addQuantity(t.quantity, t.price)
-                }
-            }
-
-            await this.investmentRepository.update(updatedInvestment)
-        } else {
-            if (!transaction.isBuyTransaction()) return left(new NotAllowedError())
-
-            updatedInvestment = Investment.create({
-                investmentId: new UniqueEntityID(),
-                portfolioId: transaction.portfolioId,
-                assetId: transaction.assetId,
-                quantity: newQuantity,
-                currentPrice: transaction.price,
-                initialQuantity: transaction.quantity,
-                initialPrice: transaction.price
-            })
-
-            await this.investmentRepository.create(updatedInvestment)
-        }
-
-        const investimentId = currentInvestment.investmentId.toValue().toString()
-
-        if (updatedInvestment.quantity.isZero()) {
-            if (currentInvestment) {
-                await this.investmentRepository.delete(investimentId)
-            }
-        }
-
         return right({
-            updatedInvestment
+            updatedInvestment: calculationResult.value.updatedInvestment
         })
     }
 
@@ -150,29 +83,103 @@ export class UpdateInvestmentAfterTransactionService {
         transactionId        
     }: UpdateInvestmentAfterTransactionServiceRequest): Promise<ValidateServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
-        if (!investor) return left(new ResourceNotFoundError())
+        if (!investor) return left(new ResourceNotFoundError(
+            'Investor not found.'
+        ))
         
         const transaction = await this.transactionRepository.findById(transactionId)
-        if (!transaction) return left(new ResourceNotFoundError())
+        if (!transaction) return left(new ResourceNotFoundError(
+            'Investor not found.'
+        ))
         
         const portfolioId = transaction.portfolioId.toValue().toString()
         const assetId = transaction.assetId.toValue().toString()
 
         const asset = await this.assetRepository.findById(assetId)
-        if (!asset) return left(new NotAllowedError())
+        if (!asset) return left(new NotAllowedError(
+            'Asset not found.'
+        ))
 
         const currentInvestment = await this.investmentRepository.findByPortfolioIdAndAssetId(
             portfolioId,
             assetId
         )     
 
-        if (!currentInvestment) return left(new ResourceNotFoundError())
+        if (currentInvestment !== null && currentInvestment.assetId !== transaction.assetId) return left(new NotAllowedError(
+            'Transaction asset does not match the current investment.'
+        ))
         
         return right({
             currentInvestment,
-            transaction,
-            assetId,
-            portfolioId
+            transaction
+        })
+    }
+
+    private async calculateBuyImpact({
+        currentInvestment,
+        transaction
+    }: CalculateImpactRequest): Promise<CalculateImpactResponse> {
+        currentInvestment.addQuantity(transaction.quantity, transaction.price)
+        currentInvestment.updateCurrentPrice(transaction.price)
+
+        await this.investmentRepository.update(currentInvestment)
+
+        return right({
+            updatedInvestment: currentInvestment
+        })
+    }
+
+    private async calculateSellImpact({
+        currentInvestment,
+        transaction
+    }: CalculateImpactRequest): Promise<CalculateImpactResponse> {
+        currentInvestment.reduceQuantity(transaction.quantity, transaction.price)
+        currentInvestment.updateCurrentPrice(transaction.price)
+
+        await this.investmentRepository.update(currentInvestment)
+
+        return right({
+            updatedInvestment: currentInvestment
+        })
+    }
+
+    private async calculateDividendImpact({
+        currentInvestment,
+        transaction
+    }: CalculateImpactRequest): Promise<CalculateImpactResponse> {
+        currentInvestment.updateCurrentPrice(transaction.price)
+
+        // Incluir aqui uma atualização do somatório de dividendos recebidos
+
+        await this.investmentRepository.update(currentInvestment)
+
+        return right({
+            updatedInvestment: currentInvestment
+        })
+    }
+
+    private async createNewInvestment(transaction: Transaction): Promise<CalculateImpactResponse> {
+        if (!transaction.isBuyTransaction()) return left(new NotAllowedError(
+            'Only buy transactions are allowed for this operation.'
+        ))
+
+        const newInvestment = Investment.create({
+            assetId: transaction.assetId,
+            portfolioId: transaction.portfolioId,
+            quantity: transaction.quantity,
+            currentPrice: transaction.price
+        })
+
+        newInvestment.transactions.push({
+            date: transaction.dateAt,
+            quantity: transaction.quantity,
+            price: transaction.price
+        })
+
+        await this.investmentRepository.create(newInvestment)
+        
+        return right({
+            updatedInvestment: newInvestment
         })
     }
 }
