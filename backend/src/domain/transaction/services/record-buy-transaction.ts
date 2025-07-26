@@ -51,7 +51,15 @@ export class RecordBuyTransactionService {
         }
 
         const { asset, portfolio, quantityFormatted, priceFormatted, feesFormatted } = validationResult.value
+        
+        if (quantityFormatted.isZero()) return left(new NotAllowedError(
+            'Quantity must be greater than zero.'
+        ))
 
+        if (feesFormatted.getAmount() == 0) return left(new NotAllowedError(
+            'Fees must be greater than zero.'
+        ))
+        
         const newBuyTransaction = Transaction.create({
             assetId: asset.id,
             portfolioId: portfolio.id,
