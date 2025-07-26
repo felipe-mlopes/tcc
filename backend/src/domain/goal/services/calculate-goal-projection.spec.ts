@@ -142,6 +142,7 @@ describe('Calculate Investment Goal Projection', () => {
         expect(result.isRight()).toBe(true)
         if (result.isRight()) {
             const projection = result.value.analysis.projections[0]
+            
             expect(projection.monthsToComplete).toBe(-1) // Infinity converted to -1
             expect(projection.willMeetTargetDate).toBe(false)
             expect(projection.projectedCompletionDate.getFullYear()).toBe(9999)
