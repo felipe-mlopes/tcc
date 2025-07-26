@@ -16,6 +16,7 @@ export interface TransactionProps {
     transactionType: TransactionType,
     quantity: Quantity,
     price: Money,
+    income?: Money,
     totalAmount: Money,
     fees: Money,
     dateAt: Date,
@@ -43,6 +44,10 @@ export class Transaction extends Entity<TransactionProps> {
 
     public get price() {
         return this.props.price
+    }
+
+    public get income() {
+        return this.props.income
     }
 
     public get totalAmount() {
@@ -100,14 +105,19 @@ export class Transaction extends Entity<TransactionProps> {
     }
 
     public updateQuantity(newQuantity: Quantity): void {
-        this.props.quantity = newQuantity;
+        this.props.quantity = newQuantity
         this.getTotalNetAmount()
         this.touch()
     }
 
     public updatePrice(newPrice: Money): void {
-        this.props.price = newPrice;
+        this.props.price = newPrice
         this.getTotalNetAmount()
+        this.touch()
+    }
+
+    public updateIncome(newIncome: Money): void {
+        this.props.income = newIncome
         this.touch()
     }
 
@@ -130,20 +140,30 @@ export class Transaction extends Entity<TransactionProps> {
         this.props.totalAmount = this.getTotalNetAmount()
     }
     
-    public static create(props: Optional<TransactionProps, 'createdAt' | 'totalAmount'>, id?: UniqueEntityID) {
+    public static create(props: Optional<TransactionProps, 'createdAt' | 'totalAmount' >, id?: UniqueEntityID) {
         const totalGrossAmount = props.price.getAmount() * props.quantity.getValue()
         const totalNetAmount = totalGrossAmount - props.fees.getAmount()
+        
+        let quantity = props.quantity
         let totalAmount = Money.create(totalNetAmount)
+        let income = Money.zero()
 
-        if (props.transactionType == TransactionType.Sell) {
+        if (props.transactionType == TransactionType.Sell) 
             totalAmount = totalAmount.multiply(-1)
+        
+
+        if (props.transactionType == TransactionType.Dividend) {
+            quantity = Quantity.zero()
+            income = props.income!
         }
 
         const asset = new Transaction(
             {
                 ...props,
+                quantity,
+                income,
+                totalAmount,
                 createdAt: props.createdAt ?? new Date(),
-                totalAmount
             }, 
             id
         )
