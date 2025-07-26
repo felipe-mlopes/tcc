@@ -13,9 +13,10 @@ import { Money } from "@/core/value-objects/money"
 interface TransactionValidatorServiceRequest {
     investorId: string
     assetName: string
-    quantity: number
+    quantity?: number
     price: number
-    fees: number
+    fees?: number
+    income?: number
 }
 
 type TransactionValidatorServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
@@ -25,6 +26,7 @@ type TransactionValidatorServiceResponse = Either<ResourceNotFoundError | NotAll
     quantityFormatted: Quantity
     priceFormatted: Money
     feesFormatted: Money
+    incomeFormatted: Money
 }>
 
 export class TransactionValidatorService {
@@ -39,7 +41,8 @@ export class TransactionValidatorService {
         assetName,
         quantity,
         price,
-        fees
+        fees,
+        income
     }: TransactionValidatorServiceRequest): Promise<TransactionValidatorServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError(
@@ -56,29 +59,30 @@ export class TransactionValidatorService {
             'Portfolio not found.'
         ))
 
-        let quantityFormatted = Quantity.create(quantity)
-        if (quantityFormatted.isZero()) return left(new NotAllowedError(
-            'Quantity must be greater than zero.'
-        ))
-        if (quantityFormatted.getValue() < 0) {
-            quantityFormatted = quantityFormatted.multiply(-1)
+        let quantityFormatted: Quantity
+        if (quantity) {
+            quantityFormatted = Quantity.create(quantity)
+
+            if (quantityFormatted.getValue() < 0) quantityFormatted = quantityFormatted.multiply(-1)
+        } else {
+            quantityFormatted = Quantity.zero()
         }
 
         let priceFormatted = Money.create(price)
         if (priceFormatted.getAmount() == 0) return left(new NotAllowedError(
             'Price must be greater than zero.'
         ))
-        if (priceFormatted.getAmount() < 0) {
-            priceFormatted = priceFormatted.multiply(-1)
-        }
+        if (priceFormatted.getAmount() < 0) priceFormatted = priceFormatted.multiply(-1)
 
-        let feesFormatted = Money.create(fees)
-        if (feesFormatted.getAmount() == 0) return left(new NotAllowedError(
-            'Fees must be greater than zero.'
-        ))
-        if (feesFormatted.getAmount() < 0) {
-            feesFormatted = feesFormatted.multiply(-1)
-        }
+        let feesFormatted: Money
+        if (fees) feesFormatted = Money.create(fees)
+            else feesFormatted = Money.zero()
+
+        if (feesFormatted.getAmount() < 0) feesFormatted = feesFormatted.multiply(-1)
+
+        let incomeFormatted: Money
+        if (income) incomeFormatted = Money.create(income)
+            else incomeFormatted = Money.zero()
 
         return right({
             investor,
@@ -86,7 +90,8 @@ export class TransactionValidatorService {
             portfolio,
             quantityFormatted,
             priceFormatted,
-            feesFormatted
+            feesFormatted,
+            incomeFormatted
         })
     }
 }
