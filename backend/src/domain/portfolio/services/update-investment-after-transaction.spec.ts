@@ -13,6 +13,8 @@ import { makeInvestment } from "test/factories/make-investment"
 import { Quantity } from "@/core/value-objects/quantity"
 import { Money } from "@/core/value-objects/money"
 import { makeTransaction } from "test/factories/make-transaction"
+import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
+import { NotAllowedError } from "@/core/errors/not-allowed-error"
 
 let inMemoryInvestorRepository: InMemoryInvestorRepository 
 let inMemoryInvestmentRepository: InMemoryInvestmentRepository
@@ -136,8 +138,8 @@ describe('Update Investment After Transaction', () => {
             {
                 assetId: newAsset.id,
                 portfolioId: newInvestment.portfolioId,
-                quantity: Quantity.create(50),
-                price: Money.create(30.0)
+                price: Money.create(30.0),
+                income: Money.create(1.5)
             },
             TransactionType.Dividend
         )
@@ -156,10 +158,12 @@ describe('Update Investment After Transaction', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            const { currentPrice, transactions } = inMemoryInvestmentRepository.items[0]
+            const { currentPrice, transactions, yields } = inMemoryInvestmentRepository.items[0]
 
             expect(currentPrice.getAmount()).toBe(30.0)
             expect(transactions).toHaveLength(0)
+            expect(yields).toHaveLength(1)
+            expect(yields[0].incomeValue.getAmount()).toBe(1.5)
         }
     })
     
@@ -189,20 +193,168 @@ describe('Update Investment After Transaction', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            console.log(inMemoryInvestmentRepository.items[0])
-        }
+            const createdInvestment = inMemoryInvestmentRepository.items[0]
+        
+            expect(createdInvestment.quantity.getValue()).toBe(50)
+            expect(createdInvestment.currentPrice.getAmount()).toBe(30.0)
+            expect(createdInvestment.transactions).toHaveLength(1)
 
+            if (createdInvestment.transactions.length > 0) {
+                expect(createdInvestment.transactions[0].quantity.getValue()).toBe(50)
+                expect(createdInvestment.transactions[0].price.getAmount()).toBe(30.0)
+            }
+        }
     })
     
-    it('', async () => {})
-    
-    it('', async () => {})
-    
-    it('', async () => {})
-    
-    it('', async () => {})
-    
-    it('', async () => {})
-    
+    it('should be not able to update an investment with non-existent investor', async () => {
 
+        // Arrange
+        newTransaction = makeTransaction(
+            {
+                assetId: newAsset.id,
+                portfolioId: newInvestment.portfolioId,
+                quantity: Quantity.create(50),
+                price: Money.create(30.0)
+            },
+            TransactionType.Buy
+        )
+        transactionId = newTransaction.id.toValue().toString()
+
+        await inMemoryInvestmentRepository.create(newInvestment)
+        await inMemoryTransactionRepository.create(newTransaction)
+                
+        // Act
+        const result = await sut.execute({
+            investorId: 'non-existent',
+            transactionId
+        })
+
+        // Assert
+        expect(result.isLeft()).toBe(true)
+
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+            expect(result.value.message).toBe(
+                'Investor not found.'
+            )
+        }
+    })
+    
+    it('should be not able to update an investment with non-existent transaction', async () => {
+               
+        // Act
+        const result = await sut.execute({
+            investorId,
+            transactionId: 'non-existent'
+        })
+
+        // Assert
+        expect(result.isLeft()).toBe(true)
+
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+            expect(result.value.message).toBe(
+                'Transaction not found.'
+            )
+        }
+    })
+    
+    it('should be not able to update an investment with non-existent asset', async () => {
+
+        // Arrange
+        const investmentFaker = makeInvestment()
+        await inMemoryInvestmentRepository.create(investmentFaker)
+
+        newTransaction = makeTransaction(
+            {
+                portfolioId: investmentFaker.portfolioId,
+                quantity: Quantity.create(50),
+                price: Money.create(30.0)
+            },
+            TransactionType.Buy
+        )
+        transactionId = newTransaction.id.toValue().toString()
+
+        await inMemoryTransactionRepository.create(newTransaction)
+
+        // Act
+        const result = await sut.execute({
+            investorId,
+            transactionId
+        })
+
+        // Assert
+        expect(result.isLeft()).toBe(true)
+
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(ResourceNotFoundError)
+            expect(result.value.message).toBe(
+                'Asset not found.'
+            )
+        }
+    })
+    
+    it('should be not able to update an investment when transaction type is not supported', async () => {
+
+        // Arrange
+        await inMemoryInvestmentRepository.create(newInvestment)
+
+        newTransaction = makeTransaction(
+            {
+                assetId: newAsset.id,
+                portfolioId: newInvestment.portfolioId,
+            },
+            'Transfer' as TransactionType
+        )
+
+        transactionId = newTransaction.id.toValue().toString()
+        await inMemoryTransactionRepository.create(newTransaction)
+
+        // Act
+        const result = await sut.execute({
+            investorId,
+            transactionId
+        })
+
+        // Assert
+        expect(result.isLeft()).toBe(true)
+
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(NotAllowedError)
+            expect(result.value.message).toBe(
+                'Unsupported transaction type.'
+            )
+        }
+    })
+    
+    it('should be not able to update an investment when calculation method fails', async () => {
+
+        // Arrange
+        newTransaction = makeTransaction(
+            {
+                assetId: newAsset.id,
+                portfolioId: newInvestment.portfolioId
+            },
+            TransactionType.Sell
+        )
+
+        transactionId = newTransaction.id.toValue().toString()
+        await inMemoryTransactionRepository.create(newTransaction)
+
+        // Act
+        const result = await sut.execute({
+            investorId,
+            transactionId
+        })
+
+        // Assert
+        expect(result.isLeft()).toBe(true)
+
+        if (result.isLeft()) {
+            expect(result.value).toBeInstanceOf(NotAllowedError)
+            expect(result.value.message).toBe(
+                'Only buy transactions are allowed for this operation.'
+            )
+        }
+    })
 })
