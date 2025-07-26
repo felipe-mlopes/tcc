@@ -9,8 +9,12 @@ export function makeGoal(
 ) {
     const fakerName = faker.lorem.word()
     const fakerDescription = faker.lorem.sentence()
-    const fakerTargetAmount = Money.create(faker.number.float())
-    const fakerCurrentAmount = Money.create(faker.number.float())
+    const fakerTargetAmount = Money.create(faker.number.float({
+        fractionDigits: 2
+    }))
+    const fakerCurrentAmount = Money.create(faker.number.float({
+        fractionDigits: 2
+    }))
     const fakerTargetDate = faker.date.future()
 
     const goal = Goal.create(
