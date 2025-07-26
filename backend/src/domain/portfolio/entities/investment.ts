@@ -140,7 +140,7 @@ export class Investment extends Entity<InvestmentProps> {
         incomeValue,
         date
     }: InvestmentYield): void {
-        this.yields.push({
+        this.props.yields.push({
             yieldId,
             incomeValue,
             date
