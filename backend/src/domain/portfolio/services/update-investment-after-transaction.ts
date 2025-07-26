@@ -156,7 +156,7 @@ export class UpdateInvestmentAfterTransactionService {
     }: CalculateImpactRequest): Promise<CalculateImpactResponse> {        
         currentInvestment.includeYield({
             yieldId: new UniqueEntityID(),
-            incomeValue: transaction.price,
+            incomeValue: transaction.income!,
             date: transaction.dateAt
         })
         
