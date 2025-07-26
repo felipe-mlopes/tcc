@@ -7,6 +7,7 @@ import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { Investment } from "../entities/investment";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
+import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 
 export interface UpdateInvestmentAfterTransactionServiceRequest {
     investorId: string,
@@ -65,7 +66,7 @@ export class UpdateInvestmentAfterTransactionService {
                     break
                 
                 default:
-                    return left(new NotAllowedError())
+                    return left(new NotAllowedError('Unsupported transaction type.'))
             }
         } else {
             calculationResult = await this.createNewInvestment(transaction)
@@ -89,14 +90,14 @@ export class UpdateInvestmentAfterTransactionService {
         
         const transaction = await this.transactionRepository.findById(transactionId)
         if (!transaction) return left(new ResourceNotFoundError(
-            'Investor not found.'
+            'Transaction not found.'
         ))
         
         const portfolioId = transaction.portfolioId.toValue().toString()
         const assetId = transaction.assetId.toValue().toString()
 
         const asset = await this.assetRepository.findById(assetId)
-        if (!asset) return left(new NotAllowedError(
+        if (!asset) return left(new ResourceNotFoundError(
             'Asset not found.'
         ))
 
@@ -104,10 +105,6 @@ export class UpdateInvestmentAfterTransactionService {
             portfolioId,
             assetId
         )     
-
-        if (currentInvestment !== null && currentInvestment.assetId !== transaction.assetId) return left(new NotAllowedError(
-            'Transaction asset does not match the current investment.'
-        ))
         
         return right({
             currentInvestment,
@@ -119,7 +116,12 @@ export class UpdateInvestmentAfterTransactionService {
         currentInvestment,
         transaction
     }: CalculateImpactRequest): Promise<CalculateImpactResponse> {
-        currentInvestment.addQuantity(transaction.quantity, transaction.price)
+        currentInvestment.addQuantity({
+            transactionId: transaction.id,
+            quantity: transaction.quantity,
+            price: transaction.price,
+            date: transaction.dateAt
+        })
         currentInvestment.updateCurrentPrice(transaction.price)
 
         await this.investmentRepository.update(currentInvestment)
@@ -133,7 +135,12 @@ export class UpdateInvestmentAfterTransactionService {
         currentInvestment,
         transaction
     }: CalculateImpactRequest): Promise<CalculateImpactResponse> {
-        currentInvestment.reduceQuantity(transaction.quantity, transaction.price)
+        currentInvestment.reduceQuantity({
+            transactionId: transaction.id,
+            quantity: transaction.quantity,
+            price: transaction.price,
+            date: transaction.dateAt
+        })
         currentInvestment.updateCurrentPrice(transaction.price)
 
         await this.investmentRepository.update(currentInvestment)
@@ -146,11 +153,15 @@ export class UpdateInvestmentAfterTransactionService {
     private async calculateDividendImpact({
         currentInvestment,
         transaction
-    }: CalculateImpactRequest): Promise<CalculateImpactResponse> {
+    }: CalculateImpactRequest): Promise<CalculateImpactResponse> {        
+        currentInvestment.includeYield({
+            yieldId: new UniqueEntityID(),
+            incomeValue: transaction.price,
+            date: transaction.dateAt
+        })
+        
         currentInvestment.updateCurrentPrice(transaction.price)
-
-        // Incluir aqui uma atualização do somatório de dividendos recebidos
-
+        
         await this.investmentRepository.update(currentInvestment)
 
         return right({
@@ -170,14 +181,15 @@ export class UpdateInvestmentAfterTransactionService {
             currentPrice: transaction.price
         })
 
-        newInvestment.transactions.push({
-            date: transaction.dateAt,
+        newInvestment.includeTransaction({
+            transactionId: transaction.id,
             quantity: transaction.quantity,
-            price: transaction.price
+            price: transaction.price,
+            date: transaction.dateAt
         })
 
         await this.investmentRepository.create(newInvestment)
-        
+
         return right({
             updatedInvestment: newInvestment
         })
