@@ -3,16 +3,16 @@ import { Transaction, TransactionType } from "../entities/transaction"
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
 import { NotAllowedError } from "@/core/errors/not-allowed-error"
 import { TransactionRepository } from "../repositories/transaction-repository"
-import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { TransactionValidatorService } from "./transaction-validator"
+import { Money } from "@/core/value-objects/money"
+import { Quantity } from "@/core/value-objects/quantity"
 
 interface RecordDividendTransactionServiceRequest {
     investorId: string,
     assetName: string,
     transactionType: TransactionType,
-    quantity: number,
     price: number,
-    fees: number,
+    income: number,
     dateAt: Date
 }
 
@@ -30,9 +30,8 @@ export class RecordDividendTransactionService {
         investorId,
         assetName,
         transactionType,
-        quantity,
         price,
-        fees,
+        income,
         dateAt
     }: RecordDividendTransactionServiceRequest): Promise<RecordDividendTransactionServiceResponse> {
         if(transactionType != TransactionType.Dividend) return left(new NotAllowedError(
@@ -42,24 +41,28 @@ export class RecordDividendTransactionService {
         const validationResult = await this.validator.validate({
             investorId,
             assetName,
-            quantity,
             price,
-            fees
+            income
         })
 
         if (validationResult.isLeft()) {
             return left(validationResult.value)
         }
 
-        const { asset, portfolio, quantityFormatted, priceFormatted, feesFormatted } = validationResult.value
+        const { asset, portfolio, priceFormatted, incomeFormatted } = validationResult.value
+
+        if (incomeFormatted.getAmount() == 0) return left(new NotAllowedError(
+            'Income must be greater than zero.'
+        ))
 
         const newDividendTransaction = Transaction.create({
             assetId: asset.id,
             portfolioId: portfolio.id,
             transactionType,
-            quantity: quantityFormatted,
+            quantity: Quantity.zero(),
             price: priceFormatted,
-            fees: feesFormatted,
+            income: incomeFormatted,
+            fees: Money.zero(),
             dateAt
         })
 
