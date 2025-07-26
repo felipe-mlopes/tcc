@@ -156,8 +156,8 @@ export class CalculateGoalProjectionService {
         const monthsUntilTarget = this.calculateMonthsBetweenDates(today, targetDate)
 
         // Calcula o valor projetado na data alvo
-        const contributionsUntilTarget = monthlyContribution.multiply(monthsUntilTarget)
-        const projectedAmount = goal.currentAmount.add(contributionsUntilTarget)
+        const contributionsUntilTarget = monthlyContribution.getAmount() * monthsUntilTarget
+        const projectedAmount = goal.currentAmount.add(Money.create(contributionsUntilTarget))
 
         // Calcula o déficit ou superávit
         const difference = projectedAmount.subtract(goal.targetAmount)
@@ -176,8 +176,13 @@ export class CalculateGoalProjectionService {
             )
             : Percentage.zero()
             
-        const totalMonthlyContributionsNeeded = monthlyContribution.multiply(
-            monthsToComplete === Infinity ? 0 : monthsToComplete
+        const monthlyContributionsNeeded = monthsToComplete === Infinity 
+            ? 0 
+            : monthlyContribution.getAmount() * monthsToComplete
+
+        const totalMonthlyContributionsNeeded = Money.create(
+            monthlyContributionsNeeded,
+            goal.targetAmount.getCurrency()
         )
 
         return {
