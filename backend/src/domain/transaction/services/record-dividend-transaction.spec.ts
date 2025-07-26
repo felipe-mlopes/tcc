@@ -60,12 +60,11 @@ describe('Record Dividend Transaction Service', () => {
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
             transactionType: TransactionType.Dividend,
-            quantity: 10,
             price: 100,
-            fees: 1.5,
+            income: 10,
             dateAt: new Date()
         })
-
+        
         // Assert
         expect(result.isRight()).toBe(true)
 
@@ -73,10 +72,8 @@ describe('Record Dividend Transaction Service', () => {
             expect(inMemoryTransactionRepository.items[0].assetId).toBe(asset.id)
             expect(inMemoryTransactionRepository.items[0].portfolioId).toBe(portfolio.id)
             expect(inMemoryTransactionRepository.items[0].transactionType).toBe(TransactionType.Dividend)
-            expect(inMemoryTransactionRepository.items[0].quantity.getValue()).toBe(10)
             expect(inMemoryTransactionRepository.items[0].price.getAmount()).toBe(100)
-            expect(inMemoryTransactionRepository.items[0].fees.getAmount()).toBe(1.5)
-            expect(inMemoryTransactionRepository.items[0].totalAmount.getAmount()).toBe(998.5)
+            expect(inMemoryTransactionRepository.items[0].income?.getAmount()).toBe(10)
         }
     })
 
@@ -92,9 +89,8 @@ describe('Record Dividend Transaction Service', () => {
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
             transactionType: TransactionType.Buy,
-            quantity: 10,
             price: 100,
-            fees: 1.5,
+            income: 1.5,
             dateAt: new Date()
         })
 
@@ -116,9 +112,8 @@ describe('Record Dividend Transaction Service', () => {
             investorId: 'non-existent',
             assetName: asset.name,
             transactionType: TransactionType.Dividend,
-            quantity: 10,
             price: 100,
-            fees: 1.5,
+            income: 1.5,
             dateAt: new Date()
         })
 
@@ -141,9 +136,8 @@ describe('Record Dividend Transaction Service', () => {
             investorId: investor.id.toValue().toString(),
             assetName: 'non-existent',
             transactionType: TransactionType.Dividend,
-            quantity: 10,
             price: 100,
-            fees: 1.5,
+            income: 1.5,
             dateAt: new Date()
         })
 
@@ -167,9 +161,8 @@ describe('Record Dividend Transaction Service', () => {
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
             transactionType: TransactionType.Dividend,
-            quantity: 10,
             price: 100,
-            fees: 1.5,
+            income: 1.5,
             dateAt: new Date()
         })
 
@@ -179,35 +172,6 @@ describe('Record Dividend Transaction Service', () => {
         if (result.isLeft()) {
             expect(result.value).toBeInstanceOf(ResourceNotFoundError)
             expect(result.value.message).toBe('Portfolio not found.')
-        }
-    })
-
-    it('should be not able to record dividend if quantity is zero', async () => {
-
-        // Arrange
-        await inMemoryInvestorRepository.create(investor)
-        await inMemoryAssetRepository.create(asset)
-        await inMemoryPortfolioRepository.create(portfolio)
-
-        // Act
-        const result = await sut.execute({
-            investorId: investor.id.toValue().toString(),
-            assetName: asset.name,
-            transactionType: TransactionType.Dividend,
-            quantity: 0,
-            price: 100,
-            fees: 1.5,
-            dateAt: new Date()
-        })
-
-        // Assert
-        expect(result.isLeft()).toBe(true)
-
-        if (result.isLeft()) {
-            expect(result.value).toBeInstanceOf(NotAllowedError)
-            expect(result.value.message).toBe(
-                'Quantity must be greater than zero.'
-            )
         }
     })
 
@@ -223,9 +187,8 @@ describe('Record Dividend Transaction Service', () => {
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
             transactionType: TransactionType.Dividend,
-            quantity: 10,
             price: 0,
-            fees: 1.5,
+            income: 1.5,
             dateAt: new Date()
         })
 
@@ -240,7 +203,7 @@ describe('Record Dividend Transaction Service', () => {
         }
     })
 
-    it('should be not able to record dividend if fees is zero', async () => {
+    it('should be not able to record dividend if income is zero', async () => {
 
         // Arrange
         await inMemoryInvestorRepository.create(investor)
@@ -252,9 +215,8 @@ describe('Record Dividend Transaction Service', () => {
             investorId: investor.id.toValue().toString(),
             assetName: asset.name,
             transactionType: TransactionType.Dividend,
-            quantity: 10,
             price: 100,
-            fees: 0,
+            income: 0,
             dateAt: new Date()
         })
 
@@ -264,7 +226,7 @@ describe('Record Dividend Transaction Service', () => {
         if (result.isLeft()) {
             expect(result.value).toBeInstanceOf(NotAllowedError)
             expect(result.value.message).toBe(
-                'Fees must be greater than zero.'
+                'Income must be greater than zero.'
             )
         }
     })
