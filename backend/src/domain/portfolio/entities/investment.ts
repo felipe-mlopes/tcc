@@ -6,19 +6,27 @@ import { Percentage } from "@/core/value-objects/percentage";
 import { Quantity } from "@/core/value-objects/quantity";
 
 export interface InvestmentTransaction {
-    quantity: Quantity;
-    price: Money;
-    date: Date;
+    quantity: Quantity
+    price: Money
+    date: Date
+    transactionId: UniqueEntityID
+}
+
+export interface InvestmentYield {
+    yieldId: UniqueEntityID
+    incomeValue: Money
+    date: Date,
 }
 
 export interface InvestmentProps {
-    portfolioId: UniqueEntityID,
-    assetId: UniqueEntityID,
-    quantity: Quantity,
-    currentPrice: Money,
-    transactions: InvestmentTransaction[],
-    createdAt: Date,
-    updatedAt?: Date,
+    portfolioId: UniqueEntityID
+    assetId: UniqueEntityID
+    quantity: Quantity
+    currentPrice: Money
+    transactions: InvestmentTransaction[]
+    yields: InvestmentYield[]
+    createdAt: Date
+    updatedAt?: Date
 }
 
 export class Investment extends Entity<InvestmentProps> {
@@ -52,6 +60,10 @@ export class Investment extends Entity<InvestmentProps> {
 
     public get transactions() {
         return [...this.props.transactions] // Retorna uma cópia para manter imutabilidade
+    }
+
+    public get yields() {
+        return [...this.props.yields] // Retorna uma cópia para manter imutabilidade
     }
 
     private calculateAveragePrice(): Money {
@@ -107,30 +119,72 @@ export class Investment extends Entity<InvestmentProps> {
         this.touch()
     }
 
-    public addQuantity(additionalQuantity: Quantity, purchasePrice: Money): void {
-        // Adiciona a transação
+    public includeTransaction({
+        transactionId,
+        quantity,
+        price,
+        date
+    }: InvestmentTransaction): void {
         this.props.transactions.push({
-            quantity: additionalQuantity,
-            price: purchasePrice,
-            date: new Date()
+            transactionId,
+            quantity,
+            price,
+            date
         })
-
-        // Atualiza a quantidade total
-        this.props.quantity = this.props.quantity.add(additionalQuantity)
         
         this.touch()
     }
 
-    public reduceQuantity(quantityToReduce: Quantity, purchasePrice: Money): void {
+    public includeYield({
+        yieldId,
+        incomeValue,
+        date
+    }: InvestmentYield): void {
+        this.yields.push({
+            yieldId,
+            incomeValue,
+            date
+        })
+
+        this.touch()
+    }
+
+    public addQuantity({
+        transactionId,
+        quantity,
+        price,
+        date
+    }: InvestmentTransaction): void {
         // Adiciona a transação
         this.props.transactions.push({
-            quantity: quantityToReduce,
-            price: purchasePrice,
-            date: new Date()
+            transactionId,
+            quantity,
+            price,
+            date
         })
 
         // Atualiza a quantidade total
-        this.props.quantity = this.props.quantity.subtract(quantityToReduce)
+        this.props.quantity = this.props.quantity.add(quantity)
+        
+        this.touch()
+    }
+
+    public reduceQuantity({
+        transactionId,
+        quantity,
+        price,
+        date
+    }: InvestmentTransaction): void {
+        // Adiciona a transação
+        this.props.transactions.push({
+            transactionId,
+            quantity,
+            price,
+            date
+        })
+
+        // Atualiza a quantidade total
+        this.props.quantity = this.props.quantity.subtract(quantity)
         
         this.touch()
     }
@@ -160,21 +214,25 @@ export class Investment extends Entity<InvestmentProps> {
     }
 
     public static create(
-        props: Optional<Omit<InvestmentProps, 'transactions'>, 'createdAt'> & {
+        props: Optional<Omit<InvestmentProps, 'transactions' | 'yields'>, 'createdAt'> & {
+            transactionId?: string;
             initialQuantity?: Quantity;
             initialPrice?: Money;
+            dateAt?: Date
         }, 
         id?: UniqueEntityID
     ) {
         const transactions: InvestmentTransaction[] = []
+        const yields: InvestmentYield[] = []
         const createdAt = props.createdAt ?? new Date()
         
         // Se houver quantidade e preço inicial, cria a primeira transação
         if (props.initialQuantity && props.initialPrice) {
             transactions.push({
+                transactionId: new UniqueEntityID(props.transactionId) ?? '',
                 quantity: props.initialQuantity,
                 price: props.initialPrice,
-                date: createdAt
+                date: props.dateAt ?? new Date()
             })
         }
 
@@ -182,6 +240,7 @@ export class Investment extends Entity<InvestmentProps> {
             {
                 ...props,
                 transactions,
+                yields,
                 createdAt
             },
             id
