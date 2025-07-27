@@ -7,7 +7,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
 
     async findById(id: string): Promise<Transaction | null> {
         const transaction = this.items.find(
-            item => item.id.toString() === id
+            item => item.id.toValue().toString() === id
         )
 
         if (!transaction) return null
@@ -17,7 +17,14 @@ export class InMemoryTransactionRepository implements TransactionRepository {
 
     async findManyByPortfolioId(portfolioId: string, { page }: PaginationParams): Promise<Transaction[]> {
         const transactions = this.items
-            .filter(item => item.portfolioId.toString() === portfolioId)
+            .filter(item => item.portfolioId.toValue().toString() === portfolioId)
+            .sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    return a.createdAt.getTime() - b.createdAt.getTime()
+                }
+
+                return a.id.toValue().toString().localeCompare(b.id.toValue().toString())
+            })
             .slice((page - 1) * 20, page * 20)
         
         return transactions
@@ -29,7 +36,17 @@ export class InMemoryTransactionRepository implements TransactionRepository {
         { page }: PaginationParams
     ): Promise<Transaction[]> {
         const transactions = this.items
-            .filter(item => item.portfolioId.toString() === portfolioId && item.assetId.toString() === assetId)
+            .filter(
+                item => item.portfolioId.toValue().toString() === portfolioId && 
+                item.assetId.toValue().toString() === assetId
+            )
+            .sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    return a.createdAt.getTime() - b.createdAt.getTime()
+                }
+
+                return a.id.toValue().toString().localeCompare(b.id.toValue().toString())
+            })
             .slice((page - 1) * 20, page * 20)
 
         return transactions
@@ -46,7 +63,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
     }
 
     async delete(transactionId: string): Promise<void> {
-        const itemIndex = this.items.findIndex(item => item.id.toString() === transactionId)
+        const itemIndex = this.items.findIndex(item => item.id.toValue().toString() === transactionId)
         
         this.items.splice(itemIndex, 1)
     }

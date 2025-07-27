@@ -7,7 +7,7 @@ export class InMemoryInvestmentRepository implements InvestmentRepository {
     
     async findById(id: string): Promise<Investment | null> {
         const investment = this.items.find(
-            item => item.id.toString() === id
+            item => item.id.toValue().toString() === id
         )
         
         if (!investment) return null
@@ -20,8 +20,8 @@ export class InMemoryInvestmentRepository implements InvestmentRepository {
         assetId: string
     ): Promise<Investment | null> {
         const investment = this.items.find(
-            item => item.portfolioId.toString() === portfolioId && 
-            item.assetId.toString() === assetId
+            item => item.portfolioId.toValue().toString() === portfolioId && 
+            item.assetId.toValue().toString() === assetId
         )
         
         if (!investment) return null
@@ -34,7 +34,14 @@ export class InMemoryInvestmentRepository implements InvestmentRepository {
         { page }: PaginationParams
     ): Promise<Investment[]> {
         const investments = this.items
-            .filter(item => item.portfolioId.toString() === portfolioId)
+            .filter(item => item.portfolioId.toValue().toString() === portfolioId)
+            .sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    return a.createdAt.getTime() - b.createdAt.getTime()
+                }
+
+                return a.id.toValue().toString().localeCompare(b.id.toValue().toString())
+            })
             .slice((page - 1) * 20, page * 20)
 
         return investments
@@ -46,7 +53,17 @@ export class InMemoryInvestmentRepository implements InvestmentRepository {
         { page }: PaginationParams
     ): Promise<Investment[]> {
         const investments = this.items
-            .filter(item => item.portfolioId.toString() === portfolioId && item.assetId.toString() === assetId)
+            .filter(item => 
+                item.portfolioId.toValue().toString() === portfolioId && 
+                item.assetId.toValue().toString() === assetId
+            )
+            .sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    return a.createdAt.getTime() - b.createdAt.getTime()
+                }
+
+                return a.id.toValue().toString().localeCompare(b.id.toValue().toString())
+            })
             .slice((page - 1) * 20, page * 20)
 
         return investments
@@ -63,7 +80,7 @@ export class InMemoryInvestmentRepository implements InvestmentRepository {
     }
 
     async delete(investimentId: string): Promise<void> {
-        const itemIndex = this.items.findIndex(item => item.id.toString() === investimentId)
+        const itemIndex = this.items.findIndex(item => item.id.toValue().toString() === investimentId)
         
         this.items.splice(itemIndex, 1)
     }
