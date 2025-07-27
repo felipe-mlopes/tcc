@@ -6,7 +6,7 @@ export class InMemoryPortfolioRepository implements PortfolioRepository {
     
     async findById(id: string): Promise<Portfolio | null> {
         const portfolio = this.items.find(
-            item => item.id.toString() === id
+            item => item.id.toValue().toString() === id
         )
 
         if (!portfolio) return null
@@ -16,7 +16,7 @@ export class InMemoryPortfolioRepository implements PortfolioRepository {
 
     async findByInvestorId(investorId: string): Promise<Portfolio | null> {
         const portfolio = this.items.find(
-            item => item.investorId.toString() === investorId
+            item => item.investorId.toValue().toString() === investorId
         )
 
         if (!portfolio) return null
