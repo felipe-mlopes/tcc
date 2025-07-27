@@ -1,0 +1,50 @@
+@startuml Desactive Investor - Success Flow
+title Desactive Investor Service - Success Flow
+
+actor Client
+participant DesactiveInvestorService as Service
+participant InvestorRepository as Repository
+participant Investor
+
+Client -> Service: execute({investorId})
+activate Service
+
+Service -> Repository: findById(investorId)
+activate Repository
+Repository --> Service: investor
+deactivate Repository
+
+Service -> Investor: desactive()
+activate Investor
+Investor -> Investor: touch()
+note over Investor: Sets isActive = false\nUpdates updatedAt
+deactivate Investor
+
+Service -> Repository: update(investor)
+activate Repository
+Repository --> Service: void
+deactivate Repository
+
+Service --> Client: Right({message: "The investor has been desactive."})
+deactivate Service
+@enduml
+
+' Desactive Investor Service - Investor Not Found
+@startuml Desactive Investor - Investor Not Found
+title Desactive Investor Service - Investor Not Found
+
+actor Client
+participant DesactiveInvestorService as Service
+participant InvestorRepository as Repository
+
+Client -> Service: execute({investorId})
+activate Service
+
+Service -> Repository: findById(investorId)
+activate Repository
+Repository --> Service: null
+deactivate Repository
+
+Service --> Client: Left(ResourceNotFoundError("Investor not found."))
+deactivate Service
+@enduml

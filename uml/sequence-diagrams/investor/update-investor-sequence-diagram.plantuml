@@ -1,0 +1,38 @@
+@startuml Update Investor - Success Flow
+title Update Investor Service - Success Flow
+
+actor Client
+participant UpdateInvestorService as Service
+participant InvestorRepository as Repository
+participant Investor
+
+Client -> Service: execute({investorId, name?, email?})
+activate Service
+
+Service -> Repository: findById(investorId)
+activate Repository
+Repository --> Service: investor
+deactivate Repository
+
+alt name is provided and not empty
+    Service -> Investor: updateName(name)
+    activate Investor
+    Investor -> Investor: touch()
+    deactivate Investor
+end
+
+alt email is provided and not empty
+    Service -> Investor: updateEmail(email)
+    activate Investor
+    Investor -> Investor: touch()
+    deactivate Investor
+end
+
+Service -> Repository: update(investor)
+activate Repository
+Repository --> Service: void
+deactivate Repository
+
+Service --> Client: Right({investor})
+deactivate Service
+@enduml

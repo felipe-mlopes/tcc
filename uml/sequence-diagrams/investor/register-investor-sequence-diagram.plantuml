@@ -1,0 +1,76 @@
+@startuml Register Investor - Success Flow
+' Register Investor Service - Success Flow
+!theme plain
+
+title Register Investor Service - Success Flow
+
+actor Client
+participant RegisterInvestorService as Service
+participant InvestorRepository as Repository
+participant Email as EmailVO
+participant Name as NameVO
+participant CPF as CPFVO
+participant DateOfBirth as DateVO
+participant Investor
+
+Client -> Service: execute({email, name, cpf, dateOfBirth})
+activate Service
+
+Service -> Repository: findByEmail(email)
+activate Repository
+Repository --> Service: null
+deactivate Repository
+
+Service -> Repository: findByCpf(cpf)
+activate Repository
+Repository --> Service: null
+deactivate Repository
+
+Service -> DateVO: isValid(dateOfBirth)
+activate DateVO
+DateVO --> Service: true
+deactivate DateVO
+
+Service -> DateVO: calculateAge(dateOfBirth)
+activate DateVO
+DateVO --> Service: age
+deactivate DateVO
+
+Service -> Service: getRiskProfileSuggestion(age)
+activate Service
+Service --> Service: riskProfile
+deactivate Service
+
+Service -> EmailVO: create(email)
+activate EmailVO
+EmailVO --> Service: emailVO
+deactivate EmailVO
+
+Service -> NameVO: create(name)
+activate NameVO
+NameVO --> Service: nameVO
+deactivate NameVO
+
+Service -> CPFVO: create(cpf)
+activate CPFVO
+CPFVO --> Service: cpfVO
+deactivate CPFVO
+
+Service -> DateVO: create(dateOfBirth)
+activate DateVO
+DateVO --> Service: dateVO
+deactivate DateVO
+
+Service -> Investor: create({email, name, cpf, dateOfBirth, riskProfile})
+activate Investor
+Investor --> Service: newInvestor
+deactivate Investor
+
+Service -> Repository: create(newInvestor)
+activate Repository
+Repository --> Service: void
+deactivate Repository
+
+Service --> Client: Right({newInvestor})
+deactivate Service
+@enduml

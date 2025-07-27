@@ -1,0 +1,31 @@
+@startuml Register Asset - Success Flow
+title Register Asset Service - Sequence Diagram (Success Flow)
+
+actor Client
+participant RegisterAssetService as Service
+participant UniqueEntityID as EntityID
+participant Asset
+participant AssetRepository as Repository
+
+Client -> Service: execute({symbol, name, assetType, sector, exchange, currency})
+activate Service
+
+Service -> EntityID: new UniqueEntityID()
+activate EntityID
+EntityID --> Service: uniqueId
+deactivate EntityID
+
+Service -> Asset: create({asserId, symbol, name, assetType, sector, exchange, currency})
+activate Asset
+note over Asset: Creates new Asset with:\n- Generated unique ID\n- Provided properties\n- createdAt = new Date()\n- isActive = true
+Asset --> Service: newAsset
+deactivate Asset
+
+Service -> Repository: create(newAsset)
+activate Repository
+Repository --> Service: void
+deactivate Repository
+
+Service --> Client: Right({newAsset})
+deactivate Service
+@enduml
