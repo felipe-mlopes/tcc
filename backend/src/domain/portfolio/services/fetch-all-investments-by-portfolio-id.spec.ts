@@ -2,7 +2,6 @@ import { InMemoryAssetRepository } from "test/repositories/in-memory-asset-repos
 import { InMemoryInvestorRepository } from "test/repositories/in-memory-investor-repository"
 import { InMemoryPortfolioRepository } from "test/repositories/in-memory-portfolio-repository"
 import { Investor } from "@/domain/investor/entities/investor"
-import { Asset } from "@/domain/asset/entities/asset"
 import { Portfolio } from "../entities/portfolio"
 import { InMemoryInvestmentRepository } from "test/repositories/in-memory-investment-repository"
 import { makeInvestor } from "test/factories/make-investor"
@@ -23,7 +22,6 @@ let sut: FetchAllInvestmentsByPortfolioIdService
 let newInvestor: Investor
 let newPortfolio: Portfolio
 let investorId: string
-let assetId: string
 
 describe('Fetch All Investments By PortfolioId', () => {
     beforeEach(() => {
@@ -92,7 +90,7 @@ describe('Fetch All Investments By PortfolioId', () => {
         }
     })
     
-    it('should be able to fetch empty investments by portfolio id', async () => {
+    it('should be able to fetch investments, returning an empty list if no investments are found', async () => {
 
         // Arrange
         const newAsset = makeAsset()
@@ -117,19 +115,28 @@ describe('Fetch All Investments By PortfolioId', () => {
         }
     })
 
-    // Corrigir esse teste
     it('should be able to paginated all investiments by portfolio id', async () => {
 
         // Arrange
         await inMemoryInvestorRepository.create(newInvestor)
         await inMemoryPortfolioRepository.create(newPortfolio)
 
-        for (let i = 1; i <= 22; i++) {
-            await inMemoryAssetRepository.create(makeAsset())
-            await inMemoryInvestmentRepository.create(makeInvestment({
-                portfolioId: newPortfolio.id,
+        const assets = []
+        const investments = []
 
-            }))
+        for (let i = 1; i <= 22; i++) {
+            const asset = makeAsset()
+            assets.push(asset)
+            await inMemoryAssetRepository.create(asset)
+
+            const investment = makeInvestment({
+                portfolioId: newPortfolio.id,
+                assetId: asset.id,
+                quantity: Quantity.create(i * 10),
+                currentPrice: Money.create(i * 5)
+            })
+            investments.push(investment)
+            await inMemoryInvestmentRepository.create(investment)
         }
 
         // Act
@@ -145,6 +152,10 @@ describe('Fetch All Investments By PortfolioId', () => {
             const { investment } = result.value
             
             expect(investment).toHaveLength(2)
+            expect(investment[0].quantity.getValue()).toBe(210) // 21 * 10
+            expect(investment[0].currentPrice.getAmount()).toBe(105) // 21 * 5
+            expect(investment[1].quantity.getValue()).toBe(220) // 22 * 10
+            expect(investment[1].currentPrice.getAmount()).toBe(110) // 22 * 5
         }
     })
     
