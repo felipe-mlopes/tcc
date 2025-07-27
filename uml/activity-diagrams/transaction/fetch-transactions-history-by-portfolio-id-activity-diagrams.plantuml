@@ -1,0 +1,40 @@
+@startuml Fetch Transactions History by Portfolio ID
+title Fetch Transactions History by Portfolio ID Service - Flow
+
+start
+
+:Receive request\n(investorId, page);
+
+partition "Sequential Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found";
+    stop
+  endif
+  
+  :Extract investor ID;
+  
+  :Find portfolio by investor ID;
+  if (Portfolio exists?) then (no)
+    :Return error: "Portfolio not found";  
+    stop
+  endif
+}
+
+partition "Transaction Retrieval" {
+  :Extract portfolio ID from verified portfolio;
+  
+  :Fetch paginated transactions by portfolio ID;
+  note right
+    transactionRepository.findManyByPortfolioId(
+      portfolioId, 
+      { page }
+    )
+    Returns all transaction types for the portfolio
+  end note
+}
+
+:Return paginated transaction list;
+
+stop
+@enduml

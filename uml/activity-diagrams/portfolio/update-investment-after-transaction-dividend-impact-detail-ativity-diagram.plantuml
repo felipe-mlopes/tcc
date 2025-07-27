@@ -1,0 +1,35 @@
+@startuml Update Investment - Dividend Impact Detail
+title Update Investment After Transaction - Dividend Impact Calculation
+
+start
+
+:Receive dividend transaction and current investment;
+
+partition "Dividend Transaction Processing" {
+  :Generate unique yield ID;
+  
+  :Add yield to investment;
+  note right
+    investment.includeYield({
+      yieldId: generated ID,
+      incomeValue: transaction.income,
+      date: transaction.dateAt
+    })
+    - Records dividend received
+    - Adds to yields history
+    - Doesn't affect quantity
+  end note
+  
+  :Update current price with transaction price;
+  note right
+    Price update for accurate valuation
+    even though quantity doesn't change
+  end note
+  
+  :Save updated investment to repository;
+}
+
+:Return updated investment;
+
+stop
+@enduml

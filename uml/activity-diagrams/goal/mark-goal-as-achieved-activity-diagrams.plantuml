@@ -1,0 +1,48 @@
+@startuml Mark Goal as Achieved Service
+title Mark Goal as Achieved Service - Detailed Activity Flow
+
+start
+
+:Receive achievement request\n(goalId, investorId, reason?);
+
+partition "Security Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Find goal by ID;
+  if (Goal exists?) then (no)
+    :Return error: "Goal not found.";
+    stop
+  endif
+  
+  :Check goal status;
+  if (Goal is active?) then (no)
+    :Return error: "Goal cannot be modified because it is not active.";
+    stop
+  endif
+  
+  :Verify goal ownership;
+  if (Goal belongs to investor?) then (no)
+    :Return error: "You are not allowed to access this goal.";
+    stop
+  endif
+}
+
+partition "Achievement Processing" {
+  :Mark goal as achieved;
+  note right
+    goal.markAsAchieved()
+    - Sets status = ACHIEVED
+    - Updates timestamp via touch()
+  end note
+  
+  :Save updated goal to repository;
+}
+
+:Return success with achieved goal;
+
+stop
+@enduml

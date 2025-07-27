@@ -1,0 +1,103 @@
+@startuml Edit Investment Goal Service
+title Edit Investment Goal Service - Detailed Activity Flow
+
+start
+
+:Receive goal edit request\n(investorId, goalId, name?, description?, targetAmount?, targetDate?, priority?, status?);
+
+partition "Comprehensive Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Find goal by ID;
+  if (Goal exists?) then (no)
+    :Return error: "Goal not found.";
+    stop
+  endif
+  
+  :Check goal ownership;
+  if (Goal belongs to investor?) then (no)
+    :Return error: "The goal does not belong to that investor.";
+    stop
+  endif
+  
+  :Check if at least one field provided;
+  if (All fields are undefined?) then (yes)
+    :Return error: "It is necessary to inform some change field.";
+    stop
+  endif
+}
+
+partition "Conditional Updates" {
+  if (Name provided?) then (yes)
+    :Update goal name;
+    note right
+      goal.updateName(name)
+      Trims whitespace and calls touch()
+    end note
+  endif
+  
+  if (Description provided?) then (yes)
+    :Update goal description;
+    note right
+      goal.updateDescription(description)
+      Trims whitespace and calls touch()
+    end note
+  endif
+  
+  if (Target amount provided?) then (yes)
+    :Create Money value object;
+    :Update target amount;
+    note right
+      goal.updateTargetAmount(Money.create(targetAmount))
+      May automatically mark as achieved if current >= target
+    end note
+  endif
+  
+  if (Target date provided?) then (yes)
+    :Update target date;
+    note right
+      goal.updateTargetDate(targetDate)
+      Calls touch() to update timestamp
+    end note
+  endif
+  
+  if (Priority provided and different?) then (yes)
+    :Update priority;
+    note right
+      goal.updatePriority(priority)
+      Only updates if different from current
+    end note
+  endif
+  
+  if (Status provided and different?) then (yes)
+    switch (New status?)
+    case (ACHIEVED)
+      :Mark goal as achieved;
+      note right
+        goal.markAsAchieved()
+        Sets status and calls touch()
+      end note
+    case (CANCELLED)
+      :Cancel goal;
+      note right
+        goal.cancel()
+        Sets status and calls touch()
+      end note
+    case (ACTIVE)
+      :Reactivate goal;
+      note right
+        goal.reactivate()
+        Sets status and calls touch()
+      end note
+    endswitch
+  endif
+}
+
+:Return success with updated goal;
+
+stop
+@enduml

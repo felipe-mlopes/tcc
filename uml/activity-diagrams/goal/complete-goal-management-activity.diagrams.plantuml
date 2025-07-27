@@ -1,0 +1,49 @@
+@startuml Complete Goal Management Flow
+title Complete Goal Management Flow - Lifecycle Overview
+
+start
+
+partition "Goal Registration" {
+  :Create new investment goal;
+  :Set initial parameters;
+  :Set status = ACTIVE;
+  :Set currentAmount = 0;
+}
+
+partition "Goal Monitoring & Updates" {
+  repeat
+    :Monitor goal progress;
+    
+    switch (Action needed?)
+    case (Update progress)
+      :Add contributions to current amount;
+      :Check if automatically achieved;
+    case (Edit goal parameters)
+      :Update name, description, target, etc.;
+      :Validate ownership and permissions;
+    case (Calculate projections)
+      :Run projection scenarios;
+      :Analyze completion probability;
+      :Generate recommendations;
+    case (No action)
+      :Continue monitoring;
+    endswitch
+    
+  repeat while (Goal is active?)
+}
+
+partition "Goal Completion" {
+  switch (Completion type?)
+  case (Achieved)
+    :Mark as achieved;
+    :Update status to ACHIEVED;
+  case (Cancelled)
+    :Cancel goal;
+    :Update status to CANCELLED;
+  endswitch
+}
+
+:Goal lifecycle complete;
+
+stop
+@enduml

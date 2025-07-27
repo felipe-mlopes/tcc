@@ -1,0 +1,35 @@
+@startuml Update Goal Progress Service
+title Update Goal Progress Service - Detailed Activity Flow
+
+start
+
+:Receive progress request\n(investorId, goalId);
+
+partition "Basic Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Find goal by ID;
+  if (Goal exists?) then (no)
+    :Return error: "Goal not found.";
+    stop
+  endif
+}
+
+partition "Progress Calculation" {
+  :Calculate current progress;
+  note right
+    goal.progress (getter)
+    - Returns currentAmount / targetAmount
+    - Clamped to maximum 100%
+    - Returns Percentage value object
+  end note
+}
+
+:Return progress percentage;
+
+stop
+@enduml

@@ -1,0 +1,34 @@
+@startuml Update Investment - Buy Impact Detail
+title Update Investment After Transaction - Buy Impact Calculation
+
+start
+
+:Receive buy transaction and current investment;
+
+partition "Buy Transaction Processing" {
+  :Add quantity to current investment;
+  note right
+    investment.addQuantity({
+      transactionId,
+      quantity,
+      price,
+      date
+    })
+    - Adds transaction to history
+    - Updates total quantity
+    - Calls touch() for timestamp
+  end note
+  
+  :Update current price with transaction price;
+  note right
+    investment.updateCurrentPrice(transactionPrice)
+    This reflects the most recent market price
+  end note
+  
+  :Save updated investment to repository;
+}
+
+:Return updated investment;
+
+stop
+@enduml

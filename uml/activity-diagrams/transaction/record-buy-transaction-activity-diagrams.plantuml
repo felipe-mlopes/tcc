@@ -1,0 +1,62 @@
+@startuml Record Buy Transaction Service
+title Record Buy Transaction Service - Detailed Flow
+
+start
+
+:Receive buy transaction request\n(investorId, assetName, transactionType, quantity, price, fees, dateAt);
+
+partition "Transaction Type Validation" {
+  if (Transaction type is BUY?) then (no)
+    :Return error:\n"Only buy transactions are allowed for this operation.";
+    stop
+  endif
+}
+
+partition "Comprehensive Validation" {
+  :Call TransactionValidatorService.validate();
+  if (Validation successful?) then (no)
+    :Return validation error;
+    stop
+  endif
+  
+  :Extract validated entities and formatted values;
+}
+
+partition "Business Rules Validation" {
+  if (Quantity is zero?) then (yes)
+    :Return error:\n"Quantity must be greater than zero.";
+    stop
+  endif
+  
+  if (Fees is zero?) then (yes)
+    :Return error:\n"Fees must be greater than zero.";
+    stop
+  endif
+}
+
+partition "Transaction Creation" {
+  :Create Transaction entity with:
+  - Asset ID
+  - Portfolio ID
+  - BUY transaction type
+  - Validated quantity
+  - Validated price
+  - Validated fees
+  - Provided date;
+  
+  note right
+    Transaction.create() handles:
+    - Total amount calculation
+    - Setting createdAt timestamp
+    - Applying transaction type logic
+  end note
+}
+
+partition "Persistence" {
+  :Save buy transaction to repository;
+}
+
+:Return success with new buy transaction;
+
+stop
+@enduml

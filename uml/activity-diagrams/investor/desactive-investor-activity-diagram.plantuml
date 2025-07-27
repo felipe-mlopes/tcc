@@ -1,0 +1,58 @@
+@startuml Desactive Investor Service
+title Desactive Investor Service - Activity Diagram
+
+start
+
+:Receive desactivation request\n(investorId);
+
+:Find investor by ID;
+if (Investor found?) then (no)
+  :Return error:\n"Investor not found.";
+  stop
+endif
+
+:Call investor.desactive();
+note right
+  Sets isActive = false
+  Calls touch() to update timestamp
+end note
+
+:Save updated investor to repository;
+
+:Return success message:\n"The investor has been desactive.";
+
+stop
+@enduml
+
+' Risk Profile Assignment Logic (Detailed)
+@startuml Risk Profile Assignment Logic
+title Risk Profile Assignment Logic - Detailed Flow
+
+start
+
+:Calculate age from date of birth;
+
+if (Age < 25?) then (yes)
+  :Assign Aggressive profile;
+  note right
+    Young investors can take
+    more risks for higher returns
+  end note
+elseif (Age >= 25 AND Age < 50?) then (yes)
+  :Assign Conservative profile;
+  note right
+    Middle-aged investors prefer
+    stable, lower-risk investments
+  end note
+else (Age >= 50)
+  :Assign Moderate profile;
+  note right
+    Older investors balance
+    growth with preservation
+  end note
+endif
+
+:Return assigned risk profile;
+
+stop
+@enduml

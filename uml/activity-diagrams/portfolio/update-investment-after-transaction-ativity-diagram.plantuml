@@ -1,0 +1,67 @@
+@startuml Update Investment After Transaction - Main Flow
+title Update Investment After Transaction Service - Main Flow
+
+start
+
+:Receive update request\n(investorId, transactionId);
+
+partition "Initial Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Find transaction by ID;
+  if (Transaction exists?) then (no)
+    :Return error: "Transaction not found.";
+    stop
+  endif
+  
+  :Extract portfolio ID and asset ID from transaction;
+  
+  :Find asset by ID;
+  if (Asset exists?) then (no)
+    :Return error: "Asset not found.";
+    stop
+  endif
+  
+  :Find existing investment by portfolio and asset;
+  note right
+    This can return null - it's valid for
+    first-time investments
+  end note
+}
+
+partition "Investment Processing Logic" {
+  if (Current investment exists?) then (yes)
+    :Process existing investment;
+    
+    switch (Transaction type?)
+    case (BUY)
+      :Execute buy impact calculation;
+    case (SELL)  
+      :Execute sell impact calculation;
+    case (DIVIDEND)
+      :Execute dividend impact calculation;
+    case (default)
+      :Return error: "Unsupported transaction type.";
+      stop
+    endswitch
+    
+  else (no)
+    :Create new investment;
+    
+    if (Transaction is BUY?) then (no)
+      :Return error:\n"Only buy transactions allowed for new investments.";
+      stop
+    endif
+    
+    :Execute new investment creation;
+  endif
+}
+
+:Return updated investment;
+
+stop
+@enduml

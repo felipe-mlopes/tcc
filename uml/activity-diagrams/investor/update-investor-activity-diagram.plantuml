@@ -1,0 +1,35 @@
+@startuml Update Investor Service
+title Update Investor Service - Activity Diagram
+
+start
+
+:Receive update request\n(investorId, name?, email?);
+
+:Find investor by ID;
+if (Investor found?) then (no)
+  :Return error:\n"Investor not found.";
+  stop
+endif
+
+:Check if name or email provided;
+if (Name and email both empty/null?) then (yes)
+  :Return error:\n"Name or email are required.";
+  stop
+endif
+
+if (Name provided and not empty?) then (yes)
+  :Update investor name;
+  :Call touch() to update timestamp;
+endif
+
+if (Email provided and not empty?) then (yes)
+  :Update investor email;
+  :Call touch() to update timestamp;
+endif
+
+:Save updated investor to repository;
+
+:Return success with updated investor;
+
+stop
+@enduml

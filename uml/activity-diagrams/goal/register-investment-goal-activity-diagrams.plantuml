@@ -1,0 +1,47 @@
+@startuml Register Investment Goal Service
+title Register Investment Goal Service - Detailed Activity Flow
+
+start
+
+:Receive goal registration request\n(investorId, name, description?, targetAmount, targetDate, priority);
+
+partition "Basic Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+}
+
+partition "Goal Creation" {
+  :Create Money value object from targetAmount;
+  note right
+    Money.create(targetAmount)
+    Uses default currency
+  end note
+  
+  :Create UniqueEntityID from investorId;
+  
+  :Set description = provided value or null;
+  
+  :Create Goal entity with:
+  - Investor ID
+  - Name
+  - Description (optional)
+  - Target amount (Money VO)
+  - Target date  
+  - Priority
+  - Status = Active (default)
+  - Current amount = zero (default)
+  - Auto-generated goal ID
+  - Current timestamp;
+}
+
+partition "Persistence" {
+  :Save goal to repository;
+}
+
+:Return success with new goal;
+
+stop
+@enduml

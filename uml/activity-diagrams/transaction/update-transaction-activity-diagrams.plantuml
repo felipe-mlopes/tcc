@@ -1,0 +1,102 @@
+@startuml Update Transaction Service
+title Update Transaction Service - Detailed Activity Flow
+
+start
+
+:Receive update request\n(investorId, transactionId, transactionType?, quantity?, price?, fees?);
+
+partition "Initial Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Check if at least one field is provided;
+  if (All fields are undefined?) then (yes)
+    :Return error:\n"At least one transaction field must be provided.";
+    stop
+  endif
+  
+  :Find transaction by ID;
+  if (Transaction exists?) then (no)
+    :Return error: "Transaction not found.";
+    stop
+  endif
+}
+
+partition "Transaction Type Update" {
+  if (Transaction type provided and not empty?) then (yes)
+    :Update transaction type;
+    note right
+      transaction.updateTransactionType(transactionType)
+      This may affect total amount calculation
+    end note
+  endif
+}
+
+partition "Quantity Update" {
+  if (Quantity provided?) then (yes)
+    :Make quantity absolute (Math.abs);
+    :Create Quantity value object;
+    
+    if (Quantity is zero?) then (yes)
+      :Return error:\n"Quantity must be greater than zero.";
+      stop
+    endif
+    
+    :Update transaction quantity;
+    :Recalculate total amount;
+    note right
+      transaction.updateQuantity(newQuantity)
+      transaction.updateTotalAmount()
+    end note
+  endif
+}
+
+partition "Price Update" {
+  if (Price provided?) then (yes)
+    :Make price absolute (Math.abs);
+    :Create Money value object;
+    
+    if (Price is zero?) then (yes)
+      :Return error:\n"Price must be greater than zero.";
+      stop
+    endif
+    
+    :Update transaction price;
+    :Recalculate total amount;
+    note right
+      transaction.updatePrice(newPrice)
+      transaction.updateTotalAmount()
+    end note
+  endif
+}
+
+partition "Fees Update" {
+  if (Fees provided?) then (yes)
+    :Make fees absolute (Math.abs);
+    :Create Money value object;
+    
+    if (Fees is zero?) then (yes)
+      :Return error:\n"Fees must be greater than zero.";
+      stop
+    endif
+    
+    :Update transaction fees;
+    :Recalculate total amount;
+    note right
+      transaction.updateFees(newFees)
+      transaction.updateTotalAmount()
+    end note
+  endif
+}
+
+partition "Persistence" {
+  :Save updated transaction to repository;
+}
+
+:Return success with edited transaction;
+
+stop
+@enduml

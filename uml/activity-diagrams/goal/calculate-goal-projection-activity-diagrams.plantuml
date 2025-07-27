@@ -1,0 +1,139 @@
+@startuml Calculate Goal Projection Service
+title Calculate Goal Projection Service - Detailed Activity Flow
+
+start
+
+:Receive projection request\n(investorId, goalId, scenarios[]);
+
+partition "Comprehensive Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Find goal by ID;
+  if (Goal exists?) then (no)
+    :Return error: "Goal not found.";
+    stop
+  endif
+  
+  :Check goal status;
+  if (Goal is active?) then (no)
+    :Return error: "Goal cannot be modified because it is not active.";
+    stop
+  endif
+  
+  :Check scenarios array;
+  if (Scenarios empty or null?) then (yes)
+    :Return error: "No scenarios available to proceed.";
+    stop
+  endif
+  
+  :Validate each scenario;
+  repeat
+    if (Monthly contribution missing?) then (yes)
+      :Return error: "You must provide at least one scenario to continue.";
+      stop
+    endif
+    
+    if (Monthly contribution negative?) then (yes)
+      :Return error: "Monthly contribution cannot be negative.";
+      stop
+    endif
+    
+    if (Currency mismatch?) then (yes)
+      :Return error: "Monthly contribution currency must match target amount currency.";
+      stop
+    endif
+  repeat while (More scenarios?)
+  
+  :Check goal ownership;
+  if (Goal belongs to investor?) then (no)
+    :Return error: "You are not allowed to access this goal.";
+    stop
+  endif
+}
+
+partition "Projection Calculations" {
+  :Initialize projections array;
+  
+  repeat
+    :Calculate projection for current scenario;
+    
+    partition "Scenario Calculation" {
+      :Calculate remaining amount;
+      :Calculate months to complete;
+      note right
+        remainingAmount / monthlyContribution
+        = ceil(months needed)
+      end note
+      
+      :Calculate projected completion date;
+      note right
+        today + monthsToComplete
+      end note
+      
+      :Calculate months until target date;
+      :Calculate projected amount at target date;
+      note right
+        currentAmount + (monthlyContribution * monthsUntilTarget)
+      end note
+      
+      :Calculate shortfall/surplus;
+      note right
+        projectedAmount - targetAmount
+        Shortfall if negative, surplus if positive
+      end note
+      
+      :Calculate progress percentage at target date;
+      note right
+        min(projectedAmount / targetAmount, 1.0) * 100%
+      end note
+      
+      :Determine if will meet target date;
+      note right
+        projectedCompletionDate <= targetDate
+      end note
+      
+      :Create projection result;
+    }
+    
+    :Add result to projections array;
+  repeat while (More scenarios?)
+}
+
+partition "Analysis Compilation" {
+  :Calculate recommended monthly contribution;
+  note right
+    remainingAmount * 1.1 / monthsUntilTarget
+    10% buffer for safety
+  end note
+  
+  :Calculate minimum monthly contribution;
+  note right
+    remainingAmount / monthsUntilTarget
+    Exact amount needed
+  end note
+  
+  :Calculate current monthly requirement;
+  note right
+    Same as minimum contribution
+  end note
+  
+  :Create comprehensive analysis object;
+  note right
+    GoalProjectionAnalysis contains:
+    - Goal reference
+    - All projection results
+    - Recommended contribution
+    - Minimum contribution
+    - Current requirement
+    - Analysis timestamp
+  end note
+}
+
+:Return success with complete analysis;
+
+stop
+@enduml

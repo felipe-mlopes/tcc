@@ -1,0 +1,43 @@
+@startuml Update Investment - New Investment Creation
+title Update Investment After Transaction - New Investment Creation
+
+start
+
+:Receive transaction for non-existing investment;
+
+partition "New Investment Validation" {
+  :Check if transaction is BUY type;
+  
+  if (Transaction is BUY?) then (no)
+    :Return error:\n"Only buy transactions allowed for this operation.";
+    stop
+  endif
+}
+
+partition "New Investment Creation" {
+  :Create Investment entity with:
+  - Asset ID from transaction
+  - Portfolio ID from transaction  
+  - Quantity from transaction
+  - Current price from transaction
+  - Auto-generated investment ID
+  - Current timestamp;
+  
+  :Include transaction in investment history;
+  note right
+    investment.includeTransaction({
+      transactionId,
+      quantity,
+      price,
+      date
+    })
+    Establishes the transaction history
+  end note
+  
+  :Save new investment to repository;
+}
+
+:Return new investment;
+
+stop
+@enduml

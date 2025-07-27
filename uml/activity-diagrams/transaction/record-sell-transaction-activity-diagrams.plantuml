@@ -1,0 +1,62 @@
+@startuml Record Sell Transaction Service
+title Record Sell Transaction Service - Detailed Flow
+
+start
+
+:Receive sell transaction request\n(investorId, assetName, transactionType, quantity, price, fees, dateAt);
+
+partition "Transaction Type Validation" {
+  if (Transaction type is SELL?) then (no)
+    :Return error:\n"Only sell transactions are allowed for this operation.";
+    stop
+  endif
+}
+
+partition "Comprehensive Validation" {
+  :Call TransactionValidatorService.validate();
+  if (Validation successful?) then (no)
+    :Return validation error;
+    stop
+  endif
+  
+  :Extract validated entities and formatted values;
+}
+
+partition "Business Rules Validation" {
+  if (Quantity is zero?) then (yes)
+    :Return error:\n"Quantity must be greater than zero.";
+    stop
+  endif
+  
+  if (Fees is zero?) then (yes)
+    :Return error:\n"Fees must be greater than zero.";
+    stop
+  endif
+}
+
+partition "Transaction Creation" {
+  :Create Transaction entity with:
+  - Asset ID
+  - Portfolio ID
+  - SELL transaction type
+  - Validated quantity
+  - Validated price
+  - Validated fees
+  - Provided date;
+  
+  note right
+    For SELL transactions:
+    - Total amount may be negative
+    - Quantity represents shares sold
+    - Fees reduce net proceeds
+  end note
+}
+
+partition "Persistence" {
+  :Save sell transaction to repository;
+}
+
+:Return success with new sell transaction;
+
+stop
+@enduml

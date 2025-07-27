@@ -1,0 +1,63 @@
+@startuml Record Dividend Transaction Service
+title Record Dividend Transaction Service - Detailed Flow
+
+start
+
+:Receive dividend transaction request\n(investorId, assetName, transactionType, price, income, dateAt);
+
+partition "Transaction Type Validation" {
+  if (Transaction type is DIVIDEND?) then (no)
+    :Return error:\n"Only dividend transactions are allowed for this operation.";
+    stop
+  endif
+}
+
+partition "Comprehensive Validation" {
+  :Call TransactionValidatorService.validate();
+  note right
+    For dividends, quantity is not required
+    but price and income are essential
+  end note
+  
+  if (Validation successful?) then (no)
+    :Return validation error;
+    stop
+  endif
+  
+  :Extract validated entities and formatted values;
+}
+
+partition "Business Rules Validation" {
+  if (Income is zero?) then (yes)
+    :Return error:\n"Income must be greater than zero.";
+    stop
+  endif
+}
+
+partition "Transaction Creation" {
+  :Create Transaction entity with:
+  - Asset ID
+  - Portfolio ID
+  - DIVIDEND transaction type
+  - Quantity = zero (dividends don't affect quantity)
+  - Validated price (for record keeping)
+  - Validated income
+  - Fees = zero (typically no fees for dividends)
+  - Provided date;
+  
+  note right
+    Dividend transactions:
+    - Don't affect asset quantity
+    - Record income received
+    - May update asset price for valuation
+  end note
+}
+
+partition "Persistence" {
+  :Save dividend transaction to repository;
+}
+
+:Return success with new dividend transaction;
+
+stop
+@enduml

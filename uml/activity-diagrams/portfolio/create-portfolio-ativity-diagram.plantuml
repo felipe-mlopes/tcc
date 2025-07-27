@@ -1,0 +1,46 @@
+@startuml Create Portfolio Service
+title Create Portfolio Service - Detailed Activity Flow
+
+start
+
+:Receive portfolio creation request\n(investorId, name, description?);
+
+partition "Validation" {
+  :Find investor by ID;
+  
+  if (Investor exists?) then (no)
+    :Return error:\n"Investor not found.";
+    stop
+  endif
+}
+
+partition "Portfolio Creation" {
+  :Create UniqueEntityID from investorId;
+  
+  :Set description = provided value or empty string;
+  
+  :Initialize empty allocations array;
+  
+  :Create Portfolio entity with:
+  - Generated/provided ID
+  - Investor ID
+  - Name
+  - Description
+  - Empty allocations
+  - Current timestamp
+  - Default total value (zero);
+}
+
+partition "Persistence" {
+  :Save portfolio to repository;
+  
+  if (Save successful?) then (no)
+    :Handle database error;
+    stop
+  endif
+}
+
+:Return success with new portfolio;
+
+stop
+@enduml

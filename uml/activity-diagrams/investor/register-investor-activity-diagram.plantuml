@@ -1,0 +1,52 @@
+@startuml Register Investor Service
+title Register Investor Service - Activity Diagram
+
+start
+
+:Receive registration request\n(email, name, cpf, dateOfBirth);
+
+:Check if email already exists;
+if (Email exists?) then (yes)
+  :Return error:\n"Email or CPF is already in use.";
+  stop
+endif
+
+:Check if CPF already exists;
+if (CPF exists?) then (yes)
+  :Return error:\n"Email or CPF is already in use.";
+  stop
+endif
+
+:Validate date of birth;
+if (Date is valid?) then (no)
+  :Return error:\n"Invalid date of birth.";
+  stop
+endif
+
+if (Date is in future?) then (yes)
+  :Return error:\n"Invalid date of birth.";
+  stop
+endif
+
+:Calculate age from date of birth;
+
+:Determine risk profile based on age;
+note right
+  - Age < 25: Aggressive
+  - Age 25-49: Conservative  
+  - Age >= 50: Moderate
+end note
+
+:Create Email value object;
+:Create Name value object;
+:Create CPF value object;
+:Create DateOfBirth value object;
+
+:Create Investor entity with\nvalue objects and risk profile;
+
+:Save investor to repository;
+
+:Return success with new investor;
+
+stop
+@enduml

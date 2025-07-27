@@ -1,0 +1,63 @@
+@startuml Add Investment to Portfolio Service
+title Add Investment to Portfolio Service - Detailed Activity Flow
+
+start
+
+:Receive investment request\n(investorId, assetId, quantity, currentPrice);
+
+partition "Comprehensive Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Find asset by ID;
+  if (Asset exists?) then (no)
+    :Return error: "Asset not found.";
+    stop
+  endif
+  
+  :Find portfolio by investor ID;
+  if (Portfolio exists?) then (no)
+    :Return error: "Portfolio not found.";
+    stop
+  endif
+  
+  :Create Quantity value object from number;
+  :Create Money value object from currentPrice;
+}
+
+partition "Investment Creation" {
+  :Extract portfolio ID from verified portfolio;
+  
+  :Create Investment entity with:
+  - Portfolio ID
+  - Asset ID  
+  - Formatted quantity
+  - Formatted current price
+  - Auto-generated investment ID
+  - Current timestamp;
+  
+  :Save investment to repository;
+}
+
+partition "Portfolio Updates" {
+  :Add investment ID to portfolio allocations;
+  note right
+    portfolio.updateAllocation(investmentId)
+  end note
+  
+  :Increase portfolio total value;
+  note right
+    portfolio.increaseTotalValue(quantity, currentPrice)
+    Calculates: quantity * currentPrice
+  end note
+  
+  :Save updated portfolio to repository;
+}
+
+:Return success with new investment;
+
+stop
+@enduml

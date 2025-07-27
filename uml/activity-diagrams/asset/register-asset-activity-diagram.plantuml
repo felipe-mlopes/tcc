@@ -1,0 +1,47 @@
+@startuml Register Asset - Detailed Flow
+title Register Asset Service - Detailed Registration Flow
+
+start
+
+:Start asset registration;
+
+partition "Input Processing" {
+  :Receive registration data;
+  note right
+    - symbol: string
+    - name: string
+    - assetType: AssetType enum
+    - sector: string
+    - exchange: string
+    - currency: string
+  end note
+}
+
+partition "Entity Creation" {
+  :Generate unique asset ID;
+  
+  :Create Asset entity;
+  note right
+    Asset.create() method:
+    - Sets provided properties
+    - Sets createdAt = new Date()
+    - Sets isActive = true
+    - Sets updatedAt = null
+  end note
+}
+
+partition "Persistence" {
+  :Save asset to repository;
+  
+  if (Save successful?) then (no)
+    :Handle database error;
+    stop
+  endif
+}
+
+partition "Response" {
+  :Return Right result with new asset;
+}
+
+stop
+@enduml

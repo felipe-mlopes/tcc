@@ -1,0 +1,39 @@
+@startuml Fetch All Investments Service
+title Fetch All Investments by Portfolio ID Service - Detailed Flow
+
+start
+
+:Receive fetch request\n(investorId, page);
+
+partition "Validation Chain" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Extract investor ID;
+  
+  :Find portfolio by investor ID;
+  if (Portfolio exists?) then (no)
+    :Return error: "Portfolio not found.";
+    stop
+  endif
+}
+
+partition "Data Retrieval" {
+  :Extract portfolio ID from verified portfolio;
+  
+  :Query investments by portfolio ID with pagination;
+  note right
+    investmentRepository.findManyByPortfolio(
+      portfolioId, 
+      { page }
+    )
+  end note
+}
+
+:Return paginated investment list;
+
+stop
+@enduml

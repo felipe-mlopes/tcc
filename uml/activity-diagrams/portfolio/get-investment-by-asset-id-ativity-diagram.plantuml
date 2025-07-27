@@ -1,0 +1,44 @@
+@startuml Get Investment by Asset ID Service
+title Get Investment by Asset ID Service - Detailed Flow
+
+start
+
+:Receive request\n(investorId, assetId);
+
+partition "Triple Validation" {
+  :Find investor by ID;
+  if (Investor exists?) then (no)
+    :Return error: "Investor not found.";
+    stop
+  endif
+  
+  :Find asset by ID;
+  if (Asset exists?) then (no)
+    :Return error: "Asset not found.";
+    stop
+  endif
+  
+  :Extract investor ID;
+  
+  :Find portfolio by investor ID;
+  if (Portfolio exists?) then (no)
+    :Return error: "Portfolio not found.";
+    stop
+  endif
+}
+
+partition "Specific Investment Query" {
+  :Extract portfolio ID;
+  
+  :Search for investment by portfolio ID and asset ID;
+  note right
+    Returns null if investment doesn't exist
+    This is a valid scenario - investor might
+    not have invested in this specific asset yet
+  end note
+}
+
+:Return investment (or null);
+
+stop
+@enduml

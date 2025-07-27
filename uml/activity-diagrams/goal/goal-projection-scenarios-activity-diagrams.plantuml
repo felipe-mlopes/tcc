@@ -1,0 +1,49 @@
+@startuml Goal Projection Scenarios Service
+title Goal Projection Scenarios Service - Static Factory Methods
+
+start
+
+:Receive scenario creation request;
+
+switch (Scenario type requested?)
+case (Conservative)
+  :Create conservative scenario;
+  note right
+    Static factory method:
+    - Creates Money VO from amount
+    - Sets scenarioName = 'Conservative'
+    - Returns ProjectionScenario
+  end note
+
+case (Moderate)
+  :Create moderate scenario;
+  note right
+    Static factory method:
+    - Creates Money VO from amount
+    - Sets scenarioName = 'Moderate'
+    - Returns ProjectionScenario
+  end note
+
+case (Aggressive)
+  :Create aggressive scenario;
+  note right
+    Static factory method:
+    - Creates Money VO from amount
+    - Sets scenarioName = 'Agressive' (sic)
+    - Returns ProjectionScenario
+  end note
+
+case (Multiple)
+  :Create all three scenarios;
+  note right
+    Creates array with:
+    - Conservative scenario
+    - Moderate scenario
+    - Aggressive scenario
+  end note
+endswitch
+
+:Return scenario(s);
+
+stop
+@enduml

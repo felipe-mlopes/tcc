@@ -1,0 +1,34 @@
+@startuml Update Investment - Sell Impact Detail
+title Update Investment After Transaction - Sell Impact Calculation
+
+start
+
+:Receive sell transaction and current investment;
+
+partition "Sell Transaction Processing" {
+  :Reduce quantity from current investment;
+  note right
+    investment.reduceQuantity({
+      transactionId,
+      quantity,
+      price,
+      date
+    })
+    - Adds transaction to history
+    - Reduces total quantity
+    - Calls touch() for timestamp
+  end note
+  
+  :Update current price with transaction price;
+  note right
+    Even for sells, we update the current
+    market price for portfolio valuation
+  end note
+  
+  :Save updated investment to repository;
+}
+
+:Return updated investment;
+
+stop
+@enduml
