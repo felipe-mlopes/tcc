@@ -1,319 +1,208 @@
 @startuml Diagrama de Classes
 !theme plain
-skinparam Linetype ortho
-skinparam PackageStyle rectangle
+skinparam dpi 300
+skinparam classFontSize 8
+skinparam packageFontSize 10
+skinparam classAttributeIconSize 0
+skinparam minClassWidth 120
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+skinparam wrapWidth 200
+skinparam maxMessageSize 150
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+    FontSize 8
+}
+skinparam package {
+    BackgroundColor #f0f0f0
+    BorderColor black
+    FontSize 10
+}
+skinparam enum {
+    BackgroundColor #e8f4f8
+    BorderColor black
+    FontSize 8
+}
+left to right direction
+scale 0.7
 
-' Investor Management Domain
-package "Investor Management" {
-
-    class Investor {
-        - investorId: uuid
-        - email: Email
-        - name: Name
-        - cpf: CPF
-        - dateOfBirth: DateOfBirth
-        - riskProfile: InvestorProfile
-        - createdAt: Date
-        - updatedAt: Date
-        - isActive: boolean
-
-        - touch(): void
-        + updateName(newName: string): void
-        + updateEmail(newEmail: string): void
-        + desactive(): void
-        + {static} create(): Investor
+package "Core & Value Objects" {
+    abstract class AggregateRoot<T> {
+        #props: T
+        #id: UniqueEntityID
     }
-
-    class Email <<ValueObject>> {
-        - value: String
-        + getValue(): String
-        + equals(other: Email): boolean
-        + {static} create(value: string): Email
+    
+    abstract class Entity<T> {
+        #props: T
+        #id: UniqueEntityID
     }
-
-    class CPF <<ValueObject>> {
-        - value: String
-        + getValue(): String
-        + {static} create(value: string): CPF
+    
+    class UniqueEntityID {
+        -value: string
+        +equals(): boolean
     }
-
-    class Name <<ValueObject>> {
-        - value: String
-        + getValue(): String
-        + equals(other: Name): boolean
-        + {static} create(value: string): Name
+    
+    class Money {
+        -amount: number
+        -currency: string
+        +getAmount(): number
+        +add(): Money
+        +subtract(): Money
+        +multiply(): Money
     }
-
-    class DateOfBirth <<ValueObject>> {
-        - value: Date
-        + getValue(): Date
-        + {static} create(value: Date): DateOfBirth
+    
+    class Percentage {
+        -value: number
+        +getValue(): number
+        +fromDecimal(): Percentage
     }
-
-    enum InvestorProfile {
-        CONSERVATIVE
-        MODERATE
-        AGGRESSIVE
+    
+    class Quantity {
+        -value: number
+        +getValue(): number
+        +add(): Quantity
+        +isZero(): boolean
     }
 }
-
-'Portfolio Management Domain
-package "Portfolio Management" {
-    class Portfolio {
-        - portfolioId: uuid
-        - investorId: uuid
-        - name: String
-        - description: String
-        - createdAt: Date
-        - updatedAt: Date
-        - totalValue: TotalValue
-        - allocations: Array<string>
-
-        - touch(): void
-        + increaseTotalValue(quantity: number, price: number): void
-        + decreaseTotalValue(quantity: number, price: number): void
-        + updateAllocation(newAllocation: string): void
-        + {static} create(): Portfolio
-    }
-
-    class Investment {
-        - investmentId: uuid
-        - portfolioId: uuid
-        - assetId: uuid
-        - quantity: Quantity
-        - currentPrice: Money
-        - transactions: InvestmentTransaction[]
-        - yields: InvestmentYield[]
-        - createdAt: Date
-        - updatedAt: Date
-
-        - calculateAveragePrice(): Money
-        - touch(): void
-        + getTotalInvested(): Money
-        + getCurrentValue(): Money
-        + getProfitLoss(): Money
-        + getProfitLossPercentage(): Percentage
-        + updateCurrentPrice(newPrice: Money): void
-        + includeTransaction(transaction: InvestmentTransaction): void
-        + includeYield(yield: InvestmentYield): void
-        + addQuantity(transaction: InvestmentTransaction): void
-        + reduceQuantity(transaction: InvestmentTransaction): void
-        + hasQuantity(): boolean
-        + isInProfit(): boolean
-        + isInLoss(): boolean
-        + belongsToPortfolio(portfolioId: uuid): boolean
-        + equals(other: Investment): boolean
-        + {static} create(): Investment
-    }
-
-    class InvestmentTransaction <<ValueObject>> {
-        + transactionId: uuid
-        + quantity: Quantity
-        + price: Money
-        + date: Date
-    }
-
-    class InvestmentYield <<ValueObject>> {
-        + yieldId: uuid
-        + incomeValue: Money
-        + date: Date
-    }
-
-    class Money <<ValueObject>> {
-        - amount: decimal
-        - currency: Currency
-        + getAmount(): decimal
-        + getCurrency(): Currency
-        + add(other: Money): Money
-        + subtract(other: Money): Money
-        + multiply(multiplier: decimal): Money
-        + divide(divisor: decimal): Money
-        + {static} zero(currency?: Currency): Money
-        + {static} create(amount: decimal, currency?: Currency): Money
-    }
-
-    class Quantity <<ValueObject>> {
-        - value: decimal
-        + getValue(): decimal
-        + add(other: Quantity): Quantity
-        + subtract(other: Quantity): Quantity
-        + isZero(): boolean
-        + {static} zero(): Quantity
-    }
-
-    class Percentage <<ValueObject>> {
-        - value: decimal
-        + getValue(): decimal
-        + {static} zero(): Percentage
-        + {static} fromDecimal(decimal: number): Percentage
-    }
-
-    class TotalValue <<ValueObject>> {
-        - value: decimal
-        + getValue(): decimal
-        + {static} zero(): TotalValue
-    }
-}
-
-' Transaction Management Domain
-package "Transaction Management" {
-    class Transaction {
-        - transactionId: uuid
-        - portfolioId: uuid
-        - assetId: uuid
-        - transactionType: TransactionType
-        - quantity: Quantity
-        - price: Money
-        - income: Money
-        - totalAmount: Money
-        - fees: Money
-        - dateAt: Date
-        - createdAt: Date
-        - updatedAt: Date
-        - notes: String
-
-        - touch(): void
-        + isBuyTransaction(): boolean
-        + isSellTransaction(): boolean
-        + isDividendTransaction(): boolean
-        + updateTransactionType(newType: TransactionType): void
-        + updateQuantity(newQuantity: Quantity): void
-        + updatePrice(newPrice: Money): void
-        + updateIncome(newIncome: Money): void
-        + updateFees(newFees: Money): void
-        + updateTotalAmount(): void
-        + getTotalGrossAmount(): Money
-        + getTotalNetAmount(): Money
-        + {static} create(): Transaction
-    }
-
-    enum TransactionType {
-        BUY
-        SELL
-        DIVIDEND
-    }
-}
-
-' Asset Management Domain
-package "Asset Management" {
-    class Asset {
-        - assetId: uuid
-        - symbol: String
-        - name: String
-        - assetType: AssetType
-        - sector: String
-        - exchange: String
-        - currency: String
-        - createdAt: Date
-        - updatedAt: Date
-        - isActive: boolean
-
-        - touch(): void
-        + desactive(): void
-        + {static} create(): Asset
-    }
-
+package "Asset" {
     enum AssetType {
-        STOCK
-        ETF
-        FIIS
-        BOND
-        CRYPTO
+        Stock, ETF, FIIs
+        Bond, Crypto
+    }
+    
+    class Asset {
+        -symbol: string
+        -name: string
+        -assetType: AssetType
+        -sector: string
+        -currency: string
+        -isActive: boolean
+        +desactive(): void
     }
 }
 
-' Goal Management Domain
-package "Goal Management" {
-    class Goal {
-        - goalId: uuid
-        - investorId: uuid
-        - name: String
-        - description: String
-        - targetAmount: Money
-        - currentAmount: Money
-        - targetDate: Date
-        - priority: Priority
-        - status: Status
-        - createdAt: Date
-        - updatedAt: Date
-
-        - touch(): void
-        + progress(): Percentage
-        + remainingAmount(): Money
-        + daysUntilTarget(): number
-        + isOverdue(): boolean
-        + isAchieved(): boolean
-        + addToCurrentAmount(amount: Money): void
-        + subtractFromCurrentAmount(amount: Money): void
-        + updateName(newName: string): void
-        + updateDescription(newDescription: string): void
-        + updateTargetAmount(newTargetAmount: Money): void
-        + updateTargetDate(newTargetDate: Date): void
-        + updatePriority(newPriority: Priority): void
-        + markAsAchieved(): void
-        + cancel(): void
-        + reactivate(): void
-        + belongsToUser(investorId: uuid): boolean
-        + isHighPriority(): boolean
-        + isMediumPriority(): boolean
-        + isLowPriority(): boolean
-        + isActive(): boolean
-        + isCancelled(): boolean
-        + requiresImmediateAttention(): boolean
-        + equals(other: Goal): boolean
-        + {static} create(): Goal
+package "Investor" {
+    enum InvestorProfile {
+        Conservative
+        Moderate, Aggressive
     }
+    
+    class Investor {
+        -email: Email
+        -name: Name
+        -cpf: CPF
+        -riskProfile: InvestorProfile
+        -isActive: boolean
+        +updateName(): void
+        +updateEmail(): void
+    }
+}
 
+package "Portfolio" {
+    class Portfolio {
+        -investorId: UniqueEntityID
+        -name: string
+        -description: string
+        -totalValue: TotalValue
+        +increaseTotalValue(): void
+        +decreaseTotalValue(): void
+    }
+    
+    class Investment {
+        -portfolioId: UniqueEntityID
+        -assetId: UniqueEntityID
+        -quantity: Quantity
+        -currentPrice: Money
+        -transactions: Transaction[]
+        +getTotalInvested(): Money
+        +getCurrentValue(): Money
+        +getProfitLoss(): Money
+        +addQuantity(): void
+    }
+    
+    class InvestmentTransaction {
+        +quantity: Quantity
+        +price: Money
+        +date: Date
+        +transactionId: UniqueEntityID
+    }
+}
+
+package "Transaction" {
+    enum TransactionType {
+        Buy, Sell, Dividend
+    }
+    
+    class Transaction {
+        -portfolioId: UniqueEntityID
+        -assetId: UniqueEntityID
+        -transactionType: TransactionType
+        -quantity: Quantity
+        -price: Money
+        -totalAmount: Money
+        -fees: Money
+        -dateAt: Date
+        +isBuyTransaction(): boolean
+        +getTotalNetAmount(): Money
+    }
+}
+
+package "Goal" {
     enum Priority {
-        HIGH
-        MEDIUM
-        LOW
+        High, Medium, Low
     }
-
+    
     enum Status {
-        ACTIVE
-        ACHIEVED
-        CANCELLED
+        Active, Achieved, Cancelled
+    }
+    
+    class Goal {
+        -investorId: UniqueEntityID
+        -name: string
+        -targetAmount: Money
+        -currentAmount: Money
+        -targetDate: Date
+        -priority: Priority
+        -status: Status
+        +progress: Percentage
+        +addToCurrentAmount(): void
+        +markAsAchieved(): void
     }
 }
 
 ' Relationships
-Investor ||--o{ Portfolio : owns
-Investor ||--o{ Goal : has
-Investor ||--|| InvestorProfile : has
-Investor ||--|| Email : has
-Investor ||--|| CPF : has
-Investor ||--|| Name : has
-Investor ||--|| DateOfBirth : has
+Asset ||--|| AssetType
+Investor ||--|| InvestorProfile
+Transaction ||--|| TransactionType
+Goal ||--|| Priority
+Goal ||--|| Status
 
-Portfolio ||--o{ Investment : contains
-Portfolio ||--|| Investor : belongs_to
-Portfolio ||--o{ Transaction : has
-Portfolio ||--|| TotalValue : has_value
+Portfolio ||--o{ Investment
+Investment ||--o{ InvestmentTransaction
+Portfolio ||--o{ Transaction
 
-Investment ||--|| Asset : references
-Investment ||--|| Money : priced_in
-Investment ||--|| Quantity : measured_in
-Investment ||--o{ InvestmentTransaction : has_transactions
-Investment ||--o{ InvestmentYield : has_yields
+Investor ||--o{ Portfolio
+Investor ||--o{ Goal
+Asset ||--o{ Investment
+Asset ||--o{ Transaction
 
-Asset ||--|| AssetType : categorized_as
-Asset ||--o{ Transaction : involved_in
-Asset ||--o{ Investment : referenced_by
+' Core inheritance
+Asset --|> AggregateRoot
+Portfolio --|> AggregateRoot
+Investment --|> Entity
+Transaction --|> Entity
+Goal --|> Entity
+Investor --|> Entity
 
-Transaction ||--|| TransactionType : classified_as
-Transaction ||--|| Portfolio : belongs_to
-Transaction ||--|| Asset : involves
-Transaction ||--|| Money : has_price
-Transaction ||--|| Money : has_fees
-Transaction ||--|| Money : has_total_amount
-Transaction ||--|| Money : has_income
-Transaction ||--|| Quantity : has_quantity
-
-Goal ||--|| Priority : prioritized_as
-Goal ||--|| Status : has_status
-Goal ||--|| Investor : belongs_to
-Goal ||--|| Money : has_target_amount
-Goal ||--|| Money : has_current_amount
+' Value object usage
+Investment *-- Money
+Investment *-- Quantity
+Transaction *-- Money
+Transaction *-- Quantity
+Goal *-- Money
+Portfolio *-- Money
 
 @enduml
