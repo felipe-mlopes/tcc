@@ -1,0 +1,90 @@
+@startuml Caso de Uso - Registrar Ativo
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Registrar Ativo
+
+actor "Sistema Cliente" as Client
+actor "Administrador" as Admin
+actor "Provedor de Dados" as DataProvider
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Registrar Ativo" as UC1
+    usecase "Validar Dados do Ativo" as UC2
+    usecase "Gerar ID Único" as UC3
+    usecase "Criar Entidade Asset" as UC4
+    usecase "Persistir Ativo" as UC5
+    usecase "Confirmar Registro" as UC6
+}
+
+package "Repositório" {
+    usecase "Criar Ativo" as R1
+}
+
+package "Validações" {
+    usecase "Validar Símbolo" as V1
+    usecase "Validar Tipo de Ativo" as V2
+    usecase "Validar Setor" as V3
+    usecase "Validar Bolsa" as V4
+    usecase "Validar Moeda" as V5
+}
+
+Client --> UC1 : solicita registro
+Admin --> UC1 : autoriza cadastro
+DataProvider --> UC1 : fornece dados do ativo
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+UC2 ..> V4 : <<include>>
+UC2 ..> V5 : <<include>>
+
+UC5 --> R1 : persiste
+
+note right of V2
+  Tipos válidos:
+  - Stock (Ações)
+  - ETF (Fundos)
+  - FIIs (Imobiliários)
+  - Bond (Títulos)
+  - Crypto (Criptomoedas)
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Dados do ativo fornecidos
+  - Símbolo único no sistema
+  - Tipo de ativo válido
+  
+  **Pós-condições:**
+  - Ativo criado no sistema
+  - ID único gerado
+  - Ativo ativo por padrão
+  - Timestamps de criação definidos
+end note
+
+note left of UC3
+  Geração automática de
+  UniqueEntityID para
+  garantir identificação
+  única do ativo
+end note
+
+note right of UC6
+  Retorna o novo ativo
+  criado com todos os
+  dados persistidos
+end note
+
+@enduml
