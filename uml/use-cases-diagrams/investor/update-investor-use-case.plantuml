@@ -1,0 +1,71 @@
+@startuml Caso de Uso - Atualizar Investidor
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Atualizar Investidor
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Atualizar Investidor" as UC1
+    usecase "Validar Investidor Existe" as UC2
+    usecase "Validar Dados Obrigatórios" as UC3
+    usecase "Atualizar Nome" as UC4
+    usecase "Atualizar Email" as UC5
+    usecase "Persistir Alterações" as UC6
+}
+
+package "Repositório" {
+    usecase "Buscar por ID" as R1
+    usecase "Atualizar Investidor" as R2
+}
+
+Client --> UC1 : solicita atualização
+Investor --> UC1 : fornece novos dados
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC1 ..> UC4 : <<extend>>
+UC1 ..> UC5 : <<extend>>
+
+UC2 --> R1 : consulta
+UC6 --> R2 : persiste
+
+note right of UC3
+  Validação:
+  - Pelo menos um campo 
+    (nome ou email) deve 
+    ser fornecido
+  - Campos não podem 
+    estar vazios
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Pelo menos um campo deve ser informado
+  
+  **Pós-condições:**
+  - Dados do investidor atualizados
+  - Timestamp de atualização registrado
+end note
+
+note right of UC4
+  <<extend>>
+  [nome fornecido e válido]
+end note
+
+note right of UC5
+  <<extend>>
+  [email fornecido e válido]
+end note
+
+@enduml

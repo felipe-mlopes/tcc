@@ -1,0 +1,63 @@
+@startuml Caso de Uso - Desativar Investidor
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Desativar Investidor
+
+actor "Sistema Cliente" as Client
+actor "Administrador" as Admin
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Desativar Investidor" as UC1
+    usecase "Validar Investidor Existe" as UC2
+    usecase "Marcar como Inativo" as UC3
+    usecase "Persistir Alterações" as UC4
+    usecase "Confirmar Desativação" as UC5
+}
+
+package "Repositório" {
+    usecase "Buscar por ID" as R1
+    usecase "Atualizar Investidor" as R2
+}
+
+Client --> UC1 : solicita desativação
+Admin --> UC1 : autoriza desativação
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+
+UC2 --> R1 : consulta
+UC4 --> R2 : persiste
+
+note right of UC3
+  Soft Delete:
+  - Define isActive = false
+  - Mantém dados históricos
+  - Atualiza timestamp
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir no sistema
+  - ID válido deve ser fornecido
+  
+  **Pós-condições:**
+  - Investidor marcado como inativo
+  - Dados históricos preservados
+  - Confirmação de desativação enviada
+end note
+
+note left of UC5
+  Retorna mensagem:
+  "The investor has 
+  been desactive."
+end note
+
+@enduml

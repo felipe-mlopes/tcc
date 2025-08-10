@@ -1,0 +1,63 @@
+@startuml Caso de Uso - Registrar Investidor
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Registrar Investidor
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Registrar Investidor" as UC1
+    usecase "Validar Email Único" as UC2
+    usecase "Validar CPF Único" as UC3
+    usecase "Validar Data de Nascimento" as UC4
+    usecase "Calcular Perfil de Risco" as UC5
+    usecase "Criar Value Objects" as UC6
+    usecase "Persistir Investidor" as UC7
+}
+
+package "Repositório" {
+    usecase "Buscar por Email" as R1
+    usecase "Buscar por CPF" as R2
+    usecase "Criar Investidor" as R3
+}
+
+Client --> UC1 : solicita registro
+Investor --> UC1 : fornece dados pessoais
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+UC1 ..> UC7 : <<include>>
+
+UC2 --> R1 : consulta
+UC3 --> R2 : consulta
+UC7 --> R3 : persiste
+
+note right of UC5
+  Perfil baseado na idade:
+  - < 25 anos: Agressivo
+  - 25-49 anos: Conservador  
+  - ≥ 50 anos: Moderado
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Email válido e único
+  - CPF válido e único
+  - Data de nascimento válida
+  
+  **Pós-condições:**
+  - Investidor criado no sistema
+  - Perfil de risco atribuído
+end note
+
+@enduml
