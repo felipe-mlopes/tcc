@@ -1,0 +1,80 @@
+@startuml Caso de Uso - Buscar Transações por Portfolio
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Buscar Transações por Portfolio
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Buscar Transações por Portfolio" as UC1
+    usecase "Validar Investidor" as UC2
+    usecase "Localizar Portfolio" as UC3
+    usecase "Buscar Transações" as UC4
+    usecase "Aplicar Paginação" as UC5
+    usecase "Retornar Lista" as UC6
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor por ID" as R1
+    usecase "Buscar Portfolio por Investidor" as R2
+    usecase "Buscar Transações Paginadas" as R3
+}
+
+Client --> UC1 : solicita histórico do portfolio
+Investor --> UC1 : consulta suas transações
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC2 --> R1 : consulta
+UC3 --> R2 : consulta
+UC4 --> R3 : busca paginada
+
+note right of UC5
+  Paginação:
+  - Número da página obrigatório
+  - Limite por página definido
+  - Ordenação cronológica
+  - Otimização de performance
+end note
+
+note right of UC4
+  Busca Abrangente:
+  - Todas as transações do portfolio
+  - Todos os tipos (Buy/Sell/Dividend)
+  - Todos os ativos
+  - Histórico completo
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Portfolio deve existir
+  - Página deve ser válida (≥ 1)
+  
+  **Pós-condições:**
+  - Lista de transações retornada
+  - Respeitando paginação
+  - Ordenadas por data
+  - Histórico completo do portfolio
+end note
+
+note left of UC6
+  Retorno:
+  - Array de Transaction[]
+  - Ordenação cronológica
+  - Paginação aplicada
+  - Sem filtros por tipo
+end note
+
+@enduml

@@ -1,0 +1,90 @@
+@startuml Caso de Uso - Registrar Transação de Dividendo
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Registrar Transação de Dividendo
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Registrar Dividendo" as UC1
+    usecase "Validar Tipo Transação" as UC2
+    usecase "Executar Validações" as UC3
+    usecase "Validar Rendimento" as UC4
+    usecase "Criar Transação" as UC5
+    usecase "Persistir Transação" as UC6
+    usecase "Retornar Transação" as UC7
+}
+
+package "Serviço de Validação" {
+    usecase "Validar Investidor" as SV1
+    usecase "Validar Ativo" as SV2
+    usecase "Validar Portfolio" as SV3
+    usecase "Formatar Value Objects" as SV4
+}
+
+package "Repositório" {
+    usecase "Criar Transação" as R1
+}
+
+Client --> UC1 : solicita registro de dividendo
+Investor --> UC1 : recebe dividendo
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+UC1 ..> UC7 : <<include>>
+
+UC3 ..> SV1 : <<include>>
+UC3 ..> SV2 : <<include>>
+UC3 ..> SV3 : <<include>>
+UC3 ..> SV4 : <<include>>
+
+UC6 --> R1 : persiste
+
+note right of UC2
+  Validação de Tipo:
+  - Aceita apenas TransactionType.Dividend
+  - Rejeita outros tipos com erro
+  - Operação específica de rendimento
+end note
+
+note right of UC4
+  Validações Específicas:
+  - Rendimento (income) > 0
+  - Preço atual obrigatório
+  - Quantidade = 0 (automático)
+  - Taxas = 0 (automático)
+end note
+
+note right of UC5
+  Criação Específica:
+  - Quantity.zero() automático
+  - Money.zero() para taxas
+  - Income como valor principal
+  - Sem impacto na quantidade
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Tipo = Dividend obrigatório
+  - Investidor deve existir
+  - Ativo deve existir
+  - Portfolio deve existir
+  - Rendimento > 0
+  
+  **Pós-condições:**
+  - Transação de dividendo criada
+  - Rendimento registrado
+  - Quantidade não alterada
+end note
+
+@enduml

@@ -1,0 +1,81 @@
+@startuml Caso de Uso - Buscar Transações por Ativo
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Buscar Transações por Ativo
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Buscar Transações por Ativo" as UC1
+    usecase "Validar Investidor" as UC2
+    usecase "Localizar Portfolio" as UC3
+    usecase "Buscar por Ativo Específico" as UC4
+    usecase "Aplicar Paginação" as UC5
+    usecase "Retornar Lista Filtrada" as UC6
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor por ID" as R1
+    usecase "Buscar Portfolio por Investidor" as R2
+    usecase "Buscar por Portfolio e Ativo" as R3
+}
+
+Client --> UC1 : solicita histórico de ativo
+Investor --> UC1 : consulta transações específicas
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC2 --> R1 : consulta
+UC3 --> R2 : consulta
+UC4 --> R3 : busca filtrada
+
+note right of UC4
+  Busca Específica:
+  - Portfolio + Ativo específico
+  - Todos os tipos de transação
+  - Histórico completo do ativo
+  - Filtro automático aplicado
+end note
+
+note right of UC5
+  Paginação Filtrada:
+  - Página obrigatória
+  - Limite por página
+  - Ordenação cronológica
+  - Apenas transações do ativo
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Portfolio deve existir
+  - AssetId válido fornecido
+  - Página deve ser válida (≥ 1)
+  
+  **Pós-condições:**
+  - Lista filtrada por ativo
+  - Histórico específico retornado
+  - Paginação aplicada
+  - Análise focada possível
+end note
+
+note left of UC6
+  Retorno Filtrado:
+  - Apenas transações do ativo
+  - Todos os tipos incluídos
+  - Ordenação cronológica
+  - Facilita análise específica
+end note
+
+@enduml

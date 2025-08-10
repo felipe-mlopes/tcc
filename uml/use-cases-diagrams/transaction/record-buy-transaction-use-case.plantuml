@@ -1,0 +1,89 @@
+@startuml Caso de Uso - Registrar Transação de Compra
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Registrar Transação de Compra
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Registrar Compra" as UC1
+    usecase "Validar Tipo Transação" as UC2
+    usecase "Executar Validações" as UC3
+    usecase "Validar Valores" as UC4
+    usecase "Criar Transação" as UC5
+    usecase "Persistir Transação" as UC6
+    usecase "Retornar Transação" as UC7
+}
+
+package "Serviço de Validação" {
+    usecase "Validar Investidor" as SV1
+    usecase "Validar Ativo" as SV2
+    usecase "Validar Portfolio" as SV3
+    usecase "Formatar Value Objects" as SV4
+}
+
+package "Repositório" {
+    usecase "Criar Transação" as R1
+}
+
+Client --> UC1 : solicita registro de compra
+Investor --> UC1 : executa compra de ativo
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+UC1 ..> UC7 : <<include>>
+
+UC3 ..> SV1 : <<include>>
+UC3 ..> SV2 : <<include>>
+UC3 ..> SV3 : <<include>>
+UC3 ..> SV4 : <<include>>
+
+UC6 --> R1 : persiste
+
+note right of UC2
+  Validação de Tipo:
+  - Aceita apenas TransactionType.Buy
+  - Rejeita outros tipos com erro
+  - Garante operação específica
+end note
+
+note right of UC4
+  Validações de Valor:
+  - Quantidade > 0
+  - Preço > 0  
+  - Taxas > 0
+  - Valores são obrigatórios
+end note
+
+note right of SV4
+  Formatação:
+  - Quantity.create(number)
+  - Money.create(number)
+  - Validações automáticas
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Tipo = Buy obrigatório
+  - Investidor deve existir
+  - Ativo deve existir
+  - Portfolio deve existir
+  - Valores > 0
+  
+  **Pós-condições:**
+  - Transação de compra criada
+  - Valores calculados automaticamente
+  - Timestamp registrado
+end note
+
+@enduml

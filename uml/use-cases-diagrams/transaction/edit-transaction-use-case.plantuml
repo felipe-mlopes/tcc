@@ -1,0 +1,109 @@
+@startuml Caso de Uso - Editar Transação
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Editar Transação
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Editar Transação" as UC1
+    usecase "Validar Requisitos" as UC2
+    usecase "Atualizar Campos" as UC3
+    usecase "Recalcular Valores" as UC4
+    usecase "Persistir Alterações" as UC5
+    usecase "Retornar Transação" as UC6
+}
+
+package "Validações" {
+    usecase "Validar Investidor" as V1
+    usecase "Validar Transação Existe" as V2
+    usecase "Validar Campos Obrigatórios" as V3
+}
+
+package "Atualizações Opcionais" {
+    usecase "Atualizar Tipo" as U1
+    usecase "Atualizar Quantidade" as U2
+    usecase "Atualizar Preço" as U3
+    usecase "Atualizar Taxas" as U4
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor" as R1
+    usecase "Buscar Transação" as R2
+    usecase "Atualizar Transação" as R3
+}
+
+Client --> UC1 : solicita edição
+Investor --> UC1 : modifica transação
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+
+UC3 ..> U1 : <<extend>>
+UC3 ..> U2 : <<extend>>
+UC3 ..> U3 : <<extend>>
+UC3 ..> U4 : <<extend>>
+
+V1 --> R1 : consulta
+V2 --> R2 : consulta
+UC5 --> R3 : persiste
+
+note right of V3
+  Validação:
+  - Pelo menos um campo deve
+    ser fornecido para atualização
+  - Valores devem ser positivos
+  - Tipos devem ser válidos
+end note
+
+note right of U2
+  <<extend>>
+  [quantidade fornecida]
+  - Converte para valor absoluto
+  - Valida > 0
+  - Recalcula total
+end note
+
+note right of U3
+  <<extend>>
+  [preço fornecido]
+  - Converte para valor absoluto
+  - Valida > 0
+  - Recalcula total
+end note
+
+note right of U4
+  <<extend>>
+  [taxas fornecidas]
+  - Converte para valor absoluto
+  - Valida ≥ 0
+  - Recalcula total
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Transação deve existir
+  - Pelo menos um campo para atualizar
+  
+  **Pós-condições:**
+  - Transação atualizada
+  - Valores recalculados
+  - Timestamp atualizado
+end note
+
+@enduml
