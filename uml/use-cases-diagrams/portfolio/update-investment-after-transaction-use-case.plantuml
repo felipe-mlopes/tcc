@@ -1,0 +1,113 @@
+@startuml Caso de Uso - Atualizar Investimento Após Transação
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Atualizar Investimento Após Transação
+
+actor "Sistema Cliente" as Client
+actor "Sistema de Transações" as TransactionSystem
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Atualizar Investimento" as UC1
+    usecase "Validar Requisitos" as UC2
+    usecase "Processar por Tipo" as UC3
+    usecase "Persistir Alterações" as UC4
+    usecase "Retornar Investimento" as UC5
+}
+
+package "Validações" {
+    usecase "Validar Investidor" as V1
+    usecase "Validar Transação" as V2
+    usecase "Validar Ativo" as V3
+    usecase "Buscar Investimento Atual" as V4
+}
+
+package "Processamento por Tipo" {
+    usecase "Processar Compra" as P1
+    usecase "Processar Venda" as P2
+    usecase "Processar Dividendo" as P3
+    usecase "Criar Novo Investimento" as P4
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor" as R1
+    usecase "Buscar Transação" as R2
+    usecase "Buscar Ativo" as R3
+    usecase "Buscar Investimento" as R4
+    usecase "Atualizar/Criar Investimento" as R5
+}
+
+Client --> UC1 : solicita atualização
+TransactionSystem --> UC1 : notifica transação processada
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+UC2 ..> V4 : <<include>>
+
+UC3 ..> P1 : <<extend>>
+UC3 ..> P2 : <<extend>>
+UC3 ..> P3 : <<extend>>
+UC3 ..> P4 : <<extend>>
+
+V1 --> R1 : consulta
+V2 --> R2 : consulta
+V3 --> R3 : consulta
+V4 --> R4 : consulta
+UC4 --> R5 : persiste
+
+note right of P1
+  <<extend>>
+  [tipo = Buy E investimento existe]
+  - Adiciona quantidade
+  - Atualiza preço médio
+  - Registra transação
+end note
+
+note right of P2
+  <<extend>>
+  [tipo = Sell E investimento existe]
+  - Reduz quantidade
+  - Atualiza preço atual
+  - Registra transação
+end note
+
+note right of P3
+  <<extend>>
+  [tipo = Dividend E investimento existe]
+  - Registra rendimento
+  - Atualiza preço atual
+  - Mantém quantidade
+end note
+
+note right of P4
+  <<extend>>
+  [investimento não existe E tipo = Buy]
+  - Cria novo investimento
+  - Define quantidade inicial
+  - Registra primeira transação
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Transação deve existir e ser válida
+  - Ativo deve existir
+  
+  **Pós-condições:**
+  - Investimento atualizado ou criado
+  - Histórico de transações atualizado
+  - Preços e quantidades recalculados
+end note
+
+@enduml

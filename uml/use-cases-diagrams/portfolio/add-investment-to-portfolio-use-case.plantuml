@@ -1,0 +1,87 @@
+@startuml Caso de Uso - Adicionar Investimento ao Portfolio
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Adicionar Investimento ao Portfolio
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Adicionar Investimento" as UC1
+    usecase "Validar Requisitos" as UC2
+    usecase "Criar Investimento" as UC3
+    usecase "Atualizar Portfolio" as UC4
+    usecase "Persistir Dados" as UC5
+    usecase "Retornar Investimento" as UC6
+}
+
+package "Validações" {
+    usecase "Validar Investidor Existe" as V1
+    usecase "Validar Ativo Existe" as V2
+    usecase "Validar Portfolio Existe" as V3
+    usecase "Formatar Value Objects" as V4
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor" as R1
+    usecase "Buscar Ativo" as R2
+    usecase "Buscar Portfolio" as R3
+    usecase "Criar Investimento" as R4
+    usecase "Atualizar Portfolio" as R5
+}
+
+Client --> UC1 : solicita adição
+Investor --> UC1 : fornece dados do investimento
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+UC2 ..> V4 : <<include>>
+
+V1 --> R1 : consulta
+V2 --> R2 : consulta
+V3 --> R3 : consulta
+UC5 --> R4 : persiste
+UC4 --> R5 : atualiza
+
+note right of UC4
+  Atualizações no Portfolio:
+  - Adiciona ID do investimento
+    nas alocações
+  - Incrementa valor total
+  - Atualiza timestamp
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Ativo deve existir
+  - Portfolio deve existir
+  - Quantidade > 0
+  - Preço > 0
+  
+  **Pós-condições:**
+  - Investimento criado
+  - Portfolio atualizado
+  - Valor total recalculado
+end note
+
+note left of V4
+  Formatação:
+  - Quantity.create(number)
+  - Money.create(number)
+end note
+
+@enduml

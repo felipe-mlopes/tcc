@@ -1,0 +1,69 @@
+@startuml Caso de Uso - Criar Portfoli
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Criar Portfolio
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Criar Portfolio" as UC1
+    usecase "Validar Investidor" as UC2
+    usecase "Gerar ID Único" as UC3
+    usecase "Criar Entidade Portfolio" as UC4
+    usecase "Persistir Portfolio" as UC5
+    usecase "Retornar Portfolio Criado" as UC6
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor por ID" as R1
+    usecase "Criar Portfolio" as R2
+}
+
+Client --> UC1 : solicita criação
+Investor --> UC1 : fornece dados do portfolio
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+UC1 ..> UC6 : <<include>>
+
+UC2 --> R1 : consulta
+UC5 --> R2 : persiste
+
+note right of UC4
+  Dados do Portfolio:
+  - investorId (obrigatório)
+  - name (obrigatório)
+  - description (opcional)
+  - allocations (array vazio)
+  - totalValue (zero inicial)
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Nome do portfolio obrigatório
+  
+  **Pós-condições:**
+  - Portfolio criado no sistema
+  - Vinculado ao investidor
+  - Valor total inicial zero
+  - Lista de alocações vazia
+end note
+
+note left of UC3
+  Geração automática de
+  UniqueEntityID para
+  identificação única
+  do portfolio
+end note
+
+@enduml

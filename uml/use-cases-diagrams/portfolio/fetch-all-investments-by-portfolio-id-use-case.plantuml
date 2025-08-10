@@ -1,0 +1,76 @@
+@startuml Caso de Uso - Buscar Investimentos por Portfolio
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Buscar Investimentos por Portfolio
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Buscar Investimentos" as UC1
+    usecase "Validar Requisitos" as UC2
+    usecase "Buscar por Portfolio" as UC3
+    usecase "Aplicar Paginação" as UC4
+    usecase "Retornar Lista" as UC5
+}
+
+package "Validações" {
+    usecase "Validar Investidor Existe" as V1
+    usecase "Validar Portfolio Existe" as V2
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor por ID" as R1
+    usecase "Buscar Portfolio por Investidor" as R2
+    usecase "Buscar Investimentos Paginados" as R3
+}
+
+Client --> UC1 : solicita listagem
+Investor --> UC1 : solicita seus investimentos
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+
+V1 --> R1 : consulta
+V2 --> R2 : consulta
+UC3 --> R3 : busca paginada
+
+note right of UC4
+  Paginação:
+  - Recebe número da página
+  - Aplica limite por página
+  - Retorna resultados
+    correspondentes
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Portfolio deve existir
+  - Página deve ser válida (≥ 1)
+  
+  **Pós-condições:**
+  - Lista de investimentos retornada
+  - Respeitando paginação
+  - Ordenados por data de criação
+end note
+
+note left of UC3
+  Busca todos os investimentos
+  do portfolio específico
+  com aplicação de filtros
+  e ordenação
+end note
+
+@enduml

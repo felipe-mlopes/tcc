@@ -1,0 +1,78 @@
+@startuml Caso de Uso - Buscar Investimento por Ativo
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Buscar Investimento por Ativo
+
+actor "Sistema Cliente" as Client
+actor "Investidor" as Investor
+
+package "Sistema de Gestão de Investimentos" {
+    usecase "Buscar Investimento por Ativo" as UC1
+    usecase "Validar Requisitos" as UC2
+    usecase "Buscar Investimento Específico" as UC3
+    usecase "Retornar Resultado" as UC4
+}
+
+package "Validações" {
+    usecase "Validar Investidor Existe" as V1
+    usecase "Validar Ativo Existe" as V2
+    usecase "Validar Portfolio Existe" as V3
+}
+
+package "Repositório" {
+    usecase "Buscar Investidor por ID" as R1
+    usecase "Buscar Ativo por ID" as R2
+    usecase "Buscar Portfolio por Investidor" as R3
+    usecase "Buscar por Portfolio e Ativo" as R4
+}
+
+Client --> UC1 : solicita busca específica
+Investor --> UC1 : busca investimento em ativo
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+
+V1 --> R1 : consulta
+V2 --> R2 : consulta
+V3 --> R3 : consulta
+UC3 --> R4 : busca específica
+
+note right of UC3
+  Busca específica:
+  - Portfolio + Ativo
+  - Retorna investimento
+    ou null se não existir
+  - Operação única e precisa
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor deve existir
+  - Ativo deve existir
+  - Portfolio deve existir
+  
+  **Pós-condições:**
+  - Investimento retornado (se existir)
+  - Null retornado (se não existir)
+  - Sem erros para inexistência
+end note
+
+note left of UC4
+  Retorno flexível:
+  - Investment | null
+  - Permite verificação
+    de existência sem erro
+end note
+
+@enduml
