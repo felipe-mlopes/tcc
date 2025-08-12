@@ -1,0 +1,85 @@
+@startuml Caso de Uso - Cenários de Projeção de Meta
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Cenários de Projeção de Meta
+
+actor "Sistema de Cálculo" as System
+actor "Investidor" as Investor
+
+package "Sistema de Cenários de Projeção" {
+    usecase "Gerar Cenários de Projeção" as UC1
+    usecase "Criar Cenário Individual" as UC2
+    usecase "Criar Múltiplos Cenários" as UC3
+    usecase "Configurar Parâmetros" as UC4
+}
+
+package "Tipos de Cenários" {
+    usecase "Criar Cenário Conservador" as T1
+    usecase "Criar Cenário Moderado" as T2
+    usecase "Criar Cenário Agressivo" as T3
+}
+
+package "Configurações" {
+    usecase "Definir Valor Mensal" as C1
+    usecase "Definir Nome do Cenário" as C2
+    usecase "Validar Moeda" as C3
+}
+
+System --> UC1 : gera cenários
+Investor --> UC1 : solicita cenários
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<extend>>
+UC1 ..> UC4 : <<include>>
+
+UC2 ..> T1 : <<extend>>
+UC2 ..> T2 : <<extend>>
+UC2 ..> T3 : <<extend>>
+
+UC3 ..> T1 : <<include>>
+UC3 ..> T2 : <<include>>
+UC3 ..> T3 : <<include>>
+
+UC4 ..> C1 : <<include>>
+UC4 ..> C2 : <<include>>
+UC4 ..> C3 : <<include>>
+
+note right of T1
+  Cenário Conservador:
+  - Menor contribuição mensal
+  - Menor risco assumido
+  - Tempo maior para meta
+end note
+
+note right of T2
+  Cenário Moderado:
+  - Contribuição equilibrada
+  - Risco moderado
+  - Tempo médio para meta
+end note
+
+note right of T3
+  Cenário Agressivo:
+  - Maior contribuição mensal
+  - Maior comprometimento
+  - Menor tempo para meta
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Moeda da meta definida
+  - Valores de contribuição válidos
+  
+  **Pós-condições:**
+  - Cenários criados com parâmetros
+  - Nomes apropriados atribuídos
+  - Valores monetários formatados
+end note
+
+@enduml

@@ -1,0 +1,80 @@
+@startuml Caso de Uso - Atualizar Progresso da Meta
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Atualizar Progresso da Meta
+
+actor "Investidor" as Investor
+
+package "Sistema de Progresso de Metas" {
+    usecase "Consultar Progresso da Meta" as UC1
+    usecase "Validar Acesso" as UC2
+    usecase "Calcular Progresso Atual" as UC3
+    usecase "Retornar Percentual" as UC4
+}
+
+package "Validações" {
+    usecase "Validar Investidor" as V1
+    usecase "Validar Meta Existente" as V2
+    usecase "Verificar Propriedade" as V3
+}
+
+package "Cálculos" {
+    usecase "Obter Valor Atual" as C1
+    usecase "Obter Valor Alvo" as C2
+    usecase "Calcular Percentual" as C3
+}
+
+Investor --> UC1 : consulta progresso
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+
+UC3 ..> C1 : <<include>>
+UC3 ..> C2 : <<include>>
+UC3 ..> C3 : <<include>>
+
+note right of C3
+  Cálculo do progresso:
+  - Percentual = (Atual / Alvo) * 100
+  - Limitado a 100% máximo
+  - Classe Percentage utilizada
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor autenticado
+  - Meta existente no sistema
+  - Acesso autorizado à meta
+  
+  **Pós-condições:**
+  - Progresso atual calculado
+  - Percentual retornado
+  - Dados atualizados consultados
+end note
+
+note left of UC3
+  Utiliza a propriedade
+  'progress' da entidade
+  Goal que calcula automaticamente
+  o percentual de progresso
+end note
+
+note right of UC4
+  Retorna o percentual
+  de progresso usando
+  a classe Percentage
+  do domínio
+end note
+
+@enduml

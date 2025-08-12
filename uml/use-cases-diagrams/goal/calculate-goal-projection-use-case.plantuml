@@ -1,0 +1,92 @@
+@startuml Caso de Uso - Calcular Projeção de Meta
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Calcular Projeção de Meta
+
+actor "Investidor" as Investor
+
+package "Sistema de Projeção de Metas" {
+    usecase "Calcular Projeção de Meta" as UC1
+    usecase "Validar Dados de Entrada" as UC2
+    usecase "Calcular Projeções por Cenário" as UC3
+    usecase "Gerar Análise de Projeção" as UC4
+    usecase "Retornar Resultados" as UC5
+}
+
+package "Validações" {
+    usecase "Validar Investidor" as V1
+    usecase "Validar Meta" as V2
+    usecase "Validar Status Ativo" as V3
+    usecase "Verificar Propriedade" as V4
+    usecase "Validar Cenários" as V5
+    usecase "Validar Moedas" as V6
+}
+
+package "Cálculos" {
+    usecase "Calcular Meses para Completar" as C1
+    usecase "Calcular Data de Conclusão" as C2
+    usecase "Calcular Valor Projetado" as C3
+    usecase "Calcular Déficit/Superávit" as C4
+    usecase "Calcular Progresso" as C5
+    usecase "Calcular Contribuição Recomendada" as C6
+    usecase "Calcular Contribuição Mínima" as C7
+}
+
+Investor --> UC1 : solicita projeção
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<include>>
+UC1 ..> UC5 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+UC2 ..> V4 : <<include>>
+UC2 ..> V5 : <<include>>
+UC2 ..> V6 : <<include>>
+
+UC3 ..> C1 : <<include>>
+UC3 ..> C2 : <<include>>
+UC3 ..> C3 : <<include>>
+UC3 ..> C4 : <<include>>
+UC3 ..> C5 : <<include>>
+
+UC4 ..> C6 : <<include>>
+UC4 ..> C7 : <<include>>
+
+note right of V5
+  Validações de cenários:
+  - Pelo menos um cenário
+  - Contribuição não negativa
+  - Moeda compatível
+  - Nome do cenário válido
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor autenticado
+  - Meta ativa existente
+  - Cenários válidos fornecidos
+  
+  **Pós-condições:**
+  - Análise de projeção gerada
+  - Múltiplos cenários calculados
+  - Contribuições recomendadas
+  - Data de análise registrada
+end note
+
+note left of UC3
+  Calcula projeções para
+  cada cenário fornecido,
+  considerando contribuições
+  mensais diferentes
+end note
+
+@enduml

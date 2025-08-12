@@ -1,0 +1,93 @@
+@startuml Caso de Uso - Editar Meta de Investimento
+!theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
+left to right direction
+
+title Diagrama de Caso de Uso - Editar Meta de Investimento
+
+actor "Investidor" as Investor
+
+package "Sistema de Edição de Metas" {
+    usecase "Editar Meta de Investimento" as UC1
+    usecase "Validar Permissões" as UC2
+    usecase "Atualizar Dados da Meta" as UC3
+    usecase "Alterar Status da Meta" as UC4
+    usecase "Confirmar Alterações" as UC5
+}
+
+package "Validações" {
+    usecase "Validar Investidor" as V1
+    usecase "Validar Meta Existente" as V2
+    usecase "Verificar Propriedade" as V3
+    usecase "Validar Campos de Entrada" as V4
+}
+
+package "Atualizações" {
+    usecase "Atualizar Nome" as U1
+    usecase "Atualizar Descrição" as U2
+    usecase "Atualizar Valor Alvo" as U3
+    usecase "Atualizar Data Alvo" as U4
+    usecase "Atualizar Prioridade" as U5
+}
+
+package "Mudanças de Status" {
+    usecase "Marcar como Conquistada" as S1
+    usecase "Cancelar Meta" as S2
+    usecase "Reativar Meta" as S3
+}
+
+Investor --> UC1 : solicita edição
+
+UC1 ..> UC2 : <<include>>
+UC1 ..> UC3 : <<include>>
+UC1 ..> UC4 : <<extend>>
+UC1 ..> UC5 : <<include>>
+
+UC2 ..> V1 : <<include>>
+UC2 ..> V2 : <<include>>
+UC2 ..> V3 : <<include>>
+UC2 ..> V4 : <<include>>
+
+UC3 ..> U1 : <<extend>>
+UC3 ..> U2 : <<extend>>
+UC3 ..> U3 : <<extend>>
+UC3 ..> U4 : <<extend>>
+UC3 ..> U5 : <<extend>>
+
+UC4 ..> S1 : <<extend>>
+UC4 ..> S2 : <<extend>>
+UC4 ..> S3 : <<extend>>
+
+note right of V4
+  Validação de campos:
+  - Pelo menos um campo para alterar
+  - Valores não negativos
+  - Datas futuras válidas
+  - Prioridade válida
+end note
+
+note bottom of UC1
+  **Pré-condições:**
+  - Investidor autenticado
+  - Meta existente
+  - Propriedade da meta verificada
+  - Pelo menos um campo para alterar
+  
+  **Pós-condições:**
+  - Meta atualizada no sistema
+  - Alterações persistidas
+  - Status atualizado se necessário
+end note
+
+note left of UC4
+  Permite mudanças de status:
+  - Active → Achieved
+  - Active → Cancelled
+  - Cancelled → Active
+end note
+
+@enduml
