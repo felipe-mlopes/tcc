@@ -1,139 +1,163 @@
-@startuml Diagrama de Casos de Uso
+@startuml Sistema de Gerenciamento de Investimentos
 !theme plain
+skinparam dpi 300
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
-
+skinparam backgroundColor white
+skinparam defaultTextAlignment center
 left to right direction
 
+title Sistema de Gerenciamento de Investimentos - Diagrama de Casos de Uso
+
 actor "Investidor" as Investor
-actor "Administrador" as Admin
 actor "Sistema" as System
 actor "Provedor de Dados" as MarketData
 
 rectangle "Sistema de Gerenciamento de Investimentos" {
-    package "Gerenciamento de Usuários" {
-        usecase "Registrar Usuário" as UC1
+    
+    package "Gerenciamento de Investidores" {
+        usecase "Registrar Investidor" as UC1
         usecase "Atualizar Perfil" as UC2
-        usecase "Atualizar Perfil de Risco" as UC3
-        usecase "Desativar Usuário" as UC4
-    }
-
-    package "Gerenciamento de Portfólio" {
-        usecase "Criar Portfólio" as UC5
-        usecase "Adicionar Investimento" as UC6
-        usecase "Atualizar Quantidade" as UC7
-        usecase "Remover Investimento" as UC8
-        usecase "Calcular Performance" as UC9
-        usecase "Rebalancear Portfólio" as UC10
+        usecase "Definir Perfil de Risco" as UC3
     }
 
     package "Gerenciamento de Ativos" {
-        usecase "Registrar Ativo" as UC11
-        usecase "Atualizar Preço" as UC12
-        usecase "Obter Preço Atual" as UC13
-        usecase "Histórico de Preços" as UC14
+        usecase "Registrar Ativo" as UC4
+        usecase "Atualizar Preço do Ativo" as UC5
+        usecase "Consultar Preço Atual" as UC6
+        usecase "Obter Histórico de Preços" as UC7
+    }
+
+    package "Gerenciamento de Portfólios" {
+        usecase "Criar Portfólio" as UC8
+        usecase "Adicionar Ativo ao Portfólio" as UC9
+        usecase "Atualizar Quantidade" as UC10
+        usecase "Remover Ativo do Portfólio" as UC11
+        usecase "Calcular Performance" as UC12
     }
 
     package "Gerenciamento de Transações" {
-        usecase "Registrar Compra" as UC15
-        usecase "Registrar Venda" as UC16
-        usecase "Registrar Dividendo" as UC17
-        usecase "Histórico de Transações" as UC18
-        usecase "Calcular Ganhos Realizados" as UC19
+        usecase "Registrar Transação de Compra" as UC13
+        usecase "Registrar Transação de Venda" as UC14
+        usecase "Registrar Dividendo" as UC15
+        usecase "Consultar Histórico" as UC16
+        usecase "Calcular Ganhos/Perdas" as UC17
     }
 
     package "Gerenciamento de Metas" {
-        usecase "Criar Meta de Investimento" as UC20
+        usecase "Registrar Meta de Investimento" as UC18
+        usecase "Editar Meta" as UC19
+        usecase "Calcular Projeção da Meta" as UC20
         usecase "Atualizar Progresso" as UC21
-        usecase "Calcular Projeção" as UC22
-        usecase "Marcar como Alcançada" as UC23
-    }
-
-    package "Análises e Relatórios" {
-        usecase "Gerar Relatório Performance" as UC24
-        usecase "Calcular Métricas" as UC25
-        usecase "Comparar com Benchmark" as UC26
-        usecase "Relatório de Alocação" as UC27
-    }
-
-    package "Notificações" {
-        usecase "Criar Alerta de Preço" as UC28
-        usecase "Enviar Notificação" as UC29
-        usecase "Marcar como Lida" as UC30
-        usecase "Disparar Alerta" as UC31
+        usecase "Marcar como Conquistada" as UC22
     }
 }
 
 ' Relacionamentos do Investidor
-Investor --> UC1
-Investor --> UC2
-Investor --> UC3
-Investor --> UC5
-Investor --> UC6
-Investor --> UC7
-Investor --> UC8
-Investor --> UC9
-Investor --> UC10
-Investor --> UC13
-Investor --> UC14
-Investor --> UC15
-Investor --> UC16
-Investor --> UC17
-Investor --> UC18
-Investor --> UC19
-Investor --> UC20
-Investor --> UC21
-Investor --> UC22
-Investor --> UC23
-Investor --> UC24
-Investor --> UC25
-Investor --> UC26
-Investor --> UC27
-Investor --> UC28
-Investor --> UC30
-
-' Relacionamentos do Administrador
-Admin --> UC4
-Admin --> UC11
-Admin --> UC12
-Admin --> UC24
-Admin --> UC25
-Admin --> UC26
-Admin --> UC27
+Investor --> UC1 : registra-se
+Investor --> UC2 : atualiza dados
+Investor --> UC3 : define perfil
+Investor --> UC8 : cria portfólio
+Investor --> UC9 : adiciona ativos
+Investor --> UC10 : ajusta quantidade
+Investor --> UC11 : remove ativo
+Investor --> UC12 : consulta performance
+Investor --> UC13 : efetua compra
+Investor --> UC14 : efetua venda
+Investor --> UC16 : consulta histórico
+Investor --> UC18 : define meta
+Investor --> UC19 : altera meta
+Investor --> UC20 : projeta meta
+Investor --> UC21 : acompanha progresso
+Investor --> UC22 : marca conquista
 
 ' Relacionamentos do Sistema
-System --> UC9
-System --> UC10
-System --> UC12
-System --> UC19
-System --> UC21
-System --> UC22
-System --> UC24
-System --> UC25
-System --> UC26
-System --> UC29
-System --> UC31
+System --> UC5 : atualiza preços
+System --> UC12 : calcula métricas
+System --> UC15 : processa dividendos
+System --> UC17 : calcula resultados
+System --> UC20 : projeta cenários
+System --> UC21 : monitora progresso
 
 ' Relacionamentos do Provedor de Dados
-MarketData --> UC12
-MarketData --> UC13
-MarketData --> UC14
+MarketData --> UC4 : fornece dados
+MarketData --> UC5 : atualiza cotações
+MarketData --> UC6 : fornece preços
+MarketData --> UC7 : histórico mercado
 
-' Relacionamentos extend
-UC6 .> UC15 : <<extend>>
-UC7 .> UC15 : <<extend>>
-UC7 .> UC16 : <<extend>>
-UC8 .> UC16 : <<extend>>
-UC31 .> UC29 : <<extend>>
-UC21 .> UC29 : <<extend>>
-UC10 .> UC29 : <<extend>>
+' Relacionamentos include - Dependências obrigatórias
+UC8 ..> UC1 : <<include>>
+UC9 ..> UC8 : <<include>>
+UC9 ..> UC4 : <<include>>
+UC13 ..> UC9 : <<include>>
+UC14 ..> UC9 : <<include>>
+UC15 ..> UC9 : <<include>>
+UC12 ..> UC6 : <<include>>
+UC17 ..> UC16 : <<include>>
+UC18 ..> UC1 : <<include>>
+UC20 ..> UC18 : <<include>>
+UC21 ..> UC18 : <<include>>
+UC22 ..> UC18 : <<include>>
 
-' Relacionamentos include
-UC5 .> UC1 : <<include>>
-UC6 .> UC5 : <<include>>
-UC15 .> UC6 : <<include>>
-UC16 .> UC6 : <<include>>
-UC24 .> UC9 : <<include>>
-UC25 .> UC9 : <<include>>
-UC28 .> UC13 : <<include>>
+' Relacionamentos extend - Funcionalidades opcionais
+UC10 ..> UC13 : <<extend>>
+UC10 ..> UC14 : <<extend>>
+UC11 ..> UC14 : <<extend>>
+
+note top of UC1
+**Entidade Core: Investor**
+- Identificação única
+- Perfil de investimento
+- Preferências de risco
+end note
+
+note top of UC4
+**Entidade Core: Asset** 
+- Símbolo único
+- Tipo de ativo
+- Informações de mercado
+end note
+
+note top of UC8
+**Entidade Core: Portfolio**
+- Composição de ativos
+- Métricas de performance
+- Histórico de alocação
+end note
+
+note top of UC13
+**Entidade Core: Transaction**
+- Operações de compra/venda
+- Registro de dividendos
+- Controle de posições
+end note
+
+note top of UC18
+**Entidade Core: Goal**
+- Objetivos de investimento
+- Projeções e cenários
+- Acompanhamento de progresso
+end note
+
+note bottom of Investor
+**Ator Principal**
+Pessoa física que utiliza
+o sistema para gerenciar
+seus investimentos
+end note
+
+note bottom of System
+**Sistema Interno**
+Processa dados, calcula
+métricas e executa
+operações automatizadas
+end note
+
+note bottom of MarketData
+**Fonte Externa**
+Fornece dados de mercado
+atualizados e históricos
+dos ativos financeiros
+end note
 
 @enduml
