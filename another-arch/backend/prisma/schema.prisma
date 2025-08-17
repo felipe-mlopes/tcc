@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Investor {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  cpf       String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  portfolios Portfolio[]
+  Goal       Goal[]
+
+  @@map("investors")
+}
+
+model Asset {
+  id          String    @id @default(cuid())
+  symbol      String    @unique
+  name        String
+  type        AssetType
+  sector      String?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  investments Investment[]
+
+  @@map("assets")
+}
+
+model Portfolio {
+  id         String   @id @default(cuid())
+  name       String
+  investorId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  investor    Investor     @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  investments Investment[]
+
+  @@map("portfolios")
+}
+
+model Investment {
+  id            String   @id @default(cuid())
+  portfolioId   String
+  assetId       String
+  quantity      Decimal  @db.Decimal(18, 8)
+  averagePrice  Decimal  @db.Decimal(18, 8)
+  totalInvested Decimal  @db.Decimal(18, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  portfolio    Portfolio     @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  asset        Asset         @relation(fields: [assetId], references: [id])
+  transactions Transaction[]
+
+  @@unique([portfolioId, assetId])
+  @@map("investments")
+}
+
+model Transaction {
+  id           String          @id @default(cuid())
+  investmentId String
+  type         TransactionType
+  quantity     Decimal         @db.Decimal(18, 8)
+  price        Decimal         @db.Decimal(18, 8)
+  totalAmount  Decimal         @db.Decimal(18, 2)
+  fees         Decimal?        @db.Decimal(18, 2)
+  executedAt   DateTime
+  createdAt    DateTime        @default(now())
+
+  investment Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+model Goal {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  targetAmount  Decimal      @db.Decimal(15, 2)
+  currentAmount Decimal      @default(0) @db.Decimal(15, 2)
+  targetDate    DateTime
+  isAchieved    Boolean      @default(false)
+  priority      GoalPriority @default(MEDIUM)
+  category      GoalCategory
+  investorId    String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  investor Investor @relation(fields: [investorId], references: [id], onDelete: Cascade)
+
+  @@map("goals")
+}
+
+enum AssetType {
+  STOCK
+  BOND
+  FUND
+  ETF
+  CRYPTO
+  REAL_ESTATE
+}
+
+enum TransactionType {
+  BUY
+  SELL
+  DIVIDEND
+  SPLIT
+  BON
+}
+
+enum GoalPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum GoalCategory {
+  RETIREMENT
+  EMERGENCY_FUND
+  HOUSE_PURCHASE
+  EDUCATION
+  VACATION
+  CAR_PURCHASE
+  DEBT_PAYMENT
+  OTHER
+}

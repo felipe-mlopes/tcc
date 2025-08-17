@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: investment_postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: investment_user
+      POSTGRES_PASSWORD: investment_password
+      POSTGRES_DB: investment_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - investment_network
+
+  # Opcional: PgAdmin para interface gráfica
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: investment_pgadmin
+    restart: always
+    ports:
+      - '8080:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@investment.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - investment_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  investment_network:
+    driver: bridge
