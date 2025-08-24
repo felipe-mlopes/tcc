@@ -1,5 +1,4 @@
 import { InMemoryInvestorRepository } from "test/repositories/in-memory-investor-repository"
-import { UpdateGoalProgressService } from "./update-goal-progress"
 import { InMemoryGoalRepository } from "test/repositories/in-memory-goal-repository"
 import { Investor } from "@/domain/investor/entities/investor"
 import { Goal, Status } from "../entities/goal"
