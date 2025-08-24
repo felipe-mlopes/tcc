@@ -12,7 +12,6 @@ export function makePortfolio(
 
     const portfolio = Portfolio.create(
         {
-            portfolioId: new UniqueEntityID(),
             investorId: new UniqueEntityID(),
             name: fakerName,
             totalValue: fakerTotalValue,
