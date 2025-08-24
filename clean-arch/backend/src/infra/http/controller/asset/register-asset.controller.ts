@@ -1,33 +1,79 @@
-import { BadRequestException, Body, Controller, NotFoundException, Post } from "@nestjs/common";
-import { z } from "zod";
+import { BadRequestException, Body, Controller, HttpCode, HttpStatus, NotFoundException, Post } from "@nestjs/common";
+import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { RegisterAssetService } from "@/domain/asset/services/register-asset";
-import { AssetType } from "@/domain/asset/entities/asset";
-import { Public } from "@/infra/auth/public";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
-import { ApiTags } from "@nestjs/swagger";
+import { Public } from "@/infra/auth/public";
+import { RegisterAssetDto } from "./dto/register-asset-dto";
+import { RegisterAssetResponseDto } from "./dto/register-asset-response-dto";
+import { RegisterAssetErrorResponseDto } from "./dto/register-asset-error-response.dto";
 
-const assetTypeValues = Object.values(AssetType) as [AssetType, ...AssetType[]]
-
-const registerAssetBodySchema = z.object({
-    symbol: z.string().min(3).max(5),
-    name: z.string().min(3),
-    assetType: z.enum(assetTypeValues),
-    sector: z.string(),
-    exchange: z.string(),
-    currency: z.string().min(3).max(3)
-});
-
-type RegisterAssetBody = z.infer<typeof registerAssetBodySchema>;
-
-@ApiTags('assets')
+@ApiTags('Assets')
 @Controller('/asset')
 @Public()
 export class RegisterAssetController {
     constructor(private registerAssetService: RegisterAssetService) {}
 
     @Post()
-    async handle(@Body() body: RegisterAssetBody): Promise<void> {
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ 
+        summary: 'Criar novo ativo',
+        description: `Cria um novo ativo no sistema com validações completas de dados`
+    })
+    @ApiBody({
+        type: RegisterAssetDto,
+        description: 'Dados necessários para criar um novo ativo',
+        examples: {
+            stock: {
+                summary: 'Ação',
+                description: 'Exemplo de criação de uma ação',
+                value: {
+                symbol: 'AAPL',
+                name: 'Apple Inc.',
+                assetType: 'STOCK',
+                sector: 'Technology',
+                exchange: 'NASDAQ',
+                currency: 'USD'
+                }
+            }
+        }
+    })
+    @ApiCreatedResponse({
+        description: 'Ativo criado com sucesso',
+        type: RegisterAssetResponseDto,
+        example: {
+        id: 'uuid-123-456-789',
+        symbol: 'AAPL',
+        name: 'Apple Inc.',
+        status: 'created',
+        createdAt: '2024-01-15T10:30:00Z'
+        }
+    })
+    @ApiBadRequestResponse({
+        description: 'Dados inválidos fornecidos',
+        type: RegisterAssetErrorResponseDto,
+        example: {
+        statusCode: 400,
+        message: 'Validation failed',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/asset',
+        details: [
+            'symbol must be at least 3 characters',
+            'currency must be exactly 3 characters'
+        ]
+        }
+    })
+    @ApiNotFoundResponse({
+        description: 'Recurso não encontrado',
+        type: RegisterAssetErrorResponseDto,
+        example: {
+        statusCode: 404,
+        message: 'Resource not found',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/asset'
+        }
+    })
+    async handle(@Body() body: RegisterAssetDto): Promise<void> {
         const { name, symbol, assetType, sector, exchange, currency } = body;
 
         const result = await this.registerAssetService.execute({
