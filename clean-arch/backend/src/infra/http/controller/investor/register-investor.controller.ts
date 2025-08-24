@@ -20,67 +20,62 @@ export class RegisterInvestorController {
         summary: 'Registrar novo investidor',
         description: `
         Cria um novo investidor no sistema usando Value Objects para validações:
-        - Email: Validado pela classe Email (formato padrão)
-        - Nome: Validado pela classe Name (mín. 2 chars, letras, espaços, hífens, pontos, números)
-        - CPF: Validado pela classe CPF (formato e dígitos verificadores)
-        - Data de Nascimento: Validada pela classe DateOfBirth (idade mínima 18 anos, não futuro)
+            - Email: Validado pela classe Email (formato padrão)
+            - Nome: Validado pela classe Name (mín. 2 chars, letras, espaços, hífens, pontos, números)
+            - CPF: Validado pela classe CPF (formato e dígitos verificadores)
+            - Data de Nascimento: Validada pela classe DateOfBirth (idade mínima 18 anos, não futuro)
         `
     })
     @ApiBody({
         type: RegisterInvestorDto,
         description: 'Dados necessários para registrar um novo investidor',
         examples: {
-        valid: {
-            summary: 'Dados válidos',
-            description: 'Exemplo com todos os campos preenchidos corretamente',
-            value: {
-            email: 'joao.silva@email.com',
-            name: 'João Silva Santos',
-            cpf: '12345678901',
-            dateOfBirth: '1990-05-15'
+            valid: {
+                summary: 'Dados válidos',
+                description: 'Exemplo com todos os campos preenchidos corretamente',
+                value: {
+                    email: 'joao.silva@email.com',
+                    name: 'João Silva Santos',
+                    cpf: '12345678901',
+                    dateOfBirth: '1990-05-15'
+                }
             }
-        }
         }
     })
     @ApiCreatedResponse({
         description: 'Investidor registrado com sucesso',
         type: RegisterInvestorResponseDto,
         example: {
-        id: 'uuid-123-456-789',
-        email: 'joao.silva@email.com',
-        name: 'João Silva Santos',
-        cpf: '123.456.789-01',
-        dateOfBirth: '1990-05-15',
-        status: 'created',
-        createdAt: '2024-01-15T10:30:00Z'
+            message: 'O cadastro de investidor foi realizado com sucesso'
         }
     })
     @ApiBadRequestResponse({
         description: 'Dados de entrada inválidos ou erro de validação',
         type: ValidationErrorDto,
         examples: {
-        emailValidation: {
-            summary: 'Email inválido',
-            value: {
-            statusCode: 400,
-            message: 'Validation failed',
-            details: ['email: Email deve ter um formato válido'],
-            timestamp: '2024-01-15T10:30:00Z',
-            path: '/investor'
+            emailValidation: {
+                summary: 'Email inválido',
+                value: {
+                    statusCode: 400,
+                    message: 'Validation failed',
+                    details: ['email: Email deve ter um formato válido'],
+                    timestamp: '2024-01-15T10:30:00Z',
+                    path: '/investor'
+                }
             }
-        }}
+        }
     })
     @ApiConflictResponse({
         description: 'Conflito - Investidor já existe',
         type: BusinessErrorDto,
         example: {
-        statusCode: 409,
-        message: 'Investidor com este email ou CPF já existe',
-        timestamp: '2024-01-15T10:30:00Z',
-        path: '/investor'
+            statusCode: 409,
+            message: 'Investidor com este email ou CPF já existe',
+            timestamp: '2024-01-15T10:30:00Z',
+            path: '/investor'
         }
     })
-    async handle(@Body() body: RegisterInvestorDto): Promise<void> {
+    async handle(@Body() body: RegisterInvestorDto): Promise<string> {
         const { email, name, cpf, dateOfBirth } = body;
 
         const result = await this.registerInvestorService.execute({
@@ -105,6 +100,8 @@ export class RegisterInvestorController {
                 default:
                     throw new BadRequestException('Erro inesperado ao registrar investidor');
             }
-        }   
+        }
+        
+        return result.value.message
     }
 }

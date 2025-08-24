@@ -54,10 +54,7 @@ export class DeactivateInvestorController {
       success: {
         summary: 'Desativação bem-sucedida',
         value: {
-          id: 'uuid-123-456-789',
           message: 'Investidor desativado com sucesso',
-          status: 'inactive',
-          deactivatedAt: '2024-01-15T16:30:00Z'
         }
       }
     }

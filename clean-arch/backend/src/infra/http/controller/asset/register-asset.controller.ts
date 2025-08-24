@@ -42,11 +42,7 @@ export class RegisterAssetController {
         description: 'Ativo criado com sucesso',
         type: RegisterAssetResponseDto,
         example: {
-        id: 'uuid-123-456-789',
-        symbol: 'AAPL',
-        name: 'Apple Inc.',
-        status: 'created',
-        createdAt: '2024-01-15T10:30:00Z'
+            message: 'O cadastro do ativo foi realizado com sucesso'
         }
     })
     @ApiBadRequestResponse({

@@ -61,13 +61,7 @@ export class UpdateInvestorController {
     description: 'Investidor atualizado com sucesso.',
     type: UpdateInvestorResponseDto,
     example: {
-      id: 'uuid-123-456-789',
-      email: 'joao.silva.novo@email.com',
-      name: 'João Silva Santos Atualizado',
-      cpf: '123.456.789-01',
-      dateOfBirth: '1990-05-15',
-      status: 'updated',
-      updatedAt: '2024-01-15T15:30:00Z'
+      message: 'O cadastro do investidor foi atualizado com sucesso'
     }
   })
   @ApiBadRequestResponse({
@@ -124,7 +118,7 @@ export class UpdateInvestorController {
   async handle(
     @Param("id") investorId: string,
     @Body() body: UpdateInvestorDto
-  ): Promise<void> {
+  ): Promise<string> {
     const { name, email } = body;
 
     const result = await this.updateInvestorService.execute({
@@ -151,5 +145,7 @@ export class UpdateInvestorController {
           throw new BadRequestException('Erro inesperado ao atualizar investidor');
       }
     }
+
+    return result.value.message
   }
 }
