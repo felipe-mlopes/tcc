@@ -5,6 +5,7 @@ import { Transaction } from "../entities/transaction"
 import { TransactionRepository } from "../repositories/transaction-repository"
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository"
 import { PortfolioRepository } from "@/domain/portfolio/repositories/portfolio-repository"
+import { Injectable } from "@nestjs/common"
 
 interface FetchTransactionsHistoryByAssetIdServiceRequest {
     investorId: string,
@@ -16,6 +17,7 @@ type FetchTransactionsHistoryByAssetIdServiceResponse = Either<ResourceNotFoundE
     transactions: Transaction[]
 }>
 
+@Injectable()
 export class FetchTransactionsHistoryByAssetIdService {
     constructor(
         private investorRepository: InvestorRepository,

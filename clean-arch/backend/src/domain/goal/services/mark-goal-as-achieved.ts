@@ -5,6 +5,7 @@ import { Goal, Status } from "../entities/goal";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
 
 export interface MarkGoalAsAchievedServiceRequest {
     goalId: string,
@@ -20,6 +21,7 @@ type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
     goal: Goal
 }>
 
+Injectable()
 export class MarkGoalAsAchievedService {
     constructor(
         private investorRepository: InvestorRepository,

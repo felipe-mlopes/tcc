@@ -2,8 +2,8 @@ import { Either, left, right } from "@/core/either";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { GoalRepository } from "../repositories/goal-repository";
-import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { Percentage } from "@/core/value-objects/percentage";
+import { Injectable } from "@nestjs/common";
 
 export interface UpdateGoalProgressServiceRequest {
     investorId: string,
@@ -14,6 +14,7 @@ type UpdateGoalProgressServiceResponse = Either<ResourceNotFoundError, {
     progress: Percentage
 }>
 
+Injectable()
 export class UpdateGoalProgressService {
     constructor(
         private investorRepository: InvestorRepository,

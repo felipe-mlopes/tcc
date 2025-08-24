@@ -3,6 +3,7 @@ import { Investor } from "../entities/investor"
 import { InvestorRepository } from "../repositories/investor-repository"
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
 import { NotAllowedError } from "@/core/errors/not-allowed-error"
+import { Injectable } from "@nestjs/common"
 
 interface UpdateInvestorServiceRequest {
     investorId: string
@@ -14,6 +15,7 @@ type UpdateInvestorServiceResponse = Either<ResourceNotFoundError | NotAllowedEr
   investor: Investor
 }>
 
+@Injectable()
 export class UpdateInvestorService {
     constructor(private investorRepository: InvestorRepository) {}
 

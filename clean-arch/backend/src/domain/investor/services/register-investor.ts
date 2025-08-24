@@ -1,13 +1,13 @@
 import { Investor, InvestorProfile } from "../entities/investor";
 import { Either, left, right } from "@/core/either";
 
-import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { InvestorRepository } from "../repositories/investor-repository";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { DateOfBirth } from "@/core/value-objects/date-of-birth";
 import { Email } from "@/core/value-objects/email";
 import { Name } from "@/core/value-objects/name";
 import { CPF } from "@/core/value-objects/cpf";
+import { Injectable } from "@nestjs/common";
 
 interface RegisterInvestorServiceRequest {
     email: string
@@ -20,6 +20,7 @@ type RegisterInvestorServiceResponse = Either<NotAllowedError, {
     newInvestor: Investor
 }>
 
+@Injectable()
 export class RegisterInvestorService {
     constructor(private investorRepository: InvestorRepository) {}
 

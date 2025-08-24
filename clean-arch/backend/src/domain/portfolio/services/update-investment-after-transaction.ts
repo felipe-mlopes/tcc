@@ -8,6 +8,7 @@ import { Investment } from "../entities/investment";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
 
 export interface UpdateInvestmentAfterTransactionServiceRequest {
     investorId: string,
@@ -32,6 +33,7 @@ type CalculateImpactResponse = Either<NotAllowedError, {
     updatedInvestment: Investment
 }>
 
+@Injectable()
 export class UpdateInvestmentAfterTransactionService {
     constructor(
         private investorRepository: InvestorRepository,

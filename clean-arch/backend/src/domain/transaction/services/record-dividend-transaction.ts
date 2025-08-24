@@ -6,6 +6,7 @@ import { TransactionRepository } from "../repositories/transaction-repository"
 import { TransactionValidatorService } from "./transaction-validator"
 import { Money } from "@/core/value-objects/money"
 import { Quantity } from "@/core/value-objects/quantity"
+import { Injectable } from "@nestjs/common"
 
 interface RecordDividendTransactionServiceRequest {
     investorId: string,
@@ -20,6 +21,7 @@ type RecordDividendTransactionServiceResponse = Either<ResourceNotFoundError | N
     newDividendTransaction: Transaction
 }>
 
+@Injectable()
 export class RecordDividendTransactionService {
     constructor(
         private transactionRepository: TransactionRepository,

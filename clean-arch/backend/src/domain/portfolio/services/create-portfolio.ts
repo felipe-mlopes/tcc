@@ -4,6 +4,7 @@ import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { Portfolio } from "../entities/portfolio";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
 
 interface CreatePortfolioServiceRequest {
     investorId: string,
@@ -15,6 +16,7 @@ type CreatePortfolioServiceResponse = Either<ResourceNotFoundError, {
     newPortfolio: Portfolio
 }>
 
+@Injectable()
 export class CreatePortfolioService {
     constructor(
         private portfolioRepository: PortfolioRepository,

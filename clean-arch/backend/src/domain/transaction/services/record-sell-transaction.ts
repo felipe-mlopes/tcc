@@ -5,6 +5,7 @@ import { NotAllowedError } from "@/core/errors/not-allowed-error"
 import { TransactionRepository } from "../repositories/transaction-repository"
 import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { TransactionValidatorService } from "./transaction-validator"
+import { Injectable } from "@nestjs/common"
 
 interface RecordSellTransactionServiceRequest {
     investorId: string,
@@ -20,6 +21,7 @@ type RecordSellTransactionServiceResponse = Either<ResourceNotFoundError | NotAl
     newSellTransaction: Transaction
 }>
 
+@Injectable()
 export class RecordSellTransactionService {
     constructor(
         private transactionRepository: TransactionRepository,

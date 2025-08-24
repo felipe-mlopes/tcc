@@ -5,6 +5,7 @@ import { InvestorRepository } from "@/domain/investor/repositories/investor-repo
 import { GoalRepository } from "../repositories/goal-repository";
 import { Money } from "@/core/value-objects/money";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
 
 export interface RegisterInvestmentGoalServiceRequest {
     investorId: string,
@@ -19,6 +20,7 @@ type RegisterInvestmentGoalServiceResponse = Either<ResourceNotFoundError, {
     goal: Goal
 }>
 
+@Injectable()
 export class RegisterInvestmentGoalService {
     constructor(
         private investorRepository: InvestorRepository,

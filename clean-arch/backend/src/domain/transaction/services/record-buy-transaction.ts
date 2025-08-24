@@ -4,6 +4,7 @@ import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
 import { Transaction, TransactionType } from "../entities/transaction"
 import { NotAllowedError } from "@/core/errors/not-allowed-error"
 import { TransactionValidatorService } from "./transaction-validator"
+import { Injectable } from "@nestjs/common"
 
 interface RecordBuyTransactionServiceRequest {
     investorId: string,
@@ -19,6 +20,7 @@ type RecordBuyTransactionServiceResponse = Either<ResourceNotFoundError | NotAll
     newBuyTransaction: Transaction
 }>
 
+@Injectable()
 export class RecordBuyTransactionService {
     constructor(
         private transactionRepository: TransactionRepository,

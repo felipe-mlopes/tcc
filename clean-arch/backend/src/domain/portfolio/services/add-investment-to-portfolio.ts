@@ -11,6 +11,7 @@ import { Money } from "@/core/value-objects/money";
 import { Investor } from "@/domain/investor/entities/investor";
 import { Asset } from "@/domain/asset/entities/asset";
 import { Portfolio } from "../entities/portfolio";
+import { Injectable } from "@nestjs/common";
 
 
 interface AddInvestmentToPortfolioServiceRequest {
@@ -32,6 +33,7 @@ type ValidateServiceResponse = Either<ResourceNotFoundError, {
     currentPriceFormatted: Money
 }>
 
+@Injectable()
 export class AddInvestmentToPortfolioService {
     constructor(
         private portfolioRepository: PortfolioRepository,

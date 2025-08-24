@@ -1,6 +1,8 @@
 import { Money } from "@/core/value-objects/money";
 import { ProjectionScenario } from "./calculate-goal-projection";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class GoalProjectionScenariosService {
     public static createConservativeScenario(
         goalCurrency: string,

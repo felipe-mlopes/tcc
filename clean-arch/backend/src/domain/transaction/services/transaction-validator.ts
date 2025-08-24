@@ -9,6 +9,7 @@ import { AssetRepository } from "@/domain/asset/repositories/asset-repository"
 import { PortfolioRepository } from "@/domain/portfolio/repositories/portfolio-repository"
 import { Quantity } from "@/core/value-objects/quantity"
 import { Money } from "@/core/value-objects/money"
+import { Injectable } from "@nestjs/common"
 
 interface TransactionValidatorServiceRequest {
     investorId: string
@@ -29,6 +30,7 @@ type TransactionValidatorServiceResponse = Either<ResourceNotFoundError | NotAll
     incomeFormatted: Money
 }>
 
+@Injectable()
 export class TransactionValidatorService {
     constructor(
         private investorRepository: InvestorRepository,

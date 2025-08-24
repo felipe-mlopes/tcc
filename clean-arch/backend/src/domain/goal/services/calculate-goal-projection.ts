@@ -7,6 +7,7 @@ import { InvestorRepository } from "@/domain/investor/repositories/investor-repo
 import { GoalRepository } from "../repositories/goal-repository";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { Percentage } from "@/core/value-objects/percentage";
+import { Injectable } from "@nestjs/common";
 
 export interface ProjectionScenario {
     monthlyContribution: Money,
@@ -50,6 +51,7 @@ type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
     goal: Goal
 }>
 
+@Injectable()
 export class CalculateGoalProjectionService {
     constructor(
         private investorRepository: InvestorRepository,

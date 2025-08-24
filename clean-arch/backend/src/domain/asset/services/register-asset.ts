@@ -2,7 +2,7 @@ import { Either, right } from "@/core/either";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { Asset, AssetType } from "../entities/asset";
 import { AssetRepository } from "../repositories/asset-repository";
-import { UniqueEntityID } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
 
 interface RegisterAssetServiceRequest {
     symbol: string,
@@ -17,6 +17,7 @@ type RegisterAssetServiceResponse = Either<ResourceNotFoundError, {
     newAsset: Asset
 }>
 
+@Injectable()
 export class RegisterAssetService {
     constructor(private assetRepository: AssetRepository) {}
 
@@ -29,7 +30,6 @@ export class RegisterAssetService {
         currency
     }: RegisterAssetServiceRequest): Promise<RegisterAssetServiceResponse> {
         const newAsset = Asset.create({
-            asserId: new UniqueEntityID(),
             symbol,
             name,
             assetType,
