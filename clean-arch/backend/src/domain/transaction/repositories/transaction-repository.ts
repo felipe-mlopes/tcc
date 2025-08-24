@@ -1,18 +1,18 @@
 import { PaginationParams } from "@/core/repositories/pagination-params"
 import { Transaction } from "../entities/transaction"
 
-export interface TransactionRepository {
-    findById(id: string): Promise<Transaction | null>
-    findManyByPortfolioId(
+export abstract class TransactionRepository {
+    abstract findById(id: string): Promise<Transaction | null>
+    abstract findManyByPortfolioId(
         portfolioId: string, 
         params: PaginationParams
     ): Promise<Transaction[]>
-    findByManyPortfolioAndAsset(
+    abstract findByManyPortfolioAndAsset(
         portfolioId: string, 
         assetId: string, 
         params: PaginationParams
     ): Promise<Transaction[]>
-    create(transaction: Transaction): Promise<void>
-    update(transaction: Transaction): Promise<void>
-    delete(transactionId: string): Promise<void>
+    abstract create(transaction: Transaction): Promise<void>
+    abstract update(transaction: Transaction): Promise<void>
+    abstract delete(transactionId: string): Promise<void>
 }

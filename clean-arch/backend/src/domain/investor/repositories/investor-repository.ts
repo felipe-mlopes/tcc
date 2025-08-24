@@ -1,9 +1,9 @@
 import { Investor } from "../entities/investor";
 
-export interface InvestorRepository {
-    findById(id: string): Promise<Investor | null>
-    findByEmail(email: string): Promise<Investor | null>
-    findByCpf(cpf: string): Promise<Investor | null>
-    create(investor: Investor): Promise<void>
-    update(investor: Investor): Promise<void>
+export abstract class InvestorRepository {
+    abstract findById(id: string): Promise<Investor | null>
+    abstract findByEmail(email: string): Promise<Investor | null>
+    abstract findByCpf(cpf: string): Promise<Investor | null>
+    abstract create(investor: Investor): Promise<void>
+    abstract update(investor: Investor): Promise<void>
 }

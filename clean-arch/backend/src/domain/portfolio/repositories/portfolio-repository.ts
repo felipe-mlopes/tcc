@@ -1,8 +1,8 @@
 import { Portfolio } from "../entities/portfolio"
 
-export interface PortfolioRepository {
-    findById(id: string): Promise<Portfolio | null>
-    findByInvestorId(userId: string): Promise<Portfolio | null>
-    create(portfolio: Portfolio): Promise<void>
-    update(portfolio: Portfolio): Promise<void>
+export abstract class PortfolioRepository {
+    abstract findById(id: string): Promise<Portfolio | null>
+    abstract findByInvestorId(userId: string): Promise<Portfolio | null>
+    abstract create(portfolio: Portfolio): Promise<void>
+    abstract update(portfolio: Portfolio): Promise<void>
 }
