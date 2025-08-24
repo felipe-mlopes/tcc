@@ -229,7 +229,9 @@ export class Investment extends Entity<InvestmentProps> {
         // Se houver quantidade e preço inicial, cria a primeira transação
         if (props.initialQuantity && props.initialPrice) {
             transactions.push({
-                transactionId: new UniqueEntityID(props.transactionId) ?? '',
+                transactionId: typeof props.transactionId === 'string'
+                    ? new UniqueEntityID(props.transactionId)
+                    : props.transactionId ?? new UniqueEntityID(),
                 quantity: props.initialQuantity,
                 price: props.initialPrice,
                 date: props.dateAt ?? new Date()
