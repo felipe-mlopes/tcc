@@ -1,26 +1,86 @@
-import { BadRequestException, Body, Controller, NotFoundException, Post } from "@nestjs/common";
-import { z } from "zod";
+import { BadRequestException, Body, ConflictException, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 import { Public } from "@/infra/auth/public";
 import { RegisterInvestorService } from "@/domain/investor/services/register-investor";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { RegisterInvestorDto } from "./dto/register-investor-dto";
+import { RegisterInvestorResponseDto } from "./dto/register-investor-response-dto";
+import { BusinessErrorDto, ValidationErrorDto } from "./dto/register-investor-error-response-dto";
 
-const registerInvestorBodySchema = z.object({
-    email: z.email(),
-    name: z.string().min(3),
-    cpf: z.string().min(11).max(11),
-    dateOfBirth: z.coerce.date()
-});
-
-type RegisterInvestorBody = z.infer<typeof registerInvestorBodySchema>;
-
+@ApiTags('Investors')
 @Controller('/investor')
 @Public()
 export class RegisterInvestorController {
     constructor(private registerInvestorService: RegisterInvestorService) {}
 
     @Post()
-    async handle(@Body() body: RegisterInvestorBody): Promise<void> {
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ 
+        summary: 'Registrar novo investidor',
+        description: `
+        Cria um novo investidor no sistema usando Value Objects para validações:
+        - Email: Validado pela classe Email (formato padrão)
+        - Nome: Validado pela classe Name (mín. 2 chars, letras, espaços, hífens, pontos, números)
+        - CPF: Validado pela classe CPF (formato e dígitos verificadores)
+        - Data de Nascimento: Validada pela classe DateOfBirth (idade mínima 18 anos, não futuro)
+        `
+    })
+    @ApiBody({
+        type: RegisterInvestorDto,
+        description: 'Dados necessários para registrar um novo investidor',
+        examples: {
+        valid: {
+            summary: 'Dados válidos',
+            description: 'Exemplo com todos os campos preenchidos corretamente',
+            value: {
+            email: 'joao.silva@email.com',
+            name: 'João Silva Santos',
+            cpf: '12345678901',
+            dateOfBirth: '1990-05-15'
+            }
+        }
+        }
+    })
+    @ApiCreatedResponse({
+        description: 'Investidor registrado com sucesso',
+        type: RegisterInvestorResponseDto,
+        example: {
+        id: 'uuid-123-456-789',
+        email: 'joao.silva@email.com',
+        name: 'João Silva Santos',
+        cpf: '123.456.789-01',
+        dateOfBirth: '1990-05-15',
+        status: 'created',
+        createdAt: '2024-01-15T10:30:00Z'
+        }
+    })
+    @ApiBadRequestResponse({
+        description: 'Dados de entrada inválidos ou erro de validação',
+        type: ValidationErrorDto,
+        examples: {
+        emailValidation: {
+            summary: 'Email inválido',
+            value: {
+            statusCode: 400,
+            message: 'Validation failed',
+            details: ['email: Email deve ter um formato válido'],
+            timestamp: '2024-01-15T10:30:00Z',
+            path: '/investor'
+            }
+        }}
+    })
+    @ApiConflictResponse({
+        description: 'Conflito - Investidor já existe',
+        type: BusinessErrorDto,
+        example: {
+        statusCode: 409,
+        message: 'Investidor com este email ou CPF já existe',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/investor'
+        }
+    })
+    async handle(@Body() body: RegisterInvestorDto): Promise<void> {
         const { email, name, cpf, dateOfBirth } = body;
 
         const result = await this.registerInvestorService.execute({
@@ -35,9 +95,15 @@ export class RegisterInvestorController {
 
             switch (error.constructor) {
                 case NotAllowedError:
+                    if (error.message.includes('já existe') || 
+                        error.message.includes('already exists') ||
+                        error.message.includes('já cadastrado') ||
+                        error.message.includes('already registered')) {
+                        throw new ConflictException(error.message);
+                    }
                     throw new BadRequestException(error.message);
                 default:
-                    throw new BadRequestException('Unexpected error');
+                    throw new BadRequestException('Erro inesperado ao registrar investidor');
             }
         }   
     }
