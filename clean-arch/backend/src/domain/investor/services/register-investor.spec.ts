@@ -33,10 +33,13 @@ describe('Register Investor', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            expect(result.value.newInvestor.email).toBe(newInvestor.email)
-            expect(result.value.newInvestor.name).toBe(newInvestor.name)
-            expect(result.value.newInvestor.cpf).toBe(newInvestor.cpf)
-            expect(result.value.newInvestor.isActive).toBe(true)
+            const { message } = result.value
+
+            expect(message).toBe('O cadastro de investidor foi realizado com sucesso')
+            expect(inMemoryInvestorRepository.items[0].email).toBe(newInvestor.email)
+            expect(inMemoryInvestorRepository.items[0].name).toBe(newInvestor.name)
+            expect(inMemoryInvestorRepository.items[0].cpf).toBe(newInvestor.cpf)
+            expect(inMemoryInvestorRepository.items[0].isActive).toBe(true)
             expect(inMemoryInvestorRepository.items).toHaveLength(1)
         }
     })
@@ -63,7 +66,10 @@ describe('Register Investor', () => {
                 expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            expect(result.value.newInvestor.riskProfile).toBe(InvestorProfile.Conservative)
+            const { message } = result.value
+
+            expect(message).toBe('O cadastro de investidor foi realizado com sucesso')
+            expect(inMemoryInvestorRepository.items[0].riskProfile).toBe(InvestorProfile.Conservative)
         }
     })
 
@@ -89,7 +95,10 @@ describe('Register Investor', () => {
                 expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            expect(result.value.newInvestor.riskProfile).toBe(InvestorProfile.Aggressive)
+            const { message } = result.value
+
+            expect(message).toBe('O cadastro de investidor foi realizado com sucesso')
+            expect(inMemoryInvestorRepository.items[0].riskProfile).toBe(InvestorProfile.Aggressive)
         }
     })
 
@@ -115,7 +124,10 @@ describe('Register Investor', () => {
                 expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            expect(result.value.newInvestor.riskProfile).toBe(InvestorProfile.Moderate)
+            const { message } = result.value
+
+            expect(message).toBe('O cadastro de investidor foi realizado com sucesso')
+            expect(inMemoryInvestorRepository.items[0].riskProfile).toBe(InvestorProfile.Moderate)
         }
     })
 

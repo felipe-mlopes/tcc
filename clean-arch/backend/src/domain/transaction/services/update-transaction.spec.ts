@@ -74,6 +74,9 @@ describe('Edit Transaction Service', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
+            const { message } = result.value
+
+            expect(message).toBe('Transação atualizada com sucesso')   
             expect(inMemoryTransactionRepository.items[0].quantity.getValue()).toBe(20)
             expect(inMemoryTransactionRepository.items[0].price.getAmount()).toBe(50)
             expect(inMemoryTransactionRepository.items[0].fees.getAmount()).toBe(2.0)

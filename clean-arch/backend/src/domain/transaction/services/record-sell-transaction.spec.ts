@@ -70,6 +70,9 @@ describe('Record Sell Transaction Service', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
+            const { message } = result.value
+
+            expect(message).toBe('A transação de venda foi registrada com sucesso')
             expect(inMemoryTransactionRepository.items[0].assetId).toBe(asset.id)
             expect(inMemoryTransactionRepository.items[0].portfolioId).toBe(portfolio.id)
             expect(inMemoryTransactionRepository.items[0].transactionType).toBe(TransactionType.Sell)

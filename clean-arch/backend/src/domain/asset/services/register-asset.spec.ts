@@ -26,7 +26,17 @@ describe('Register Asset', () => {
 
         expect(result.isRight()).toBe(true)
 
-        const { newAsset } = result.value as { newAsset: Asset }
-        expect(inMemoryAssetRepository.items[0]).toEqual(newAsset)
+        if(result.isRight()) {
+            const { message } = result.value
+
+            expect(message).toBe('O cadastro do ativo foi realizado com sucesso')
+            expect(inMemoryAssetRepository.items[0].symbol).toBe(asset.symbol)
+            expect(inMemoryAssetRepository.items[0].name).toBe(asset.name)
+            expect(inMemoryAssetRepository.items[0].assetType).toBe(asset.assetType)
+            expect(inMemoryAssetRepository.items[0].sector).toBe(asset.sector)
+            expect(inMemoryAssetRepository.items[0].exchange).toBe(asset.exchange)
+            expect(inMemoryAssetRepository.items[0].currency).toBe(asset.currency)
+            expect(inMemoryAssetRepository.items).toHaveLength(1)
+        }
     })
 })

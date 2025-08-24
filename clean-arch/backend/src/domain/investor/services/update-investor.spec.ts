@@ -34,6 +34,9 @@ describe('Update Investor', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
+            const { message } = result.value
+
+            expect(message).toBe('O cadastro do investidor foi atualizado com sucesso')
             expect(inMemoryInvestorRepository.items[0].updatedAt).toBeDefined()
             expect(inMemoryInvestorRepository.items[0].name).toBe('New Investor')
             expect(inMemoryInvestorRepository.items[0].email).toBe('new-investor@example.com')
@@ -60,6 +63,9 @@ describe('Update Investor', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
+            const { message } = result.value
+
+            expect(message).toBe('O cadastro do investidor foi atualizado com sucesso')
             expect(inMemoryInvestorRepository.items[0].updatedAt).toBeDefined()
             expect(inMemoryInvestorRepository.items[0].name).toBe('New Investor')
         }
@@ -85,6 +91,9 @@ describe('Update Investor', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
+            const { message } = result.value
+            
+            expect(message).toBe('O cadastro do investidor foi atualizado com sucesso')
             expect(inMemoryInvestorRepository.items[0].updatedAt).toBeDefined()
             expect(inMemoryInvestorRepository.items[0].email).toBe('new-investor@example.com')
         }

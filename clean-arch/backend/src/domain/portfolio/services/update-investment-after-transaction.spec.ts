@@ -85,8 +85,10 @@ describe('Update Investment After Transaction', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
+            const { message } = result.value
             const { quantity, currentPrice, transactions } = inMemoryInvestmentRepository.items[0]
 
+            expect(message).toBe('Após a inclusão da transação, o investimento foi atualizado com sucesso')
             expect(quantity.getValue()).toBe(150) // 100 + 50
             expect(currentPrice.getAmount()).toBe(30.0)
             expect(transactions).toHaveLength(1)

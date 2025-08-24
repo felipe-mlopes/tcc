@@ -66,11 +66,12 @@ describe('Add Investment to Portfolio', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            const { newInvestment } = result.value
+            const { message } = result.value
 
-            expect(newInvestment.quantity.getValue()).toBe(100)
-            expect(newInvestment.currentPrice.getAmount()).toBe(25.50)
-            expect(newInvestment.assetId.toValue().toString()).toBe(assetId)
+            expect(message).toBe('O investimento foi adicionado ao portfólio com sucesso')
+            expect(inMemoryInvestmentRepository.items[0].quantity.getValue()).toBe(100)
+            expect(inMemoryInvestmentRepository.items[0].currentPrice.getAmount()).toBe(25.50)
+            expect(inMemoryInvestmentRepository.items[0].assetId.toValue().toString()).toBe(assetId)
             expect(inMemoryInvestmentRepository.items).toHaveLength(1)
         }
     })

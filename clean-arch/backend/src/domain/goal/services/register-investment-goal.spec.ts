@@ -50,15 +50,17 @@ describe('Register Goal', () => {
         // Assert
         expect(result.isRight()).toBe(true)
 
-        const { goal } = result.value as { goal: Goal }
-        expect(inMemoryGoalRepository.items[0]).toEqual(goal)
-        expect(goal.name).toBe(newGoal.name)
-        expect(goal.description).toBe(newGoal.description)
-        expect(goal.targetAmount.getAmount()).toBe(newGoal.targetAmount.getAmount())
-        expect(goal.targetDate).toBe(newGoal.targetDate)
-        expect(goal.priority).toBe(newGoal.priority)
+        if (result.isRight) {
+            const { message } = result.value
 
-        expect(inMemoryGoalRepository.items).toHaveLength(1)
+            expect(message).toBe('A meta de investimento foi cadastrada com sucesso')
+            expect(inMemoryGoalRepository.items[0].name).toBe(newGoal.name)
+            expect(inMemoryGoalRepository.items[0].description).toBe(newGoal.description)
+            expect(inMemoryGoalRepository.items[0].targetAmount.getAmount()).toBe(newGoal.targetAmount.getAmount())
+            expect(inMemoryGoalRepository.items[0].targetDate).toBe(newGoal.targetDate)
+            expect(inMemoryGoalRepository.items[0].priority).toBe(newGoal.priority)
+            expect(inMemoryGoalRepository.items).toHaveLength(1)
+        }
     })
 
     it('should be not able to register a investment goal without recorded investor', async () => {

@@ -38,12 +38,13 @@ describe('Create Portfolio', () => {
         // Assert
         expect(result.isRight()).toBe(true)
         if (result.isRight()) {
-            const { newPortfolio } = result.value
+            const { message } = result.value
 
-            expect(newPortfolio.name).toBe('My Investment Portfolio')
-            expect(newPortfolio.description).toBe('Portfolio for long-term investments')
-            expect(newPortfolio.investorId.toValue().toString()).toBe(investorId)
-            expect(newPortfolio.allocations).toEqual([])
+            expect(message).toBe('O portfólio foi criado com sucesso')
+            expect(inMemoryPortfolioRepository.items[0].name).toBe('My Investment Portfolio')
+            expect(inMemoryPortfolioRepository.items[0].description).toBe('Portfolio for long-term investments')
+            expect(inMemoryPortfolioRepository.items[0].investorId.toValue().toString()).toBe(investorId)
+            expect(inMemoryPortfolioRepository.items[0].allocations).toEqual([])
             expect(inMemoryPortfolioRepository.items).toHaveLength(1)
         }
     })
@@ -59,11 +60,12 @@ describe('Create Portfolio', () => {
         // Assert
         expect(result.isRight()).toBe(true)
         if (result.isRight()) {
-            const { newPortfolio } = result.value
+            const { message } = result.value
 
-            expect(newPortfolio.name).toBe('My Investment Portfolio')
-            expect(newPortfolio.description).toBe('')
-            expect(newPortfolio.investorId.toValue().toString()).toBe(investorId)
+            expect(message).toBe('O portfólio foi criado com sucesso')
+            expect(inMemoryPortfolioRepository.items[0].name).toBe('My Investment Portfolio')
+            expect(inMemoryPortfolioRepository.items[0].description).toBe('')
+            expect(inMemoryPortfolioRepository.items[0].investorId.toValue().toString()).toBe(investorId)
         }
     })
 
