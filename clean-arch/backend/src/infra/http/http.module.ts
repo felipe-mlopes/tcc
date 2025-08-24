@@ -33,6 +33,8 @@ import { RegisterInvestmentGoalController } from "./controller/goal/register-inv
 import { RegisterInvestmentGoalService } from "@/domain/goal/services/register-investment-goal";
 import { UpdateInvestmentGoalService } from "@/domain/goal/services/update-investment-goal";
 import { UpdateInvestmentGoalController } from "./controller/goal/update-investment-goal.controller";
+import { UpdateInvestmentAfterTransactionController } from "./controller/portfolio/update-investment-after-transaction.controller";
+import { UpdateInvestmentAfterTransactionService } from "@/domain/portfolio/services/update-investment-after-transaction";
 
 @Module({
     imports: [DatabaseModule],
@@ -43,7 +45,7 @@ import { UpdateInvestmentGoalController } from "./controller/goal/update-investm
         RegisterAssetController,
         CreatePortfolioController,
         AddInvestmentToPortfolioController,
-        UpdateInvestorController,
+        UpdateInvestmentAfterTransactionController,
         GetInvestmentByAssetIdController,
         FetchAllInvestmentsByPortfolioIdController,
         RecordBuyTransactionController,
@@ -62,7 +64,7 @@ import { UpdateInvestmentGoalController } from "./controller/goal/update-investm
         RegisterAssetService,
         CreatePortfolioService,
         AddInvestmentToPortfolioService,
-        UpdateInvestorService,
+        UpdateInvestmentAfterTransactionService,
         GetInvestmentByAssetIdService,
         FetchAllInvestmentsByPortfolioIdService,
         RecordBuyTransactionService,
