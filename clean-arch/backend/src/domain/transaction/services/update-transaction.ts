@@ -18,7 +18,7 @@ interface UpdateTransactionServiceRequest {
 }
 
 type UpdateTransactionServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
-    transactionEdited: Transaction
+    message: string
 }>
 
 type ValidateServiceResponse = Either<ResourceNotFoundError, {
@@ -95,7 +95,7 @@ export class UpdateTransactionService {
         await this.transactionRepository.update(transaction)
 
         return right({
-            transactionEdited: transaction
+            message: 'Transação atualizada com sucesso'
         })
     }
 

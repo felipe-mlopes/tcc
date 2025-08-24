@@ -21,7 +21,7 @@ interface CalculateImpactRequest {
 }
 
 type UpdateInvestmentAfterTransactionServiceResponse = Either<NotAllowedError, {
-    updatedInvestment: Investment
+    message: string
 }>
 
 type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
@@ -77,7 +77,7 @@ export class UpdateInvestmentAfterTransactionService {
         if (calculationResult.isLeft()) return left(calculationResult.value)
 
         return right({
-            updatedInvestment: calculationResult.value.updatedInvestment
+            message: 'Após a inclusão da transação, o investimento foi atualizado com sucesso'
         })
     }
 

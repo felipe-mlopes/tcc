@@ -14,7 +14,7 @@ interface RegisterAssetServiceRequest {
 }
 
 type RegisterAssetServiceResponse = Either<ResourceNotFoundError, {
-    newAsset: Asset
+    message: string
 }>
 
 @Injectable()
@@ -41,7 +41,7 @@ export class RegisterAssetService {
         await this.assetRepository.create(newAsset)
 
         return right({
-            newAsset
+            message: 'O cadastro do ativo foi realizado com sucesso'
         })
     }
 }

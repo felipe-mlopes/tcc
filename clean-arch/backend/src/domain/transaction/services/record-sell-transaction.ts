@@ -18,7 +18,7 @@ interface RecordSellTransactionServiceRequest {
 }
 
 type RecordSellTransactionServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
-    newSellTransaction: Transaction
+    message: string
 }>
 
 @Injectable()
@@ -76,7 +76,7 @@ export class RecordSellTransactionService {
         await this.transactionRepository.create(newSellTransaction)
 
         return right({
-            newSellTransaction
+            message: 'A transação de venda foi registrada com sucesso'
         })
     }
 }

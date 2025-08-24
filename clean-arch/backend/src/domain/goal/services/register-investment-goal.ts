@@ -17,7 +17,7 @@ export interface RegisterInvestmentGoalServiceRequest {
 }
 
 type RegisterInvestmentGoalServiceResponse = Either<ResourceNotFoundError, {
-    goal: Goal
+    message: string
 }>
 
 @Injectable()
@@ -54,7 +54,7 @@ export class RegisterInvestmentGoalService {
         await this.goalRepository.create(goal)
 
         return right({
-            goal
+            message: 'A meta de investimento foi cadastrada com sucesso'
         })
     }
 }

@@ -18,7 +18,7 @@ interface RecordDividendTransactionServiceRequest {
 }
 
 type RecordDividendTransactionServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
-    newDividendTransaction: Transaction
+    message: string
 }>
 
 @Injectable()
@@ -71,7 +71,7 @@ export class RecordDividendTransactionService {
         await this.transactionRepository.create(newDividendTransaction)
 
         return right({
-            newDividendTransaction
+            message: 'A transação de dividendo foi registrada com sucesso'
         })
     }
 }

@@ -17,7 +17,7 @@ interface RegisterInvestorServiceRequest {
 }
 
 type RegisterInvestorServiceResponse = Either<NotAllowedError, {
-    newInvestor: Investor
+    message: string
 }>
 
 @Injectable()
@@ -54,7 +54,7 @@ export class RegisterInvestorService {
         await this.investorRepository.create(newInvestor)
 
         return right({
-            newInvestor
+            message: 'O cadastro de investidor foi realizado com sucesso'
         })
     }
     

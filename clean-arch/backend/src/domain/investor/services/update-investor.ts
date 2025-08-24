@@ -12,7 +12,7 @@ interface UpdateInvestorServiceRequest {
 }
 
 type UpdateInvestorServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
-  investor: Investor
+  message: string
 }>
 
 @Injectable()
@@ -46,7 +46,7 @@ export class UpdateInvestorService {
         await this.investorRepository.update(investor)
 
         return right({
-            investor
+            message: 'O cadastro do investidor foi atualizado com sucesso'
         })
     }
 }

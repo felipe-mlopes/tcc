@@ -13,7 +13,7 @@ interface CreatePortfolioServiceRequest {
 }
 
 type CreatePortfolioServiceResponse = Either<ResourceNotFoundError, {
-    newPortfolio: Portfolio
+    message: string
 }>
 
 @Injectable()
@@ -43,7 +43,7 @@ export class CreatePortfolioService {
         await this.portfolioRepository.create(newPortfolio)
 
         return right({
-            newPortfolio
+            message: 'O portfólio foi criado com sucesso'
         })
     }
 }

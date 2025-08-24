@@ -22,7 +22,7 @@ interface AddInvestmentToPortfolioServiceRequest {
 }
 
 type AddInvestmentToPortfolioServiceResponse = Either<ResourceNotFoundError, {
-    newInvestment: Investment
+    message: string
 }>
 
 type ValidateServiceResponse = Either<ResourceNotFoundError, {
@@ -74,7 +74,7 @@ export class AddInvestmentToPortfolioService {
         await this.portfolioRepository.update(portfolioVerified)
 
         return right({
-            newInvestment
+            message: 'O investimento foi adicionado ao portfólio com sucesso'
         })
     }
 
