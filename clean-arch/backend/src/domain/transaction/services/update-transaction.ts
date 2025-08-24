@@ -6,6 +6,7 @@ import { TransactionRepository } from "../repositories/transaction-repository";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { Quantity } from "@/core/value-objects/quantity";
 import { Money } from "@/core/value-objects/money";
+import { Injectable } from "@nestjs/common";
 
 interface UpdateTransactionServiceRequest {
     investorId: string,
@@ -24,6 +25,7 @@ type ValidateServiceResponse = Either<ResourceNotFoundError, {
     transaction: Transaction
 }>
 
+@Injectable()
 export class UpdateTransactionService {
     constructor(
         private investorRepository: InvestorRepository,
