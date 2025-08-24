@@ -1,15 +1,15 @@
 import { InMemoryInvestorRepository } from "test/repositories/in-memory-investor-repository"
 import { makeInvestor } from "test/factories/make-investor"
-import { DesactiveInvestorService } from "./desactive-investor"
+import { DeactivateInvestorService } from "./deactivate-investor"
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
 
 let inMemoryInvestorRepository: InMemoryInvestorRepository
-let sut: DesactiveInvestorService
+let sut: DeactivateInvestorService
 
 describe('Desactive Investor', () => {
     beforeEach(() => {
         inMemoryInvestorRepository = new InMemoryInvestorRepository()
-        sut = new DesactiveInvestorService(inMemoryInvestorRepository)
+        sut = new DeactivateInvestorService(inMemoryInvestorRepository)
     })
 
     it('should be able to desactive investor record', async () => {
