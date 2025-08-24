@@ -7,7 +7,7 @@ import { Goal, Priority, Status } from "../entities/goal";
 import { Money } from "@/core/value-objects/money";
 import { Injectable } from "@nestjs/common";
 
-export interface EditInvestmentGoalServiceRequest {
+export interface UpdateInvestmentGoalServiceRequest {
     investorId: string,
     goalId: string,
     name?: string,
@@ -18,8 +18,8 @@ export interface EditInvestmentGoalServiceRequest {
     status?: Status
 }
 
-type EditInvestmentGoalServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
-    goal: Goal
+type UpdateInvestmentGoalServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
+    message: string
 }>
 
 type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
@@ -27,7 +27,7 @@ type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
 }>
 
 @Injectable()
-export class EditInvestmentGoalService {
+export class UpdateInvestmentGoalService {
     constructor(
         private investorRepository: InvestorRepository,
         private goalRepository: GoalRepository
@@ -42,7 +42,7 @@ export class EditInvestmentGoalService {
         targetDate,
         priority,
         status
-    }: EditInvestmentGoalServiceRequest): Promise<EditInvestmentGoalServiceResponse> {
+    }: UpdateInvestmentGoalServiceRequest): Promise<UpdateInvestmentGoalServiceResponse> {
         const goalValidate = await this.validateRequests({
             investorId, 
             goalId,
@@ -73,7 +73,7 @@ export class EditInvestmentGoalService {
         }
 
         return right({
-            goal
+            message: 'Meta de investimento atualizada com sucesso'
         })
     }
 
@@ -86,7 +86,7 @@ export class EditInvestmentGoalService {
         targetDate,
         priority,
         status
-    }: EditInvestmentGoalServiceRequest): Promise<ValidateServiceResponse> {
+    }: UpdateInvestmentGoalServiceRequest): Promise<ValidateServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError("Investor not found."))
 
