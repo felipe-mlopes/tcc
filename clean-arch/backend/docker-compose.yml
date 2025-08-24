@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: investment_postgres_clean
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: investment_clean_user
+      POSTGRES_PASSWORD: investment_clean_password
+      POSTGRES_DB: investment_clean_db
+    volumes:
+      - postgres_data_clean:/var/lib/postgresql/data
+    networks:
+      - investment_clean_network
+
+volumes:
+  postgres_data_clean:
+
+networks:
+  investment_clean_network:
+    driver: bridge
