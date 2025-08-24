@@ -1,5 +1,5 @@
 import { InMemoryTransactionRepository } from "test/repositories/in-memory-transaction-repository"
-import { UpdateTransactionService } from "./edit-transaction"
+import { UpdateTransactionService } from "./update-transaction"
 import { InMemoryInvestorRepository } from "test/repositories/in-memory-investor-repository"
 import { InMemoryAssetRepository } from "test/repositories/in-memory-asset-repository"
 import { InMemoryPortfolioRepository } from "test/repositories/in-memory-portfolio-repository"
