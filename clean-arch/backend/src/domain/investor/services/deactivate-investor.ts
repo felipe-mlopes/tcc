@@ -1,21 +1,23 @@
 import { Either, left, right } from "@/core/either"
 import { InvestorRepository } from "../repositories/investor-repository"
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
+import { Injectable } from "@nestjs/common"
 
-interface DesactiveInvestorServiceRequest {
+interface DeactivateInvestorServiceRequest {
     investorId: string
 }
 
-type DesactiveInvestorServiceResponse = Either<ResourceNotFoundError, {
+type DeactivateInvestorServiceResponse = Either<ResourceNotFoundError, {
     message: string
 }>
 
-export class DesactiveInvestorService {
+@Injectable()
+export class DeactivateInvestorService {
     constructor(private investorRepository: InvestorRepository) {}
 
     public async execute({
         investorId
-    }: DesactiveInvestorServiceRequest): Promise<DesactiveInvestorServiceResponse> {
+    }: DeactivateInvestorServiceRequest): Promise<DeactivateInvestorServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError(
             'Investor not found.'
