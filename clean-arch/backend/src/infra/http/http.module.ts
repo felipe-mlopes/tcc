@@ -1,0 +1,71 @@
+import { Module } from "@nestjs/common";
+import { DatabaseModule } from "../database/database.module";
+import { RegisterInvestorController } from "./controller/investor/register-investor.controller";
+import { UpdateInvestorController } from "./controller/investor/update-investor.controller";
+import { DeactivateInvestorController } from "./controller/investor/deactivate-investor.controller";
+import { RegisterAssetController } from "./controller/asset/register-asset.controller";
+import { CreatePortfolioController } from "./controller/portfolio/create-portfolio.controller";
+import { AddInvestmentToPortfolioController } from "./controller/portfolio/add-investment-to-portfolio.controller";
+import { GetInvestmentByAssetIdController } from "./controller/portfolio/get-investment-by-asset-id.controller";
+import { FetchAllInvestmentsByPortfolioIdController } from "./controller/portfolio/fetch-all-investments-by-portfolio-id.controller";
+import { RecordBuyTransactionController } from "./controller/transaction/record-buy-transaction.controller";
+import { RecordSellTransactionController } from "./controller/transaction/record-sell-transaction.controller";
+import { RecordDividendTransactionController } from "./controller/transaction/record-dividend-transaction.controller";
+import { FetchTransactionsHistoryByAssetIdController } from "./controller/transaction/fetch-transactions-history-by-asset-id.controller";
+import { FetchTransactionsHistoryByPortfolioIdController } from "./controller/transaction/fetch-transactions-history-by-portfolio-id.controller";
+import { RegisterInvestorService } from "@/domain/investor/services/register-investor";
+import { UpdateInvestorService } from "@/domain/investor/services/update-investor";
+import { DeactivateInvestorService } from "@/domain/investor/services/deactivate-investor";
+import { RegisterAssetService } from "@/domain/asset/services/register-asset";
+import { CreatePortfolioService } from "@/domain/portfolio/services/create-portfolio";
+import { AddInvestmentToPortfolioService } from "@/domain/portfolio/services/add-investment-to-portfolio";
+import { GetInvestmentByAssetIdService } from "@/domain/portfolio/services/get-investment-by-asset-id";
+import { FetchAllInvestmentsByPortfolioIdService } from "@/domain/portfolio/services/fetch-all-investments-by-portfolio-id";
+import { RecordBuyTransactionService } from "@/domain/transaction/services/record-buy-transaction";
+import { RecordSellTransactionService } from "@/domain/transaction/services/record-sell-transaction";
+import { RecordDividendTransactionService } from "@/domain/transaction/services/record-dividend-transaction";
+import { UpdateTransactionService } from "@/domain/transaction/services/update-transaction";
+import { UpdateTransactionController } from "./controller/transaction/update-transaction.controller";
+import { FetchTransactionsHistoryByAssetIdService } from "@/domain/transaction/services/fetch-transactions-history-by-asset-id";
+import { FetchTransactionsHistoryByPorfolioIdService } from "@/domain/transaction/services/fetch-transactions-history-by-portfolio-id";
+import { TransactionValidatorService } from "@/domain/transaction/services/transaction-validator";
+
+@Module({
+    imports: [DatabaseModule],
+    controllers: [
+        RegisterInvestorController,
+        UpdateInvestorController,
+        DeactivateInvestorController,
+        RegisterAssetController,
+        CreatePortfolioController,
+        AddInvestmentToPortfolioController,
+        UpdateInvestorController,
+        GetInvestmentByAssetIdController,
+        FetchAllInvestmentsByPortfolioIdController,
+        RecordBuyTransactionController,
+        RecordSellTransactionController,
+        RecordDividendTransactionController,
+        UpdateTransactionController,
+        FetchTransactionsHistoryByAssetIdController,
+        FetchTransactionsHistoryByPortfolioIdController
+    ],
+    providers: [
+        RegisterInvestorService,
+        UpdateInvestorService,
+        DeactivateInvestorService,
+        RegisterAssetService,
+        CreatePortfolioService,
+        AddInvestmentToPortfolioService,
+        UpdateInvestorService,
+        GetInvestmentByAssetIdService,
+        FetchAllInvestmentsByPortfolioIdService,
+        RecordBuyTransactionService,
+        RecordSellTransactionService,
+        RecordDividendTransactionService,
+        UpdateTransactionService,
+        FetchTransactionsHistoryByAssetIdService,
+        FetchTransactionsHistoryByPorfolioIdService,
+        TransactionValidatorService
+    ]
+})
+export class HttpModule {}
