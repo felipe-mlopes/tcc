@@ -20,7 +20,7 @@ export class DeactivateInvestorService {
     }: DeactivateInvestorServiceRequest): Promise<DeactivateInvestorServiceResponse> {
         const investor = await this.investorRepository.findById(investorId)
         if (!investor) return left(new ResourceNotFoundError(
-            'Investor not found.'
+            'Investor not found'
         ))
 
         investor.desactive()
@@ -28,7 +28,7 @@ export class DeactivateInvestorService {
         await this.investorRepository.update(investor)
 
         return right({
-            message: 'The investor has been desactive.'
+            message: 'Investidor desativado com sucesso'
         })
     }
 }
