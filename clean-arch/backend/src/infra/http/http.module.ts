@@ -29,6 +29,10 @@ import { UpdateTransactionController } from "./controller/transaction/update-tra
 import { FetchTransactionsHistoryByAssetIdService } from "@/domain/transaction/services/fetch-transactions-history-by-asset-id";
 import { FetchTransactionsHistoryByPorfolioIdService } from "@/domain/transaction/services/fetch-transactions-history-by-portfolio-id";
 import { TransactionValidatorService } from "@/domain/transaction/services/transaction-validator";
+import { RegisterInvestmentGoalController } from "./controller/goal/register-investment-goal.controller";
+import { RegisterInvestmentGoalService } from "@/domain/goal/services/register-investment-goal";
+import { UpdateInvestmentGoalService } from "@/domain/goal/services/update-investment-goal";
+import { UpdateInvestmentGoalController } from "./controller/goal/update-investment-goal.controller";
 
 @Module({
     imports: [DatabaseModule],
@@ -47,7 +51,9 @@ import { TransactionValidatorService } from "@/domain/transaction/services/trans
         RecordDividendTransactionController,
         UpdateTransactionController,
         FetchTransactionsHistoryByAssetIdController,
-        FetchTransactionsHistoryByPortfolioIdController
+        FetchTransactionsHistoryByPortfolioIdController,
+        RegisterInvestmentGoalController,
+        UpdateInvestmentGoalController
     ],
     providers: [
         RegisterInvestorService,
@@ -65,7 +71,9 @@ import { TransactionValidatorService } from "@/domain/transaction/services/trans
         UpdateTransactionService,
         FetchTransactionsHistoryByAssetIdService,
         FetchTransactionsHistoryByPorfolioIdService,
-        TransactionValidatorService
+        TransactionValidatorService,
+        RegisterInvestmentGoalService,
+        UpdateInvestmentGoalService
     ]
 })
 export class HttpModule {}
