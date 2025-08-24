@@ -2,25 +2,31 @@ import {
   BadRequestException,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Query,
 } from "@nestjs/common";
-import { z } from "zod";
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from "@nestjs/swagger"
 
-import { Public } from "@/infra/auth/public";
-import { FetchTransactionsHistoryByPorfolioIdService } from "@/domain/transaction/services/fetch-transactions-history-by-portfolio-id";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { FetchTransactionsHistoryByPorfolioIdService } from "@/domain/transaction/services/fetch-transactions-history-by-portfolio-id";
+import { Public } from "@/infra/auth/public";
 import { TransactionPresenter } from "@/infra/presenters/transaction-presenter";
+import { FetchAllTransactionsHistoryResponseDto, FetchTransactionsHistoryWrapperDto } from "./dto/fetch-transactions-history-response-dto";
+import { FetchAllTransactionsHistoryByPortfolioIdBusinessErrorDto } from "./dto/fetch-transactions-history-by-portfolio-id-error-response-dto";
 
-const fetchTransactionsHistoryQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-});
-
-type FetchTransactionsHistoryQuery = z.infer<typeof fetchTransactionsHistoryQuerySchema>;
-
-@Controller("/investor/:investorId/transactions")
+@ApiTags('Transactions')
+@Controller("/:investorId/transactions")
 @Public()
 export class FetchTransactionsHistoryByPortfolioIdController {
   constructor(
@@ -28,15 +34,88 @@ export class FetchTransactionsHistoryByPortfolioIdController {
   ) {}
 
   @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Buscar transações por ID do portfólio',
+    description: `
+      Busca os transações realizadas no portfólio do investidor baseado no ID do portfólio:
+      - Retorna informações dos transações se encontrado
+      - Inclui quantidade e preço transacionados
+      - Retorna null se o investidor não possui nenhum investimento
+    `
+  })
+  @ApiParam({
+    name: 'investorId',
+    description: 'ID único do investidor proprietário do portfólio',
+    example: 'uuid-123-456-789'
+  })
+  @ApiQuery({
+    name: 'page',
+    description: 'Número da página para paginação dos resultados',
+    required: false,
+    type: 'number',
+    example: 1,
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      default: 1
+    }
+  })
+  @ApiOkResponse({
+    description: 'Transações encontradas com sucesso',
+    type: FetchAllTransactionsHistoryResponseDto,
+    examples: {
+      transactions: {
+        summary: 'Transações encontradas',
+        value: [
+          {
+            id: 'uuid-transaction-123-456',
+            assetId: 'uuid-asset-111-222',
+            portfolioId: 'uuid-portfolio-789',
+            quantity: 400,
+            price: 32.50,
+            transactionType: 'Buy',
+            dateAt: '2024-06-10T14:30:00.000Z'
+          },
+          {
+            id: 'uuid-transaction-456-123',
+            assetId: 'uuid-asset-999-888',
+            portfolioId: 'uuid-portfolio-789',
+            quantity: 200,
+            price: 10.30,
+            transactionType: 'Sell',
+            dateAt: '2024-06-10T14:30:00.000Z'
+          }
+        ]
+      },
+      notFound: {
+        summary: 'Transação não encontrada',
+        value: null
+      }
+    }
+  })
+  @ApiNotFoundResponse({
+    description: 'Investidor não encontrado',
+    type: FetchAllTransactionsHistoryByPortfolioIdBusinessErrorDto,
+    examples: {
+      investorNotFound: {
+        summary: 'Investidor não encontrado',
+        value: {
+          statusCode: 404,
+          message: 'Investidor não encontrado',
+          timestamp: '2024-01-15T10:30:00Z',
+          path: '/uuid-123-456-789/transactions'
+        }
+      }
+    }
+  })
   async handle(
     @Param("investorId") investorId: string,
-    @Query() query: FetchTransactionsHistoryQuery
-  ) {
-    const { page } = fetchTransactionsHistoryQuerySchema.parse(query);
-
+    @Query("page") page: string,
+  ): Promise<FetchTransactionsHistoryWrapperDto> {
     const result = await this.fetchTransactionsHistoryByPortfolioIdService.execute({
       investorId,
-      page,
+      page: page ? Number(page) : 1,
     });
 
     if (result.isLeft()) {
@@ -55,9 +134,13 @@ export class FetchTransactionsHistoryByPortfolioIdController {
     const { transactions } = result.value;
 
     return {
-      transactions: transactions.map((transaction) => (
-            TransactionPresenter.toHTTP(transaction)
-      )),
+      transactions: transactions.map((transaction) => {
+        const httpTransaction = TransactionPresenter.toHTTP(transaction);
+        return {
+          ...httpTransaction,
+          transactionType: httpTransaction.type
+        };
+      }),
     };
   }
 }

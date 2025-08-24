@@ -2,34 +2,170 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
 } from "@nestjs/common";
-import { z } from "zod";
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from "@nestjs/swagger";
 
-import { Public } from "@/infra/auth/public";
-import { AddInvestmentToPortfolioService } from "@/domain/portfolio/services/add-investment-to-portfolio";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { AddInvestmentToPortfolioService } from "@/domain/portfolio/services/add-investment-to-portfolio";
+import { Public } from "@/infra/auth/public";
+import { AddInvestmentToPortfolioDto } from "./dto/add-investment-to-portfolio-dto";
+import { AddInvestmentToPortfolioResponseDto } from "./dto/add-investment-to-portfolio-response-dto";
+import { AddInvestmentToPortfolioBusinessErrorDto, AddInvestmentToPortfolioValidationErrorDto } from "./dto/add-investment-to-portfolio-error-response-dto";
 
-const addInvestmentBodySchema = z.object({
-  assetId: z.string().min(1),
-  quantity: z.number().positive(),
-  currentPrice: z.number().positive(),
-});
-
-type AddInvestmentBody = z.infer<typeof addInvestmentBodySchema>;
-
-@Controller("/investor/:investorId/portfolio/investment")
+@ApiTags('Portfolios')
+@Controller("/:investorId/portfolio/investment")
 @Public()
 export class AddInvestmentToPortfolioController {
   constructor(private addInvestmentToPortfolioService: AddInvestmentToPortfolioService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Adicionar investimento ao portfólio',
+    description: `
+    Adiciona um novo investimento ao portfólio do investidor:
+      - Asset ID: Identificador único do ativo a ser investido
+      - Quantidade: Número de cotas/ações a serem adquiridas (deve ser positiva)
+      - Preço atual: Valor unitário do ativo no momento da compra (deve ser positivo)
+      - O investimento será adicionado ao portfólio principal do investidor
+      - O valor total será calculado automaticamente (quantidade × preço)
+    `
+  })
+  @ApiParam({
+    name: 'investorId',
+    description: 'ID único do investidor proprietário do portfólio',
+    example: 'uuid-123-456-789'
+  })
+  @ApiBody({
+    type: AddInvestmentToPortfolioDto,
+    description: 'Dados necessários para adicionar um investimento ao portfólio',
+    examples: {
+      stock: {
+        summary: 'Investimento em ação',
+        description: 'Exemplo de compra de ações',
+        value: {
+          assetId: 'PETR4',
+          quantity: 100,
+          currentPrice: 28.50
+        }
+      },
+      fund: {
+        summary: 'Investimento em fundo',
+        description: 'Exemplo de aplicação em fundo de investimento',
+        value: {
+          assetId: 'FUND-ABC-123',
+          quantity: 50,
+          currentPrice: 125.75
+        }
+      },
+      crypto: {
+        summary: 'Investimento em criptomoeda',
+        description: 'Exemplo de compra de criptomoeda',
+        value: {
+          assetId: 'BTC',
+          quantity: 0.1,
+          currentPrice: 150000.00
+        }
+      }
+    }
+  })
+  @ApiCreatedResponse({
+    description: 'Investimento adicionado ao portfólio com sucesso',
+    type: AddInvestmentToPortfolioResponseDto,
+    example: {
+      message: 'O investimento foi adicionado ao portfólio com sucesso'
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados de entrada inválidos ou erro de validação',
+    type: AddInvestmentToPortfolioValidationErrorDto,
+    examples: {
+      quantityValidation: {
+        summary: 'Quantidade inválida',
+        value: {
+          statusCode: 400,
+          message: 'Validation failed',
+          details: ['quantity: Quantidade deve ser um número positivo'],
+          timestamp: '2024-01-15T10:30:00Z',
+          path: '/investor/uuid-123-456-789/portfolio/investment'
+        }
+      },
+      priceValidation: {
+        summary: 'Preço inválido',
+        value: {
+          statusCode: 400,
+          message: 'Validation failed',
+          details: ['currentPrice: Preço atual deve ser um número positivo'],
+          timestamp: '2024-01-15T10:30:00Z',
+          path: '/investor/uuid-123-456-789/portfolio/investment'
+        }
+      },
+      multipleErrors: {
+        summary: 'Múltiplos erros',
+        value: {
+          statusCode: 400,
+          message: 'Validation failed',
+          details: [
+            'assetId: ID do ativo é obrigatório',
+            'quantity: Quantidade deve ser um número positivo',
+            'currentPrice: Preço atual deve ser um número positivo'
+          ],
+          timestamp: '2024-01-15T10:30:00Z',
+          path: '/investor/uuid-123-456-789/portfolio/investment'
+        }
+      }
+    }
+  })
+  @ApiNotFoundResponse({
+    description: 'Investidor, portfólio ou ativo não encontrados',
+    type: AddInvestmentToPortfolioBusinessErrorDto,
+    examples: {
+      investorNotFound: {
+        summary: 'Investidor não encontrado',
+        value: {
+          statusCode: 404,
+          message: 'Investidor não encontrado',
+          timestamp: '2024-01-15T10:30:00Z',
+          path: '/investor/uuid-123-456-789/portfolio/investment'
+        }
+      },
+      portfolioNotFound: {
+        summary: 'Portfólio não encontrado',
+        value: {
+          statusCode: 404,
+          message: 'Portfólio não encontrado para este investidor',
+          timestamp: '2024-01-15T10:30:00Z',
+          path: '/investor/uuid-123-456-789/portfolio/investment'
+        }
+      },
+      assetNotFound: {
+        summary: 'Ativo não encontrado',
+        value: {
+          statusCode: 404,
+          message: 'Ativo não encontrado ou indisponível para investimento',
+          timestamp: '2024-01-15T10:30:00Z',
+          path: '/investor/uuid-123-456-789/portfolio/investment'
+        }
+      }
+    }
+  })
   async handle(
     @Param("investorId") investorId: string,
-    @Body() body: AddInvestmentBody
-  ): Promise<void> {
+    @Body() body: AddInvestmentToPortfolioDto
+  ): Promise<string> {
     const { assetId, quantity, currentPrice } = body;
 
     const result = await this.addInvestmentToPortfolioService.execute({
@@ -46,8 +182,10 @@ export class AddInvestmentToPortfolioController {
         case ResourceNotFoundError:
           throw new NotFoundException(error.message);
         default:
-          throw new BadRequestException("Unexpected error.");
+          throw new BadRequestException("Erro inesperado ao adicionar investimento ao portfólio");
       }
     }
+
+    return result.value.message
   }
 }
