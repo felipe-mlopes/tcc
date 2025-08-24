@@ -5,6 +5,7 @@ import { InvestorRepository } from "@/domain/investor/repositories/investor-repo
 import { PortfolioRepository } from "../repositories/portfolio-repository"
 import { InvestmentRepository } from "../repositories/investment-repository"
 import { Portfolio } from "../entities/portfolio"
+import { Injectable } from "@nestjs/common"
 
 interface FetchAllInvestmentsByPortfolioIdServiceRequest {
     investorId: string
@@ -19,6 +20,7 @@ type ValidatorFetchAllInvestmentsServiceResponse = Either<ResourceNotFoundError,
     portfolioVerified: Portfolio
 }>
 
+@Injectable()
 export class FetchAllInvestmentsByPortfolioIdService {
     constructor(
         private investorRepository: InvestorRepository,
