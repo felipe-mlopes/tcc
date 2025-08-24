@@ -4,24 +4,24 @@ import { makeGoal } from "test/factories/make-goal";
 import { Goal, Priority, Status } from "../entities/goal";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { makeInvestor } from "test/factories/make-investor";
-import { EditInvestmentGoalService } from "./edit-investment-goal";
+import { UpdateInvestmentGoalService } from "./update-investment-goal";
 import { Investor } from "@/domain/investor/entities/investor";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 
 let inMemoryInvestorRepository: InMemoryInvestorRepository
 let inMemoryGoalRepository: InMemoryGoalRepository
-let sut: EditInvestmentGoalService
+let sut: UpdateInvestmentGoalService
 
 let newInvestor: Investor
 let newGoal: Goal
 let investorId: string
 let goalId: string
 
-describe('Edit Investment Goal', () => {
+describe('Update Investment Goal', () => {
     beforeEach(async () => {
         inMemoryInvestorRepository = new InMemoryInvestorRepository()
         inMemoryGoalRepository = new InMemoryGoalRepository()
-        sut = new EditInvestmentGoalService(
+        sut = new UpdateInvestmentGoalService(
             inMemoryInvestorRepository,
             inMemoryGoalRepository
         )
@@ -37,7 +37,7 @@ describe('Edit Investment Goal', () => {
         goalId = newGoal.id.toValue().toString()
     })
 
-    it('should be able to edit a investment goal with all fields', async () => {    
+    it('should be able to update a investment goal with all fields', async () => {    
 
         // Act
         const result = await sut.execute({
@@ -55,18 +55,20 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            const { goal } = result.value
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
             expect(inMemoryGoalRepository.items[0]).toMatchObject({
-                name: goal.name,
-                description: goal.description,
-                targetDate: goal.targetDate,
-                targetAmount: goal.targetAmount,
-                priority: goal.priority
+                name: newGoal.name,
+                description: newGoal.description,
+                targetDate: newGoal.targetDate,
+                targetAmount: newGoal.targetAmount,
+                priority: newGoal.priority
             })     
         }
     })
 
-    it('should be able to edit only name', async () => {
+    it('should be able to update only name', async () => {
         
         // Act
         const result = await sut.execute({
@@ -79,12 +81,14 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.name).toBe('Only Name Updated')
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].name).toBe('Only Name Updated')
         }
     })
 
-    it('should be able to edit only description', async () => {
+    it('should be able to update only description', async () => {
         
         // Act
         const result = await sut.execute({
@@ -97,12 +101,14 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.description).toBe('Only Description Updated')
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].description).toBe('Only Description Updated')
         }
     })
 
-    it('should be able to edit only target amount', async () => {
+    it('should be able to update only target amount', async () => {
         
         // Act
         const result = await sut.execute({
@@ -115,12 +121,14 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.targetAmount.getAmount()).toBe(750000)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].targetAmount.getAmount()).toBe(750000)
         }
     })
 
-    it('should be able to edit only target date', async () => {
+    it('should be able to update only target date', async () => {
         
         // Arrange
         const newDate = new Date('2055-01-01')
@@ -136,12 +144,14 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.targetDate).toEqual(newDate)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].targetDate).toEqual(newDate)
         }
     })
 
-    it('should be able to edit only priority', async () => {
+    it('should be able to update only priority', async () => {
         
         // Act
         const result = await sut.execute({
@@ -154,8 +164,10 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.priority).toBe(Priority.Low)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].priority).toBe(Priority.Low)
         }
     })
 
@@ -172,8 +184,10 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.status).toBe(Status.Achieved)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].status).toBe(Status.Achieved)
         }
     })
 
@@ -190,8 +204,10 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.status).toBe(Status.Cancelled)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].status).toBe(Status.Cancelled)
         }
     })
 
@@ -211,12 +227,14 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.status).toBe(Status.Active)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].status).toBe(Status.Active)
         }
     })
 
-    it('should not be able to edit a goal with non-existent investor', async () => {
+    it('should not be able to update a goal with non-existent investor', async () => {
         
         // Act
         const result = await sut.execute({
@@ -233,7 +251,7 @@ describe('Edit Investment Goal', () => {
         }
     })
 
-    it('should not be able to edit a non-existent goal', async () => {
+    it('should not be able to update a non-existent goal', async () => {
         
         // Act
         const result = await sut.execute({
@@ -250,7 +268,7 @@ describe('Edit Investment Goal', () => {
         }
     })
 
-    it('should not be able to edit a goal without providing any field', async () => {
+    it('should not be able to update a goal without providing any field', async () => {
         
         // Act
         const result = await sut.execute({
@@ -282,8 +300,10 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.priority).toBe(currentPriority)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].priority).toBe(currentPriority)
         }
     })
 
@@ -303,12 +323,14 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.status).toBe(currentStatus)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].status).toBe(currentStatus)
         }
     })
 
-    it('should be able to edit multiple fields at once', async () => {
+    it('should be able to update multiple fields at once', async () => {
         
         // Act
         const result = await sut.execute({
@@ -323,10 +345,12 @@ describe('Edit Investment Goal', () => {
         expect(result.isRight()).toBe(true)
         
         if (result.isRight()) {
-            const { goal } = result.value
-            expect(goal.name).toBe('Multi Update Goal')
-            expect(goal.targetAmount.getAmount()).toBe(1000000)
-            expect(goal.priority).toBe(Priority.High)
+            const { message } = result.value
+
+            expect(message).toBe('Meta de investimento atualizada com sucesso')
+            expect(inMemoryGoalRepository.items[0].name).toBe('Multi Update Goal')
+            expect(inMemoryGoalRepository.items[0].targetAmount.getAmount()).toBe(1000000)
+            expect(inMemoryGoalRepository.items[0].priority).toBe(Priority.High)
         }
     })
 })
