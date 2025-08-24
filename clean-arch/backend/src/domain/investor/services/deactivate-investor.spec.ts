@@ -27,7 +27,7 @@ describe('Desactive Investor', () => {
         expect(result.isRight()).toBe(true)
 
         if (result.isRight()) {
-            expect(result.value.message).toBe('The investor has been desactive.')
+            expect(result.value.message).toBe('Investidor desativado com sucesso')
             expect(inMemoryInvestorRepository.items[0].isActive).toBe(false)
         }
     })
@@ -47,7 +47,7 @@ describe('Desactive Investor', () => {
 
         if (result.isLeft()) {
             expect(result.value).toBeInstanceOf(ResourceNotFoundError)
-            expect(result.value.message).toBe('Investor not found.')
+            expect(result.value.message).toBe('Investor not found')
         }
     })
 })
