@@ -1,0 +1,67 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { createZodDto } from "nestjs-zod";
+import { z } from "zod";
+
+const recordDividendTransactionBodySchema = z.object({
+    assetName: z
+        .string()
+        .min(3, 'Nome do ativo deve ter pelo menos 3 caracteres'),
+  
+    quantity: z
+        .number()
+        .positive('Quantidade deve ser um número positivo'),
+  
+    price: z
+        .number()
+        .positive('Preço deve ser um número positivo'),
+  
+    income: z
+        .number()
+        .positive('Proventos devem ser um número positivo'),
+  
+    dateAt: z
+      .iso
+      .date({ message: 'Data da transação deve estar em formato válido (ISO 8601)' })
+      .transform((val) => new Date(val))
+      .refine((date) => date > new Date(), {
+        message: 'Data da transação não pode ser no futuro'
+      }),
+})
+
+export class RecordDividendTransactionDto extends createZodDto(recordDividendTransactionBodySchema) {
+  @ApiProperty({
+    description: 'Nome/código do ativo a ser comprado',
+    example: 'PETR4',
+    minLength: 3
+  })
+  assetName: string;
+
+  @ApiProperty({
+    description: 'Quantidade de cotas/ações a serem compradas',
+    example: 100,
+    minimum: 0.01
+  })
+  quantity: number;
+
+  @ApiProperty({
+    description: 'Preço unitário pago pelo ativo',
+    example: 28.50,
+    minimum: 0.01
+  })
+  price: number;
+
+  @ApiProperty({
+    description: 'Proventos recebidos',
+    example: 12.90,
+    minimum: 0.01
+  })
+  income: number;
+
+  @ApiProperty({
+    description: 'Data e hora em que a transação foi executada (não pode ser no futuro)',
+    example: '2024-01-15T14:30:00Z',
+    type: 'string',
+    format: 'date-time'
+  })
+  dateAt: Date;
+}

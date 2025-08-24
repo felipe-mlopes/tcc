@@ -49,7 +49,7 @@ const registerInvestorBodySchema = z.object({
   
   dateOfBirth: z
     .iso
-    .datetime({ offset: true, message: 'Data de nascimento deve estar em formato válido (ISO 8601)' })
+    .date({ message: 'Data de nascimento deve estar em formato válido (ISO 8601)' })
     .transform((dateStr) => new Date(dateStr))
     .refine((date) => DateOfBirth.isValid(date), {
       message: 'Data de nascimento inválida: deve ser no passado e o investidor deve ter pelo menos 18 anos',
