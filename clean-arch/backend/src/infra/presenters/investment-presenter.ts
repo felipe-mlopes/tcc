@@ -7,7 +7,7 @@ export class InvestmentPresenter {
       assetId: investment.assetId.toValue().toString(),
       portfolioId: investment.portfolioId.toValue().toString(),
       quantity: investment.quantity.getValue(),
-      currentPrice: investment.currentPrice.getAmount(),
+      currentPrice: investment.currentPrice.getAmount()
     };
   }
 }

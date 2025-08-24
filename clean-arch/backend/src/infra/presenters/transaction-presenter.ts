@@ -9,9 +9,7 @@ export class TransactionPresenter {
         quantity: transaction.quantity.getValue(),
         price: transaction.price.getAmount(),
         type: transaction.transactionType,
-        dateAt: transaction.dateAt,
-        createdAt: transaction.createdAt,
-        updatedAt: transaction.updatedAt,
+        dateAt: transaction.dateAt
     };
   }
 }
