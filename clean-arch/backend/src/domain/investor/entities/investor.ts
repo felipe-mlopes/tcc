@@ -5,6 +5,7 @@ import { Email } from "@/core/value-objects/email"
 import { Name } from "@/core/value-objects/name"
 import { CPF } from "@/core/value-objects/cpf"
 import { DateOfBirth } from "@/core/value-objects/date-of-birth"
+import { Password } from "@/core/value-objects/password"
 
 export enum InvestorProfile {
     Conservative = "Conservative",
@@ -16,7 +17,7 @@ export interface InvestorProps {
     email: Email,
     name: Name,
     cpf: CPF,
-    password: string,
+    password: Password,
     dateOfBirth: DateOfBirth
     riskProfile: InvestorProfile,
     createdAt: Date,
@@ -38,7 +39,7 @@ export class Investor extends Entity<InvestorProps> {
     }
 
     public get password() {
-        return this.props.password
+        return this.props.password.getValue()
     }
 
     public get dateOfBirth() {
