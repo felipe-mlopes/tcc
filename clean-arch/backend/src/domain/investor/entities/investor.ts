@@ -16,6 +16,7 @@ export interface InvestorProps {
     email: Email,
     name: Name,
     cpf: CPF,
+    password: string,
     dateOfBirth: DateOfBirth
     riskProfile: InvestorProfile,
     createdAt: Date,
@@ -34,6 +35,10 @@ export class Investor extends Entity<InvestorProps> {
 
     public get cpf() {
         return this.props.cpf.getValue()
+    }
+
+    public get password() {
+        return this.props.password
     }
 
     public get dateOfBirth() {
