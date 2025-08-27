@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
+
 import { DatabaseModule } from "../database/database.module";
+import { CryptographyModule } from "../cryptography/cryptography.module";
 import { RegisterInvestorController } from "./controller/investor/register-investor.controller";
 import { UpdateInvestorController } from "./controller/investor/update-investor.controller";
 import { DeactivateInvestorController } from "./controller/investor/deactivate-investor.controller";
@@ -13,6 +15,11 @@ import { RecordSellTransactionController } from "./controller/transaction/record
 import { RecordDividendTransactionController } from "./controller/transaction/record-dividend-transaction.controller";
 import { FetchTransactionsHistoryByAssetIdController } from "./controller/transaction/fetch-transactions-history-by-asset-id.controller";
 import { FetchTransactionsHistoryByPortfolioIdController } from "./controller/transaction/fetch-transactions-history-by-portfolio-id.controller";
+import { UpdateInvestmentAfterTransactionController } from "./controller/portfolio/update-investment-after-transaction.controller";
+import { UpdateTransactionController } from "./controller/transaction/update-transaction.controller";
+import { RegisterInvestmentGoalController } from "./controller/goal/register-investment-goal.controller";
+import { UpdateInvestmentGoalController } from "./controller/goal/update-investment-goal.controller";
+
 import { RegisterInvestorService } from "@/domain/investor/services/register-investor";
 import { UpdateInvestorService } from "@/domain/investor/services/update-investor";
 import { DeactivateInvestorService } from "@/domain/investor/services/deactivate-investor";
@@ -25,21 +32,20 @@ import { RecordBuyTransactionService } from "@/domain/transaction/services/recor
 import { RecordSellTransactionService } from "@/domain/transaction/services/record-sell-transaction";
 import { RecordDividendTransactionService } from "@/domain/transaction/services/record-dividend-transaction";
 import { UpdateTransactionService } from "@/domain/transaction/services/update-transaction";
-import { UpdateTransactionController } from "./controller/transaction/update-transaction.controller";
 import { FetchTransactionsHistoryByAssetIdService } from "@/domain/transaction/services/fetch-transactions-history-by-asset-id";
 import { FetchTransactionsHistoryByPorfolioIdService } from "@/domain/transaction/services/fetch-transactions-history-by-portfolio-id";
 import { TransactionValidatorService } from "@/domain/transaction/services/transaction-validator";
-import { RegisterInvestmentGoalController } from "./controller/goal/register-investment-goal.controller";
 import { RegisterInvestmentGoalService } from "@/domain/goal/services/register-investment-goal";
 import { UpdateInvestmentGoalService } from "@/domain/goal/services/update-investment-goal";
-import { UpdateInvestmentGoalController } from "./controller/goal/update-investment-goal.controller";
-import { UpdateInvestmentAfterTransactionController } from "./controller/portfolio/update-investment-after-transaction.controller";
 import { UpdateInvestmentAfterTransactionService } from "@/domain/portfolio/services/update-investment-after-transaction";
+import { AuthenticateInvestorController } from "./controller/investor/authenticate-investor.controller";
+import { AuthenticateInvestorService } from "@/domain/investor/services/authenticate-investor";
 
 @Module({
-    imports: [DatabaseModule],
+    imports: [DatabaseModule, CryptographyModule],
     controllers: [
         RegisterInvestorController,
+        AuthenticateInvestorController,
         UpdateInvestorController,
         DeactivateInvestorController,
         RegisterAssetController,
@@ -59,6 +65,7 @@ import { UpdateInvestmentAfterTransactionService } from "@/domain/portfolio/serv
     ],
     providers: [
         RegisterInvestorService,
+        AuthenticateInvestorService,
         UpdateInvestorService,
         DeactivateInvestorService,
         RegisterAssetService,
