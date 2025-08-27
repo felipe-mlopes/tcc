@@ -17,6 +17,7 @@ export function makeInvestor(
     const fakerName = Name.create(faker.person.fullName())
     const fakerEmail = Email.create(faker.internet.email())
     const fakerCpf = CPF.create("111.444.689-35")
+    const fakerpassword = faker.internet.password()
     const fakerDate = DateOfBirth.create(faker.date.birthdate())
 
     const investor = Investor.create(
@@ -24,6 +25,7 @@ export function makeInvestor(
             name: fakerName,
             email: fakerEmail,
             cpf: fakerCpf,
+            password: fakerpassword,
             dateOfBirth: fakerDate,
             riskProfile: InvestorProfile.Conservative,
             ...override
