@@ -68,7 +68,7 @@ export class RegisterInvestorService {
             email: Email.create(email),
             name: Name.create(name),
             cpf: CPF.create(cpf),
-            password: hashedPassword,
+            password: Password.create(hashedPassword),
             dateOfBirth: DateOfBirth.create(parsedDate),
             riskProfile
         })
