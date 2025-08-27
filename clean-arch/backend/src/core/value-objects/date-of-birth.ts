@@ -15,8 +15,9 @@ export class DateOfBirth {
     }
 
     public static isValid(date: Date): boolean {
-        const today = new Date()
+        if (!(date instanceof Date) || isNaN(date.getTime())) return false
         
+        const today = new Date()
         if (date > today) return false
 
         const age = DateOfBirth.calculateAge(date)
