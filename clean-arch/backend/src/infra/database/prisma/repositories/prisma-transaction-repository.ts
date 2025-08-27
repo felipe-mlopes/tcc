@@ -3,7 +3,9 @@ import { PrismaService } from "../prisma.service";
 import { PaginationParams } from "@/core/repositories/pagination-params";
 import { Transaction } from "@/domain/transaction/entities/transaction";
 import { PrismaTransactionMapper } from "../mappers/prisma-transaction-mapper";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class PrismaTransactionRepository implements TransactionRepository {
     constructor(private prisma: PrismaService) {}
 

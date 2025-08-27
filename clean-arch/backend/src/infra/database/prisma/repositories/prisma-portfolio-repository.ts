@@ -1,8 +1,11 @@
+import { Injectable } from "@nestjs/common";
+
 import { Portfolio } from "@/domain/portfolio/entities/portfolio";
 import { PortfolioRepository } from "@/domain/portfolio/repositories/portfolio-repository";
 import { PrismaService } from "../prisma.service";
 import { PrismaPortfolioMapper } from "../mappers/prisma-portfolio-mapper";
 
+@Injectable()
 export class PrismaPortfolioRepository implements PortfolioRepository {
     constructor(private prisma: PrismaService) {}
     

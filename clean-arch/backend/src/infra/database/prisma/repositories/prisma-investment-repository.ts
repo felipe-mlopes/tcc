@@ -1,9 +1,12 @@
-import { InvestmentRepository } from "@/domain/portfolio/repositories/investment-repository";
-import { PrismaService } from "../prisma.service";
+import { Injectable } from "@nestjs/common";
+
 import { PaginationParams } from "@/core/repositories/pagination-params";
+import { InvestmentRepository } from "@/domain/portfolio/repositories/investment-repository";
 import { Investment } from "@/domain/portfolio/entities/investment";
+import { PrismaService } from "../prisma.service";
 import { PrismaInvestmentMapper } from "../mappers/prisma-investment-mapper";
 
+@Injectable()
 export class PrismaInvestmentRepository implements InvestmentRepository {
     constructor(private prisma: PrismaService) {}
     
