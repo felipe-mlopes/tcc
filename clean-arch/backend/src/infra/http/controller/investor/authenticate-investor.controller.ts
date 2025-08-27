@@ -13,7 +13,7 @@ import { AuthenticateInvestorErrorDto } from "./dto/authenticate-investor-error-
 @Public()
 export class AuthenticateInvestorController {
     constructor(private authenticatetInvestorService: AuthenticateInvestorService) {}
-
+    
     @Post()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({
@@ -32,8 +32,8 @@ export class AuthenticateInvestorController {
             validCredentials: {
                 summary: 'Credenciais válidas',
                 value: {
-                    email: 'investidor@exemplo.com',
-                    password: '#senhaSegura123'
+                    email: 'joao.silva@email.com',
+                    password: '#passwordTest123'
                 }
             }
         }
