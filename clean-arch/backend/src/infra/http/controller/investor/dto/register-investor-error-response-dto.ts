@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class ValidationErrorDto {
+export class RegisterInvestorValidationErrorDto {
   @ApiProperty({
     description: 'Código do status HTTP',
     example: 400
@@ -19,6 +19,9 @@ export class ValidationErrorDto {
       'email: Email deve ter um formato válido',
       'cpf: CPF deve ter um formato válido',
       'name: Nome deve ter pelo menos 2 caracteres e conter apenas letras, espaços, hífens, pontos e números',
+      'password: Senha deve ter no mínimo 6 caracteres',
+      'password: Senha deve conter pelo menos uma letra maiúscula',
+      'password: Senha deve conter pelo menos um símbolo',
       'dateOfBirth: Investidor deve ter pelo menos 18 anos'
     ],
     type: [String]
@@ -38,7 +41,7 @@ export class ValidationErrorDto {
   path: string;
 }
 
-export class BusinessErrorDto {
+export class RegisterInvestorBusinessErrorDto {
   @ApiProperty({
     description: 'Código do status HTTP',
     example: 400

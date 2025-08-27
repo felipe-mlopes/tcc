@@ -1,12 +1,12 @@
 import { BadRequestException, Body, ConflictException, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
 import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import { Public } from "@/infra/auth/public";
-import { RegisterInvestorService } from "@/domain/investor/services/register-investor";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { RegisterInvestorService } from "@/domain/investor/services/register-investor";
+import { Public } from "@/infra/auth/public";
 import { RegisterInvestorDto } from "./dto/register-investor-dto";
 import { RegisterInvestorResponseDto } from "./dto/register-investor-response-dto";
-import { BusinessErrorDto, ValidationErrorDto } from "./dto/register-investor-error-response-dto";
+import { RegisterInvestorBusinessErrorDto, RegisterInvestorValidationErrorDto } from "./dto/register-investor-error-response-dto";
 
 @ApiTags('Investors')
 @Controller('/investor')
@@ -37,6 +37,7 @@ export class RegisterInvestorController {
                     email: 'joao.silva@email.com',
                     name: 'João Silva Santos',
                     cpf: '12345678901',
+                    password: '#passwordTest123',
                     dateOfBirth: '1990-05-15'
                 }
             }
@@ -51,7 +52,7 @@ export class RegisterInvestorController {
     })
     @ApiBadRequestResponse({
         description: 'Dados de entrada inválidos ou erro de validação',
-        type: ValidationErrorDto,
+        type: RegisterInvestorValidationErrorDto,
         examples: {
             emailValidation: {
                 summary: 'Email inválido',
@@ -67,7 +68,7 @@ export class RegisterInvestorController {
     })
     @ApiConflictResponse({
         description: 'Conflito - Investidor já existe',
-        type: BusinessErrorDto,
+        type: RegisterInvestorBusinessErrorDto,
         example: {
             statusCode: 409,
             message: 'Investidor com este email ou CPF já existe',
@@ -75,14 +76,17 @@ export class RegisterInvestorController {
             path: '/investor'
         }
     })
-    async handle(@Body() body: RegisterInvestorDto): Promise<string> {
-        const { email, name, cpf, dateOfBirth } = body;
+    async handle(@Body() body: RegisterInvestorDto): Promise<RegisterInvestorResponseDto> {
+        const { email, name, cpf, password, dateOfBirth } = body;
+
+        const birthDate = new Date(dateOfBirth)
 
         const result = await this.registerInvestorService.execute({
             email,
             name,
             cpf,
-            dateOfBirth
+            password,
+            dateOfBirth: birthDate
         });
 
         if (result.isLeft()) {
@@ -102,6 +106,8 @@ export class RegisterInvestorController {
             }
         }
         
-        return result.value.message
+        return {
+            message: result.value.message
+        }
     }
 }

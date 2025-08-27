@@ -6,6 +6,7 @@ import { CPF } from "@/core/value-objects/cpf";
 import { DateOfBirth } from "@/core/value-objects/date-of-birth";
 import { Email } from "@/core/value-objects/email";
 import { Name } from "@/core/value-objects/name";
+import { Password } from "@/core/value-objects/password";
 
 const registerInvestorBodySchema = z.object({
   email: z
@@ -46,10 +47,22 @@ const registerInvestorBodySchema = z.object({
       }
     }, 'CPF deve ter um formato válido')
     .transform((cpf) => CPF.create(cpf).getValue()),
-  
+
+  password: z
+    .string()
+    .min(1, 'Senha é obrigatória')
+    .refine((password) => {
+      try {
+        Password.create(password);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }, 'Senha deve atender aos critérios de segurança')
+    .transform((password) => Password.create(password).getValue()),
+      
   dateOfBirth: z
-    .iso
-    .date({ message: 'Data de nascimento deve estar em formato válido (ISO 8601)' })
+    .string()
     .transform((dateStr) => new Date(dateStr))
     .refine((date) => DateOfBirth.isValid(date), {
       message: 'Data de nascimento inválida: deve ser no passado e o investidor deve ter pelo menos 18 anos',
@@ -79,6 +92,16 @@ export class RegisterInvestorDto extends createZodDto(registerInvestorBodySchema
     pattern: '^\\d{11}$|^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$'
   })
   cpf: string;
+
+  @ApiProperty({
+    description: 'Senha do investidor (mínimo 6 caracteres, pelo menos 1 letra maiúscula e 1 símbolo)',
+    example: 'MinhaSenh@123',
+    type: 'string',
+    format: 'password',
+    minLength: 6,
+    pattern: '^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};\':"\\\\|,.<>\\/?]).{6,}'
+  })
+  password: string;
 
   @ApiProperty({
     description: 'Data de nascimento do investidor (será validada usando a classe DateOfBirth - deve ter pelo menos 18 anos)',
