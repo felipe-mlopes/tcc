@@ -16,13 +16,14 @@ import { JwtAuthGuard } from "./jwt-auth.guard"
       inject: [EnvService],
       global: true,
       useFactory(env: EnvService) {
-        const privateKey = env.get('JWT_PRIVATE_KEY')
-        const publicKey = env.get('JWT_PUBLIC_KEY')
+        const secret = env.get('JWT_SECRET')
 
         return {
-          signOptions: { algorithm: 'RS256' },
-          privateKey: Buffer.from(privateKey, 'base64'),
-          publicKey: Buffer.from(publicKey, 'base64'),
+          secret: secret,
+          signOptions: { 
+            algorithm: 'HS256',
+            expiresIn: '1d' // Token expira em 1 dia
+          },
         }
       },
     }),
