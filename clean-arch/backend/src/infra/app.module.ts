@@ -4,7 +4,8 @@ import { envSchema } from './env/env';
 import { EnvModule } from './env/env.module';
 import { HttpModule } from './http/http.module';
 import { AuthModule } from './auth/auth.module';
-
+import { APP_PIPE } from '@nestjs/core';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 @Module({
   imports: [
@@ -15,6 +16,12 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
     EnvModule,
     HttpModule
+  ],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe
+    }
   ]
 })
 export class AppModule {}
