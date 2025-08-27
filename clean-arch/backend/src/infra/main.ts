@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { envSchema } from './env/env';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { EnvService } from './env/env.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,7 +28,9 @@ async function bootstrap() {
     ],
   });
 
-  const env = envSchema.parse(process.env);
-  await app.listen(env.PORT);
+  const envService = app.get(EnvService)
+  const port = envService.get('PORT')
+  
+  await app.listen(port);
 }
 bootstrap();
