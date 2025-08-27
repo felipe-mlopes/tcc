@@ -6,14 +6,18 @@ import { InvestorProfile } from "../entities/investor"
 import { Email } from "@/core/value-objects/email"
 import { NotAllowedError } from "@/core/errors/not-allowed-error"
 import { CPF } from "@/core/value-objects/cpf"
+import { FakeHasher } from "test/cryptography/fake-hasher"
+import { Name } from "@/core/value-objects/name"
 
 let inMemoryInvestorRepository: InMemoryInvestorRepository
+let fakeHasher: FakeHasher
 let sut: RegisterInvestorService
 
 describe('Register Investor', () => {
     beforeEach(() => {
         inMemoryInvestorRepository = new InMemoryInvestorRepository()
-        sut = new RegisterInvestorService(inMemoryInvestorRepository)
+        fakeHasher = new FakeHasher()
+        sut = new RegisterInvestorService(inMemoryInvestorRepository, fakeHasher)
     })
 
     it('should be able to register a investor', async () => {
@@ -26,6 +30,7 @@ describe('Register Investor', () => {
             name: newInvestor.name,
             cpf: newInvestor.cpf,
             email: newInvestor.email,
+            password: newInvestor.password,
             dateOfBirth: newInvestor.dateOfBirth
         })
 
@@ -44,6 +49,59 @@ describe('Register Investor', () => {
         }
     })
 
+    it('should be able to hash the password before saving the investor', async () => {
+        // Arrange
+        const newInvestor = makeInvestor({
+            password: 'plain_password'
+        })
+
+        // Act
+        const result = await sut.execute({
+            name: newInvestor.name,
+            cpf: newInvestor.cpf,
+            email: newInvestor.email,
+            password: newInvestor.password,
+            dateOfBirth: newInvestor.dateOfBirth
+        })
+
+        // Assert
+        expect(result.isRight()).toBe(true)
+
+        if (result.isRight()) {
+            const savedInvestor = inMemoryInvestorRepository.items[0]
+
+            expect(savedInvestor.password).not.toBe('plain_password')
+            expect(savedInvestor.password).toBe(`${newInvestor.password}-hashed`)
+        }
+    })
+
+    it('should create an investor with correct value objects (Email, Name, CPF)', async () => {
+        // Arrange
+        const newInvestor = makeInvestor({
+            email: Email.create('test@example.com'),
+            name: Name.create('John Doe'),
+            cpf: CPF.create('147.058.985-23'),
+        })
+
+        // Act
+        const result = await sut.execute({
+            name: newInvestor.name,
+            cpf: newInvestor.cpf,
+            email: newInvestor.email,
+            password: newInvestor.password,
+            dateOfBirth: newInvestor.dateOfBirth
+        })
+
+        // Assert
+        expect(result.isRight()).toBe(true)
+        if (result.isRight()) {
+            const savedInvestor = inMemoryInvestorRepository.items[0]
+            expect(savedInvestor.email).toEqual('test@example.com')
+            expect(savedInvestor.name).toEqual('John Doe')
+            expect(savedInvestor.cpf).toEqual('147.058.985-23')
+        }
+    })
+
     it('should be able to assign the Conservative risk profile to users aged 25-49 during registration', async () => {
 
         // Arrange
@@ -59,6 +117,7 @@ describe('Register Investor', () => {
             name: newInvestor.name,
             cpf: newInvestor.cpf,
             email: newInvestor.email,
+            password: newInvestor.password,
             dateOfBirth: newInvestor.dateOfBirth
         })
 
@@ -69,6 +128,31 @@ describe('Register Investor', () => {
             const { message } = result.value
 
             expect(message).toBe('O cadastro de investidor foi realizado com sucesso')
+            expect(inMemoryInvestorRepository.items[0].riskProfile).toBe(InvestorProfile.Conservative)
+        }
+    })
+
+    it('should be able to assign the Conservative risk profile when user age is exactly 25', async () => {
+        // Arrange
+        const dateOfBirth = new Date()
+        dateOfBirth.setFullYear(dateOfBirth.getFullYear() - 25)
+
+        const newInvestor = makeInvestor({
+            dateOfBirth: DateOfBirth.create(dateOfBirth)
+        })
+
+        // Act
+        const result = await sut.execute({
+            name: newInvestor.name,
+            cpf: newInvestor.cpf,
+            email: newInvestor.email,
+            password: newInvestor.password,
+            dateOfBirth: newInvestor.dateOfBirth
+        })
+
+        // Assert
+        expect(result.isRight()).toBe(true)
+        if (result.isRight()) {
             expect(inMemoryInvestorRepository.items[0].riskProfile).toBe(InvestorProfile.Conservative)
         }
     })
@@ -88,6 +172,7 @@ describe('Register Investor', () => {
             name: newInvestor.name,
             cpf: newInvestor.cpf,
             email: newInvestor.email,
+            password: newInvestor.password,
             dateOfBirth: newInvestor.dateOfBirth
         })
 
@@ -117,6 +202,7 @@ describe('Register Investor', () => {
             name: newInvestor.name,
             cpf: newInvestor.cpf,
             email: newInvestor.email,
+            password: newInvestor.password,
             dateOfBirth: newInvestor.dateOfBirth
         })
 
@@ -127,6 +213,31 @@ describe('Register Investor', () => {
             const { message } = result.value
 
             expect(message).toBe('O cadastro de investidor foi realizado com sucesso')
+            expect(inMemoryInvestorRepository.items[0].riskProfile).toBe(InvestorProfile.Moderate)
+        }
+    })
+
+    it('should be able to assign the Moderate risk profile when user age is exactly 50', async () => {
+        // Arrange
+        const dateOfBirth = new Date()
+        dateOfBirth.setFullYear(dateOfBirth.getFullYear() - 50)
+
+        const newInvestor = makeInvestor({
+            dateOfBirth: DateOfBirth.create(dateOfBirth)
+        })
+
+        // Act
+        const result = await sut.execute({
+            name: newInvestor.name,
+            cpf: newInvestor.cpf,
+            email: newInvestor.email,
+            password: newInvestor.password,
+            dateOfBirth: newInvestor.dateOfBirth
+        })
+
+        // Assert
+        expect(result.isRight()).toBe(true)
+        if (result.isRight()) {
             expect(inMemoryInvestorRepository.items[0].riskProfile).toBe(InvestorProfile.Moderate)
         }
     })
