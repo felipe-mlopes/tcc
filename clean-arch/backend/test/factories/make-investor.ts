@@ -3,6 +3,7 @@ import { CPF } from "@/core/value-objects/cpf";
 import { DateOfBirth } from "@/core/value-objects/date-of-birth";
 import { Email } from "@/core/value-objects/email";
 import { Name } from "@/core/value-objects/name";
+import { Password } from "@/core/value-objects/password";
 import { Investor, InvestorProfile, InvestorProps } from "@/domain/investor/entities/investor";
 import { Faker, faker, pt_BR } from '@faker-js/faker'
 
@@ -17,7 +18,7 @@ export function makeInvestor(
     const fakerName = Name.create(faker.person.fullName())
     const fakerEmail = Email.create(faker.internet.email())
     const fakerCpf = CPF.create("111.444.689-35")
-    const fakerpassword = faker.internet.password()
+    const fakerpassword = Password.create(faker.internet.password({ prefix: '@' }))
     const fakerDate = DateOfBirth.create(faker.date.birthdate())
 
     const investor = Investor.create(

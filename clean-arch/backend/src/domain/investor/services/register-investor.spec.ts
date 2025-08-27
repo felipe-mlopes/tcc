@@ -8,6 +8,7 @@ import { NotAllowedError } from "@/core/errors/not-allowed-error"
 import { CPF } from "@/core/value-objects/cpf"
 import { FakeHasher } from "test/cryptography/fake-hasher"
 import { Name } from "@/core/value-objects/name"
+import { Password } from "@/core/value-objects/password"
 
 let inMemoryInvestorRepository: InMemoryInvestorRepository
 let fakeHasher: FakeHasher
@@ -52,7 +53,7 @@ describe('Register Investor', () => {
     it('should be able to hash the password before saving the investor', async () => {
         // Arrange
         const newInvestor = makeInvestor({
-            password: 'plain_password'
+            password: Password.create('Plain1234_password')
         })
 
         // Act
@@ -70,17 +71,18 @@ describe('Register Investor', () => {
         if (result.isRight()) {
             const savedInvestor = inMemoryInvestorRepository.items[0]
 
-            expect(savedInvestor.password).not.toBe('plain_password')
+            expect(savedInvestor.password).not.toBe('@Plain1234_password')
             expect(savedInvestor.password).toBe(`${newInvestor.password}-hashed`)
         }
     })
 
-    it('should create an investor with correct value objects (Email, Name, CPF)', async () => {
+    it('should create an investor with correct value objects (Email, Name, CPF, Password)', async () => {
         // Arrange
         const newInvestor = makeInvestor({
             email: Email.create('test@example.com'),
             name: Name.create('John Doe'),
             cpf: CPF.create('147.058.985-23'),
+            password: Password.create('@Example-test123456')
         })
 
         // Act
@@ -99,6 +101,7 @@ describe('Register Investor', () => {
             expect(savedInvestor.email).toEqual('test@example.com')
             expect(savedInvestor.name).toEqual('John Doe')
             expect(savedInvestor.cpf).toEqual('147.058.985-23')
+            expect(savedInvestor.password).toEqual('@Example-test123456-hashed')
         }
     })
 
