@@ -1,7 +1,9 @@
+import { ApiProperty } from "@nestjs/swagger";
+
 export class AuthenticateInvestorResponseDto {
-  /**
-   * Token de acesso JWT para autenticação
-   * @example "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-   */
+  @ApiProperty({
+      description: 'Access Token',
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  })
   access_token: string;
 }
