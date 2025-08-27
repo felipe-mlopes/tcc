@@ -1,24 +1,32 @@
 import {
   Controller,
-  Param,
   Patch,
   NotFoundException,
   HttpCode,
   HttpStatus,
   BadRequestException,
 } from "@nestjs/common";
+import { 
+  ApiBadRequestResponse, 
+  ApiBearerAuth, 
+  ApiNotFoundResponse, 
+  ApiOkResponse, 
+  ApiOperation, 
+  ApiTags, 
+  ApiUnauthorizedResponse 
+} from "@nestjs/swagger";
 
-import { Public } from "@/infra/auth/public";
-import { DeactivateInvestorService } from "@/domain/investor/services/deactivate-investor";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
-import { ApiBadRequestResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { DeactivateInvestorService } from "@/domain/investor/services/deactivate-investor";
 import { DeactivateInvestorResponseDto } from "./dto/deactivate-investor-response-dto";
 import { DeactivateInvestorNotFoundErrorDto } from "./dto/deactivate-investor-error-response-dto";
-import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Investors')
+@ApiBearerAuth()
 @Controller("/investor")
-@Public()
 export class DeactivateInvestorController {
   constructor(private desactiveInvestorService: DeactivateInvestorService) {}
 
@@ -39,13 +47,8 @@ export class DeactivateInvestorController {
       - Investidor deve existir no sistema
       - Investidor não pode estar já desativado
       - Investidor não pode ter operações pendentes (se aplicável)
+      - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    description: 'ID único do investidor a ser desativado',
-    example: 'uuid-123-456-789'
   })
   @ApiOkResponse({
     description: 'Investidor desativado com sucesso',
@@ -59,6 +62,15 @@ export class DeactivateInvestorController {
       }
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/investor/deactivate'
+      }
+  })
   @ApiNotFoundResponse({
     description: 'Investidor não encontrado no sistema',
     type: DeactivateInvestorNotFoundErrorDto,
@@ -69,7 +81,7 @@ export class DeactivateInvestorController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-inexistente/deactivate'
+          path: '/investor/deactivate'
         }
       },
       invalidId: {
@@ -78,7 +90,7 @@ export class DeactivateInvestorController {
           statusCode: 404,
           message: 'Investidor com ID inválido não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/id-invalido/deactivate'
+          path: '/investor/deactivate'
         }
       }
     }
@@ -93,12 +105,16 @@ export class DeactivateInvestorController {
           statusCode: 400,
           message: 'Investidor já está desativado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/deactivate'
+          path: '/investor/deactivate'
         }
       }
     }
   })
-  async handle(@Param("id") investorId: string): Promise<{ message: string }> {
+  async handle(
+    @CurrentUser() user: UserPayload,
+  ): Promise<DeactivateInvestorResponseDto> {
+    const investorId = user.sub
+
     const result = await this.desactiveInvestorService.execute({
       investorId,
     });
@@ -116,6 +132,8 @@ export class DeactivateInvestorController {
       }
     }
 
-    return result.value;
+    return {
+      message: result.value.message
+    }
   }
 }

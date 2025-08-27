@@ -5,21 +5,30 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-  Param,
   Post,
 } from "@nestjs/common";
+import { 
+  ApiBadRequestResponse, 
+  ApiBearerAuth, 
+  ApiBody, 
+  ApiCreatedResponse, 
+  ApiNotFoundResponse, 
+  ApiOperation, 
+  ApiTags, 
+  ApiUnauthorizedResponse
+} from "@nestjs/swagger";
 
-import { Public } from "@/infra/auth/public";
 import { CreatePortfolioService } from "@/domain/portfolio/services/create-portfolio";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
-import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 import { CreatePortfolioDto } from "./dto/create-portfolio-dto";
 import { CreatePortfolioResponseDto } from "./dto/create-portfolio-response-dto";
 import { CreatePortfolioBusinessErrorDto, CreatePortfolioValidationErrorDto } from "./dto/create-portfolio-error-response-dto";
 
 @ApiTags('Portfolios')
-@Controller("/:investorId/portfolio")
-@Public()
+@ApiBearerAuth()
+@Controller("/portfolio")
 export class CreatePortfolioController {
   constructor(private createPortfolioService: CreatePortfolioService) {}
 
@@ -32,12 +41,8 @@ export class CreatePortfolioController {
     - Nome: Mínimo 3 caracteres, identificador único do portfólio
     - Descrição: Campo opcional para detalhar o propósito do portfólio
     - O portfólio será associado ao investidor especificado na URL
+    - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor proprietário do portfólio',
-    example: 'uuid-123-456-789'
   })
   @ApiBody({
     type: CreatePortfolioDto,
@@ -67,6 +72,15 @@ export class CreatePortfolioController {
       message: 'O portfólio foi criado com sucesso'
     }
   })
+  @ApiUnauthorizedResponse({
+    description: 'Token JWT não fornecido ou inválido',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      timestamp: '2024-01-15T10:30:00Z',
+      path: '/portfolio'
+    }
+  })
   @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos ou erro de validação',
     type: CreatePortfolioValidationErrorDto,
@@ -78,7 +92,7 @@ export class CreatePortfolioController {
           message: 'Validation failed',
           details: ['name: Nome deve ter pelo menos 3 caracteres'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/portfolio'
+          path: '/portfolio'
         }
       },
       emptyName: {
@@ -88,7 +102,7 @@ export class CreatePortfolioController {
           message: 'Validation failed',
           details: ['name: Nome é obrigatório'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/portfolio'
+          path: '/portfolio'
         }
       }
     }
@@ -100,14 +114,15 @@ export class CreatePortfolioController {
       statusCode: 404,
       message: 'Investidor não encontrado',
       timestamp: '2024-01-15T10:30:00Z',
-      path: '/uuid-123-456-789/portfolio'
+      path: '/portfolio'
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
-    @Body() body: CreatePortfolioDto
-  ): Promise<string> {
+    @Body() body: CreatePortfolioDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<CreatePortfolioResponseDto> {
     const { name, description } = body;
+    const investorId = user.sub
 
     const result = await this.createPortfolioService.execute({
       investorId,
@@ -126,6 +141,8 @@ export class CreatePortfolioController {
       }
     }
     
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

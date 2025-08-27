@@ -8,12 +8,14 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import {
+  ApiBearerAuth,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
@@ -22,10 +24,12 @@ import { UpdateInvestmentAfterTransactionService } from "@/domain/portfolio/serv
 import { Public } from "@/infra/auth/public";
 import { UpdateInvestmentAfterTransactionResponseDto } from "./dto/update-investment-after-transaction-response-dto";
 import { UpdateInvestmentAfterTransactionBusinessErrorDto, UpdateInvestmentAfterTransactionForbiddenErrorDto } from "./dto/update-investment-after-transaction-error-response-dto";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Portfolios')
-@Controller("/:investorId/portfolio/investment/:transactionId/update")
-@Public()
+@ApiBearerAuth()
+@Controller("/portfolio/investment/:transactionId/update")
 export class UpdateInvestmentAfterTransactionController {
   constructor(private updateInvestmentAfterTransactionService: UpdateInvestmentAfterTransactionService) {}
 
@@ -44,11 +48,6 @@ export class UpdateInvestmentAfterTransactionController {
     `
   })
   @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor proprietário do investimento',
-    example: 'uuid-123-456-789'
-  })
-  @ApiParam({
     name: 'transactionId',
     description: 'ID único da transação confirmada a ser processada',
     example: 'uuid-transaction-123-456'
@@ -60,6 +59,15 @@ export class UpdateInvestmentAfterTransactionController {
       message: 'Após a inclusão da transação, o investimento foi atualizado com sucesso'
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/investment/uuid-transaction-123-456/update'
+      }
+  })
   @ApiNotFoundResponse({
     description: 'Investidor, transação ou investimento não encontrados',
     type: UpdateInvestmentAfterTransactionBusinessErrorDto,
@@ -70,7 +78,7 @@ export class UpdateInvestmentAfterTransactionController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment/uuid-transaction-123-456/update'
+          path: '/portfolio/investment/uuid-transaction-123-456/update'
         }
       },
       transactionNotFound: {
@@ -79,7 +87,7 @@ export class UpdateInvestmentAfterTransactionController {
           statusCode: 404,
           message: 'Transação não encontrada',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment/uuid-transaction-123-456/update'
+          path: '/portfolio/investment/uuid-transaction-123-456/update'
         }
       },
       investmentNotFound: {
@@ -88,7 +96,7 @@ export class UpdateInvestmentAfterTransactionController {
           statusCode: 404,
           message: 'Investimento não encontrado no portfólio',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment/uuid-transaction-123-456/update'
+          path: '/portfolio/investment/uuid-transaction-123-456/update'
         }
       }
     }
@@ -103,7 +111,7 @@ export class UpdateInvestmentAfterTransactionController {
           statusCode: 403,
           message: 'Transação já foi processada anteriormente',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment/uuid-transaction-123-456/update'
+          path: '/portfolio/investment/uuid-transaction-123-456/update'
         }
       },
       invalidStatus: {
@@ -112,7 +120,7 @@ export class UpdateInvestmentAfterTransactionController {
           statusCode: 403,
           message: 'Transação não está em status válido para processamento',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment/uuid-transaction-123-456/update'
+          path: '/portfolio/investment/uuid-transaction-123-456/update'
         }
       },
       insufficientQuantity: {
@@ -121,15 +129,17 @@ export class UpdateInvestmentAfterTransactionController {
           statusCode: 403,
           message: 'Quantidade insuficiente de ativos no portfólio para realizar a venda',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment/uuid-transaction-123-456/update'
+          path: '/portfolio/investment/uuid-transaction-123-456/update'
         }
       }
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
-    @Param("transactionId") transactionId: string
-  ): Promise<string> {
+    @Param("transactionId") transactionId: string,
+    @CurrentUser() user: UserPayload
+  ): Promise<UpdateInvestmentAfterTransactionResponseDto> {
+    const investorId = user.sub
+
     const result = await this.updateInvestmentAfterTransactionService.execute({
       investorId,
       transactionId,
@@ -148,6 +158,8 @@ export class UpdateInvestmentAfterTransactionController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

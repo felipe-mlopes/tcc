@@ -10,25 +10,28 @@ import {
 } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { RecordSellTransactionService } from "@/domain/transaction/services/record-sell-transaction";
 import { TransactionType } from "@/domain/transaction/entities/transaction";
-import { Public } from "@/infra/auth/public";
 import { RecordTransactionDto } from "./dto/record-transaction-dto";
 import { RecordTransactionBusinessErrorDto, RecordTransactionValidationErrorDto } from "./dto/record-transaction-error-response-dto";
 import { RecordSellTransactionResponseDto } from "./dto/record-sell-transaction-response-dto";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Transactions')
-@Controller("/:investorId/transactions/buy")
-@Public()
+@ApiBearerAuth()
+@Controller("/transactions/sell")
 export class RecordSellTransactionController {
   constructor(
     private recordSellTransactionService: RecordSellTransactionService,
@@ -47,12 +50,8 @@ export class RecordSellTransactionController {
       - Data: Data e hora em que a transação foi executada
       - Transação será registrada com status pendente aguardando confirmação
       - Após confirmação, o portfólio será automaticamente atualizado
+      - **Requer autenticação**: Token JWT no header Authorization
       `
-    })
-    @ApiParam({
-      name: 'investorId',
-      description: 'ID único do investidor que realizou a venda',
-      example: 'uuid-123-456-789'
     })
     @ApiBody({
       type: RecordTransactionDto,
@@ -99,6 +98,15 @@ export class RecordSellTransactionController {
         message: 'Transação de venda registrada com sucesso'
       }
     })
+    @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/portfolio'
+      }
+    })
     @ApiBadRequestResponse({
       description: 'Dados de entrada inválidos ou erro de validação',
       type: RecordTransactionValidationErrorDto,
@@ -110,7 +118,7 @@ export class RecordSellTransactionController {
             message: 'Validation failed',
             details: ['assetName: Nome do ativo deve ter pelo menos 3 caracteres'],
             timestamp: '2024-01-15T10:30:00Z',
-            path: '/uuid-123-456-789/transactions/buy'
+            path: '/transactions/sell'
           }
         },
         quantityValidation: {
@@ -120,7 +128,7 @@ export class RecordSellTransactionController {
             message: 'Validation failed',
             details: ['quantity: Quantidade deve ser um número positivo'],
             timestamp: '2024-01-15T10:30:00Z',
-            path: '/uuid-123-456-789/transactions/buy'
+            path: '/transactions/sell'
           }
         },
         multipleErrors: {
@@ -134,7 +142,7 @@ export class RecordSellTransactionController {
               'price: Preço deve ser um número positivo'
             ],
             timestamp: '2024-01-15T10:30:00Z',
-            path: '/uuid-123-456-789/transactions/buy'
+            path: '/transactions/sell'
           }
         }
       }
@@ -146,14 +154,15 @@ export class RecordSellTransactionController {
         statusCode: 404,
         message: 'Investidor não encontrado',
         timestamp: '2024-01-15T10:30:00Z',
-        path: '/uuid-123-456-789/transactions/buy'
+        path: '/transactions/sell'
       }
     })
   async handle(
-    @Param("investorId") investorId: string,
-    @Body() body: RecordTransactionDto
-  ): Promise<string> {
+    @Body() body: RecordTransactionDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<RecordSellTransactionResponseDto> {
     const { assetName, quantity, price, fees, dateAt } = body;
+    const investorId = user.sub
 
     const result = await this.recordSellTransactionService.execute({
       investorId,
@@ -176,6 +185,8 @@ export class RecordSellTransactionController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

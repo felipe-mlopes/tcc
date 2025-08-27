@@ -7,23 +7,26 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import {
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { GetInvestmentByAssetIdService } from "@/domain/portfolio/services/get-investment-by-asset-id";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
-import { Public } from "@/infra/auth/public";
-import { InvestmentPresenter } from "@/infra/presenters/investment-presenter";
 import { GetInvestmentByAssetIdResponseDto } from "./dto/get-investment-by-asset-id-response-dto";
 import { GetInvestmentByAssetIdBusinessErrorDto } from "./dto/get-investment-by-asset-id-error-response-dto";
+import { InvestmentPresenter } from "@/infra/presenters/investment-presenter";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Portfolios')
-@Controller("/:investorId/portfolio/investment/:assetId")
-@Public()
+@ApiBearerAuth()
+@Controller("/portfolio/investment/:assetId")
 export class GetInvestmentByAssetIdController {
   constructor(private getInvestmentByAssetIdService: GetInvestmentByAssetIdService) {}
 
@@ -38,12 +41,8 @@ export class GetInvestmentByAssetIdController {
       - Retorna null se o investidor não possui investimento no ativo especificado
       - Útil para verificar posição atual em um ativo específico
       - Mostra histórico de performance e rentabilidade
+      - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor proprietário do portfólio',
-    example: 'uuid-123-456-789'
   })
   @ApiParam({
     name: 'assetId',
@@ -71,6 +70,15 @@ export class GetInvestmentByAssetIdController {
       }
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/portfolio/investment/uuid-123-456-789'
+      }
+  })
   @ApiNotFoundResponse({
     description: 'Investidor não encontrado ou sem acesso ao portfólio',
     type: GetInvestmentByAssetIdBusinessErrorDto,
@@ -81,7 +89,7 @@ export class GetInvestmentByAssetIdController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/portfolio/investment/PETR4'
+          path: '/portfolio/investment/uuid-123-456-789'
         }
       },
       portfolioNotFound: {
@@ -90,21 +98,17 @@ export class GetInvestmentByAssetIdController {
           statusCode: 404,
           message: 'Portfólio não encontrado para este investidor',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/portfolio/investment/PETR4'
+          path: '/portfolio/investment/uuid-123-456-789'
         }
       }
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
+    @CurrentUser() user: UserPayload,
     @Param("assetId") assetId: string,
-  ): Promise<{
-    id: string;
-    assetId: string;
-    portfolioId: string;
-    quantity: number;
-    currentPrice: number;
-  } | null> {
+  ): Promise<GetInvestmentByAssetIdResponseDto> {
+    const investorId = user.sub
+
     const result = await this.getInvestmentByAssetIdService.execute({
       investorId,
       assetId,

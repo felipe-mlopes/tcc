@@ -5,17 +5,18 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-  Param,
   Post,
 } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
@@ -24,10 +25,12 @@ import { Public } from "@/infra/auth/public";
 import { AddInvestmentToPortfolioDto } from "./dto/add-investment-to-portfolio-dto";
 import { AddInvestmentToPortfolioResponseDto } from "./dto/add-investment-to-portfolio-response-dto";
 import { AddInvestmentToPortfolioBusinessErrorDto, AddInvestmentToPortfolioValidationErrorDto } from "./dto/add-investment-to-portfolio-error-response-dto";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Portfolios')
-@Controller("/:investorId/portfolio/investment")
-@Public()
+@ApiBearerAuth()
+@Controller("/portfolio/investment")
 export class AddInvestmentToPortfolioController {
   constructor(private addInvestmentToPortfolioService: AddInvestmentToPortfolioService) {}
 
@@ -42,12 +45,8 @@ export class AddInvestmentToPortfolioController {
       - Preço atual: Valor unitário do ativo no momento da compra (deve ser positivo)
       - O investimento será adicionado ao portfólio principal do investidor
       - O valor total será calculado automaticamente (quantidade × preço)
+      - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor proprietário do portfólio',
-    example: 'uuid-123-456-789'
   })
   @ApiBody({
     type: AddInvestmentToPortfolioDto,
@@ -89,6 +88,15 @@ export class AddInvestmentToPortfolioController {
       message: 'O investimento foi adicionado ao portfólio com sucesso'
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/portfolio/investment'
+      }
+    })
   @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos ou erro de validação',
     type: AddInvestmentToPortfolioValidationErrorDto,
@@ -100,7 +108,7 @@ export class AddInvestmentToPortfolioController {
           message: 'Validation failed',
           details: ['quantity: Quantidade deve ser um número positivo'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment'
+          path: '/portfolio/investment'
         }
       },
       priceValidation: {
@@ -110,7 +118,7 @@ export class AddInvestmentToPortfolioController {
           message: 'Validation failed',
           details: ['currentPrice: Preço atual deve ser um número positivo'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/portfolio/investment'
+          path: '/portfolio/investment'
         }
       },
       multipleErrors: {
@@ -163,11 +171,12 @@ export class AddInvestmentToPortfolioController {
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
-    @Body() body: AddInvestmentToPortfolioDto
-  ): Promise<string> {
+    @Body() body: AddInvestmentToPortfolioDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<AddInvestmentToPortfolioResponseDto> {
     const { assetId, quantity, currentPrice } = body;
-
+    const investorId = user.sub
+    
     const result = await this.addInvestmentToPortfolioService.execute({
       investorId,
       assetId,
@@ -186,6 +195,8 @@ export class AddInvestmentToPortfolioController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

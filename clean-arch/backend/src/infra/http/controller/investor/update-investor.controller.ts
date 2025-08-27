@@ -9,19 +9,31 @@ import {
   Param,
   Patch,
 } from "@nestjs/common";
+import { 
+  ApiBadRequestResponse, 
+  ApiBearerAuth, 
+  ApiBody, 
+  ApiConflictResponse, 
+  ApiNotFoundResponse, 
+  ApiOkResponse, 
+  ApiOperation, 
+  ApiParam, 
+  ApiTags,
+  ApiUnauthorizedResponse
+} from "@nestjs/swagger";
 
-import { Public } from "@/infra/auth/public";
-import { UpdateInvestorService } from "@/domain/investor/services/update-investor";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
-import { ApiBadRequestResponse, ApiBody, ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { UpdateInvestorService } from "@/domain/investor/services/update-investor";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 import { UpdateInvestorDto } from "./dto/update-investor-dto";
 import { UpdateInvestorResponseDto } from "./dto/update-investor-response-dto";
 import { UpdateInvestorBusinessErrorDto, UpdateInvestorNotFoundErrorDto, UpdateInvestorValidationErrorDto } from "./dto/update-investor-error-response-dto";
 
 @ApiTags('Investors')
+@ApiBearerAuth()
 @Controller("/investor")
-@Public()
 export class UpdateInvestorController {
   constructor(private updateInvestorService: UpdateInvestorService) {}
 
@@ -35,13 +47,8 @@ export class UpdateInvestorController {
       - Nome: Validado pela classe Name (mín. 2 chars, letras, espaços, hífens, pontos, números) - OPCIONAL
       - Pelo menos um campo deve ser fornecido para atualização
       - CPF e data de nascimento não podem ser alterados
+      - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    description: 'ID único do investidor a ser atualizado',
-    example: 'uuid-123-456-789'
   })
   @ApiBody({
     type: UpdateInvestorDto,
@@ -64,6 +71,15 @@ export class UpdateInvestorController {
       message: 'O cadastro do investidor foi atualizado com sucesso'
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/investor'
+      }
+  })
   @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos ou erro de validação',
     type: UpdateInvestorValidationErrorDto,
@@ -76,7 +92,7 @@ export class UpdateInvestorController {
           message: 'Validation failed',
           details: ['body: Pelo menos um campo deve ser fornecido para atualização (name ou email)'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789'
+          path: '/investor'
         }
       },
       multipleErrors: {
@@ -90,7 +106,7 @@ export class UpdateInvestorController {
             'name: Nome deve ter pelo menos 2 caracteres e conter apenas letras, espaços, hífens, pontos e números'
           ],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789'
+          path: '/investor'
         }
       }
     }
@@ -102,7 +118,7 @@ export class UpdateInvestorController {
       statusCode: 404,
       message: 'Investidor não encontrado',
       timestamp: '2024-01-15T10:30:00Z',
-      path: '/investor/uuid-123-456-789'
+      path: '/investor'
     }
   })
   @ApiConflictResponse({
@@ -112,14 +128,15 @@ export class UpdateInvestorController {
       statusCode: 409,
       message: 'Email já está em uso por outro investidor',
       timestamp: '2024-01-15T10:30:00Z',
-      path: '/investor/uuid-123-456-789'
+      path: '/investor'
     }
   })
   async handle(
-    @Param("id") investorId: string,
-    @Body() body: UpdateInvestorDto
-  ): Promise<string> {
+    @Body() body: UpdateInvestorDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<UpdateInvestorResponseDto> {
     const { name, email } = body;
+    const investorId = user.sub
 
     const result = await this.updateInvestorService.execute({
       investorId,
@@ -146,6 +163,8 @@ export class UpdateInvestorController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

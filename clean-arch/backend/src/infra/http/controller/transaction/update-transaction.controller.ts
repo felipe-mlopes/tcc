@@ -10,25 +10,28 @@ import {
 } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { UpdateTransactionService } from "@/domain/transaction/services/update-transaction";
-import { Public } from "@/infra/auth/public";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 import { UpdateTransactionDto } from "./dto/update-transaction-dto";
 import { UpdateTransactionNotFoundErrorDto, UpdateTransactionValidationErrorDto } from "./dto/update-transaction-error-response-dto";
 import { UpdateTransactionResponseDto } from "./dto/update-transaction-response-dto";
 
 @ApiTags('Transactions')
-@Controller("/:investorId/transaction")
-@Public()
+@ApiBearerAuth()
+@Controller("/transaction")
 export class UpdateTransactionController {
   constructor(private updateTransactionService: UpdateTransactionService) {}
 
@@ -45,13 +48,8 @@ export class UpdateTransactionController {
     - Pelo menos um campo deve ser fornecido para atualização
     - Apenas transações com status PENDING podem ser alteradas
     - Transações confirmadas ou canceladas não podem ser modificadas
+    - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    type: 'string',
-    description: 'ID único do investidor proprietário da transação',
-    example: 'uuid-123-456-789'
   })
   @ApiParam({
     name: 'transactionId',
@@ -106,6 +104,15 @@ export class UpdateTransactionController {
       message: 'Transação atualizada com sucesso'
     }
   })
+  @ApiUnauthorizedResponse({
+    description: 'Token JWT não fornecido ou inválido',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      timestamp: '2024-01-15T10:30:00Z',
+      path: '/transaction/uuid-transaction-123-456'
+    }
+  })
   @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos, erro de validação ou regra de negócio',
     type: UpdateTransactionValidationErrorDto,
@@ -117,7 +124,7 @@ export class UpdateTransactionController {
           message: 'Validation failed',
           details: ['body: Pelo menos um campo deve ser fornecido para atualização'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transaction/uuid-transaction-123-456'
+          path: '/transaction/uuid-transaction-123-456'
         }
       },
       invalidValues: {
@@ -130,7 +137,7 @@ export class UpdateTransactionController {
             'price: Preço deve ser um número positivo'
           ],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transaction/uuid-transaction-123-456'
+          path: '/transaction/uuid-transaction-123-456'
         }
       },
       statusNotAllowed: {
@@ -139,7 +146,7 @@ export class UpdateTransactionController {
           statusCode: 400,
           message: 'Transação já confirmada não pode ser alterada',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transaction/uuid-transaction-123-456'
+          path: '/transaction/uuid-transaction-123-456'
         }
       }
     }
@@ -154,7 +161,7 @@ export class UpdateTransactionController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transaction/uuid-transaction-123-456'
+          path: '/transaction/uuid-transaction-123-456'
         }
       },
       transactionNotFound: {
@@ -163,17 +170,18 @@ export class UpdateTransactionController {
           statusCode: 404,
           message: 'Transação não encontrada',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transaction/uuid-transaction-123-456'
+          path: '/transaction/uuid-transaction-123-456'
         }
       }
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
     @Param("transactionId") transactionId: string,
-    @Body() body: UpdateTransactionDto
-  ): Promise<string> {
+    @Body() body: UpdateTransactionDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<UpdateTransactionResponseDto> {
     const { transactionType, quantity, price, fees } = body;
+    const investorId = user.sub
 
     const result = await this.updateTransactionService.execute({
       investorId,
@@ -197,6 +205,8 @@ export class UpdateTransactionController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

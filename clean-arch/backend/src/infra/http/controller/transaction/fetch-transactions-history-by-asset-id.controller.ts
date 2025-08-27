@@ -9,25 +9,28 @@ import {
   Query,
 } from "@nestjs/common";
 import {
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { FetchTransactionsHistoryByAssetIdService } from "@/domain/transaction/services/fetch-transactions-history-by-asset-id";
-import { Public } from "@/infra/auth/public";
 import { TransactionPresenter } from "@/infra/presenters/transaction-presenter";
 import { FetchAllTransactionsHistoryResponseDto, FetchTransactionsHistoryWrapperDto } from "./dto/fetch-transactions-history-response-dto";
 import { FetchAllTransactionsHistoryByAssetIdBusinessErrorDto } from "./dto/fetch-transactions-history-by-asset-id-error-response-dto";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Transactions')
-@Controller("/:investorId/asset/:assetId/transactions")
-@Public()
+@ApiBearerAuth()
+@Controller("/asset/:assetId/transactions")
 export class FetchTransactionsHistoryByAssetIdController {
   constructor(
     private fetchTransactionsHistoryByAssetIdService: FetchTransactionsHistoryByAssetIdService
@@ -42,12 +45,8 @@ export class FetchTransactionsHistoryByAssetIdController {
       - Retorna informações dos transações se encontrado
       - Inclui quantidade e preço transacionados
       - Retorna null se o investidor não possui nenhum investimento
+      - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor proprietário do portfólio',
-    example: 'uuid-123-456-789'
   })
   @ApiParam({
     name: 'assetId',
@@ -99,6 +98,15 @@ export class FetchTransactionsHistoryByAssetIdController {
       }
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/asset/uuid-asset-999-888/transactions'
+      }
+  })
   @ApiNotFoundResponse({
     description: 'Investidor não encontrado',
     type: FetchAllTransactionsHistoryByAssetIdBusinessErrorDto,
@@ -109,16 +117,18 @@ export class FetchTransactionsHistoryByAssetIdController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/asset/uuid-asset-999-888/transactions'
+          path: '/asset/uuid-asset-999-888/transactions'
         }
       }
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
     @Param("assetId") assetId: string,
     @Query("page") page: string,
+    @CurrentUser() user: UserPayload
   ): Promise<FetchTransactionsHistoryWrapperDto> {
+    const investorId = user.sub
+
     const result = await this.fetchTransactionsHistoryByAssetIdService.execute({
       investorId,
       assetId,

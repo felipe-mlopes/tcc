@@ -10,25 +10,28 @@ import {
 } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { UpdateInvestmentGoalService } from "@/domain/goal/services/update-investment-goal";
-import { Public } from "@/infra/auth/public";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 import { UpdateInvestmentGoalDto } from "./dto/update-investment-goal-dto";
 import { UpdateInvestmentGoalResponseDto } from "./dto/update-investment-goal-response-dto";
 import { UpdateInvestmentGoalNotFoundErrorDto, UpdateInvestmentGoalValidationErrorDto } from "./dto/update-investment-goal-error-response-dto";
 
 @ApiTags('Goals')
-@Controller("/:investorId/goals")
-@Public()
+@ApiBearerAuth()
+@Controller("/goal")
 export class UpdateInvestmentGoalController {
   constructor(private updateInvestmentGoalService: UpdateInvestmentGoalService) {}
 
@@ -45,13 +48,8 @@ export class UpdateInvestmentGoalController {
       - Prioridade: Alta, Média ou Baixa - OPCIONAL
       - Status: Ativo, Pausado, Concluído ou Cancelado - OPCIONAL
       - Pelo menos um campo deve ser fornecido para atualização
+      - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    type: 'string',
-    description: 'ID único do investidor proprietário da meta',
-    example: 'uuid-123-456-789'
   })
   @ApiParam({
     name: 'goalId',
@@ -89,6 +87,15 @@ export class UpdateInvestmentGoalController {
       message: 'Meta de investimento atualizada com sucesso'
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/goal/uuid-goal-123-456'
+      }
+  })
   @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos ou erro de validação',
     type: UpdateInvestmentGoalValidationErrorDto,
@@ -100,7 +107,7 @@ export class UpdateInvestmentGoalController {
           message: 'Validation failed',
           details: ['body: Pelo menos um campo deve ser fornecido para atualização'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/goals/uuid-goal-123-456'
+          path: '/goal/uuid-goal-123-456'
         }
       },
       multipleErrors: {
@@ -114,7 +121,7 @@ export class UpdateInvestmentGoalController {
             'targetDate: Data alvo deve ser no futuro'
           ],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/goals/uuid-goal-123-456'
+          path: '/goal/uuid-goal-123-456'
         }
       }
     }
@@ -129,7 +136,7 @@ export class UpdateInvestmentGoalController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/goals/uuid-goal-123-456'
+          path: '/goal/uuid-goal-123-456'
         }
       },
       goalNotFound: {
@@ -138,17 +145,18 @@ export class UpdateInvestmentGoalController {
           statusCode: 404,
           message: 'Meta de investimento não encontrada',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/goals/uuid-goal-123-456'
+          path: '/goal/uuid-goal-123-456'
         }
       }
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
     @Param("goalId") goalId: string,
-    @Body() body: UpdateInvestmentGoalDto
-  ): Promise<string> {
+    @Body() body: UpdateInvestmentGoalDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<UpdateInvestmentGoalResponseDto> {
     const { name, description, targetAmount, targetDate, priority, status } = body;
+    const investorId = user.sub
 
     const result = await this.updateInvestmentGoalService.execute({
       investorId,
@@ -174,6 +182,8 @@ export class UpdateInvestmentGoalController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

@@ -5,21 +5,30 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-  Param,
   Post,
 } from "@nestjs/common";
+import { 
+  ApiBadRequestResponse, 
+  ApiBearerAuth, 
+  ApiBody, 
+  ApiCreatedResponse, 
+  ApiNotFoundResponse, 
+  ApiOperation, 
+  ApiTags,
+  ApiUnauthorizedResponse
+} from "@nestjs/swagger";
 
-import { Public } from "@/infra/auth/public";
 import { RegisterInvestmentGoalService } from "@/domain/goal/services/register-investment-goal";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
-import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 import { RegisterInvestmentGoalDto } from "./dto/register-investment-goal-dto";
 import { RegisterInvestmentGoalResponseDto } from "./dto/register-investment-goal-response-dto";
 import { RegisterInvestmentGoalBusinessErrorDto, RegisterInvestmentGoalValidationErrorDto } from "./dto/register-investment-goal-error-response-dto";
 
 @ApiTags('Goals')
-@Controller("/:investorId/goals")
-@Public()
+@ApiBearerAuth()
+@Controller("/goal")
 export class RegisterInvestmentGoalController {
   constructor(private registerInvestmentGoalService: RegisterInvestmentGoalService) {}
 
@@ -34,12 +43,8 @@ export class RegisterInvestmentGoalController {
     - Valor alvo: Deve ser um valor positivo
     - Data alvo: Data futura para alcançar a meta
     - Prioridade: Alta, Média ou Baixa
+    - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor',
-    example: 'uuid-123-456-789'
   })
   @ApiBody({
     type: RegisterInvestmentGoalDto,
@@ -65,6 +70,15 @@ export class RegisterInvestmentGoalController {
       message: 'A meta de investimento foi cadastrada com sucesso',
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/goal'
+      }
+  })
   @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos ou erro de validação',
     type: RegisterInvestmentGoalValidationErrorDto,
@@ -76,7 +90,7 @@ export class RegisterInvestmentGoalController {
           message: 'Validation failed',
           details: ['name: Nome deve ter pelo menos 3 caracteres'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/goals'
+          path: '/goal'
         }
       },
       amountValidation: {
@@ -86,7 +100,7 @@ export class RegisterInvestmentGoalController {
           message: 'Validation failed',
           details: ['targetAmount: Valor alvo deve ser positivo'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/investor/uuid-123-456-789/goals'
+          path: '/goal'
         }
       }
     }
@@ -98,14 +112,15 @@ export class RegisterInvestmentGoalController {
       statusCode: 404,
       message: 'Investidor não encontrado',
       timestamp: '2024-01-15T10:30:00Z',
-      path: '/investor/uuid-123-456-789/goals'
+      path: '/goal'
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
-    @Body() body: RegisterInvestmentGoalDto
-  ): Promise<string> {
+    @Body() body: RegisterInvestmentGoalDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<RegisterInvestmentGoalResponseDto> {
     const { name, description, targetAmount, targetDate, priority } = body;
+    const investorId = user.sub
 
     const result = await this.registerInvestmentGoalService.execute({
       investorId,
@@ -127,6 +142,8 @@ export class RegisterInvestmentGoalController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

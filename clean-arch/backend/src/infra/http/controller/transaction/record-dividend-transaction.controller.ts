@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Post,
-  Param,
   BadRequestException,
   NotFoundException,
   HttpCode,
@@ -10,12 +9,13 @@ import {
 } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOperation,
-  ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
@@ -25,10 +25,12 @@ import { Public } from "@/infra/auth/public";
 import { RecordDividendTransactionDto } from "./dto/record-dividend-transaction-dto";
 import { RecordDividendTransactionResponseDto } from "./dto/record-dividend-transaction-response-dto";
 import { RecordTransactionBusinessErrorDto, RecordTransactionValidationErrorDto } from "./dto/record-transaction-error-response-dto";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Transactions')
-@Controller("/investor/:investorId/transactions/buy")
-@Public()
+@ApiBearerAuth()
+@Controller("/transactions/dividend")
 export class RecordDividendTransactionController {
   constructor(
     private recordDividendTransactionService: RecordDividendTransactionService,
@@ -47,12 +49,8 @@ export class RecordDividendTransactionController {
     - Data: Data e hora em que a transação foi executada
     - Transação será registrada com status pendente aguardando confirmação
     - Após confirmação, o portfólio será automaticamente atualizado
+    - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor que realizou o recebimento de dividendo',
-    example: 'uuid-123-456-789'
   })
   @ApiBody({
     type: RecordDividendTransactionDto,
@@ -100,6 +98,15 @@ export class RecordDividendTransactionController {
       message: 'Transação de dividendo registrada com sucesso'
     }
   })
+  @ApiUnauthorizedResponse({
+    description: 'Token JWT não fornecido ou inválido',
+    example: {
+      statusCode: 401,
+      message: 'Unauthorized',
+      timestamp: '2024-01-15T10:30:00Z',
+      path: '/transactions/dividend'
+    }
+  })
   @ApiBadRequestResponse({
     description: 'Dados de entrada inválidos ou erro de validação',
     type: RecordTransactionValidationErrorDto,
@@ -111,7 +118,7 @@ export class RecordDividendTransactionController {
           message: 'Validation failed',
           details: ['assetName: Nome do ativo deve ter pelo menos 3 caracteres'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transactions/buy'
+          path: '/transactions/dividend'
         }
       },
       quantityValidation: {
@@ -121,7 +128,7 @@ export class RecordDividendTransactionController {
           message: 'Validation failed',
           details: ['quantity: Quantidade deve ser um número positivo'],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transactions/buy'
+          path: '/transactions/dividend'
         }
       },
       multipleErrors: {
@@ -135,7 +142,7 @@ export class RecordDividendTransactionController {
             'price: Preço deve ser um número positivo'
           ],
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/transactions/buy'
+          path: '/transactions/dividend'
         }
       }
     }
@@ -147,14 +154,15 @@ export class RecordDividendTransactionController {
       statusCode: 404,
       message: 'Investidor não encontrado',
       timestamp: '2024-01-15T10:30:00Z',
-      path: '/uuid-123-456-789/transactions/buy'
+      path: '/transactions/dividend'
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
-    @Body() body: RecordDividendTransactionDto
-  ): Promise<string> {
+    @Body() body: RecordDividendTransactionDto,
+    @CurrentUser() user: UserPayload
+  ): Promise<RecordDividendTransactionResponseDto> {
     const { assetName, price, income, dateAt } = body;
+    const investorId = user.sub
 
     const result = await this.recordDividendTransactionService.execute({
       investorId,
@@ -176,6 +184,8 @@ export class RecordDividendTransactionController {
       }
     }
 
-    return result.value.message
+    return {
+      message: result.value.message
+    }
   }
 }

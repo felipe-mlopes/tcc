@@ -8,12 +8,14 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import {
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 
 import { FetchAllInvestmentsByPortfolioIdService } from "@/domain/portfolio/services/fetch-all-investments-by-portfolio-id";
@@ -22,10 +24,12 @@ import { Public } from "@/infra/auth/public";
 import { InvestmentPresenter } from "@/infra/presenters/investment-presenter";
 import { FetchAllInvestmentsByPortfolioIdResponseDto } from "./dto/fetch-all-investments-by-portfolio-id-response-dto";
 import { FetchAllInvestmentByPortfolioIdBusinessErrorDto } from "./dto/fetch-all-investments-by-portfolio-id-error-response-dto";
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Portfolios')
-@Controller("/:investorId/portfolio/investments")
-@Public()
+@ApiBearerAuth()
+@Controller("/portfolio/investments")
 export class FetchAllInvestmentsByPortfolioIdController {
   constructor(
     private fetchAllInvestmentsByPortfolioIdService: FetchAllInvestmentsByPortfolioIdService,
@@ -40,12 +44,8 @@ export class FetchAllInvestmentsByPortfolioIdController {
       - Retorna informações dos investimentos se encontrado
       - Inclui quantidade atual e último preço transacionado
       - Retorna null se o investidor não possui nenhum investimento
+      - **Requer autenticação**: Token JWT no header Authorization
     `
-  })
-  @ApiParam({
-    name: 'investorId',
-    description: 'ID único do investidor proprietário do portfólio',
-    example: 'uuid-123-456-789'
   })
   @ApiQuery({
     name: 'page',
@@ -90,6 +90,15 @@ export class FetchAllInvestmentsByPortfolioIdController {
       }
     }
   })
+  @ApiUnauthorizedResponse({
+      description: 'Token JWT não fornecido ou inválido',
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+        timestamp: '2024-01-15T10:30:00Z',
+        path: '/portfolio'
+      }
+  })
   @ApiNotFoundResponse({
     description: 'Investidor não encontrado ou sem acesso ao portfólio',
     type: FetchAllInvestmentByPortfolioIdBusinessErrorDto,
@@ -100,7 +109,7 @@ export class FetchAllInvestmentsByPortfolioIdController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/portfolio/investment/PETR4'
+          path: '/portfolio/investment/uuid-123-456-789'
         }
       },
       portfolioNotFound: {
@@ -109,17 +118,19 @@ export class FetchAllInvestmentsByPortfolioIdController {
           statusCode: 404,
           message: 'Portfólio não encontrado para este investidor',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/uuid-123-456-789/portfolio/investment/PETR4'
+          path: '/portfolio/investment/uuid-123-456-789'
         }
       }
     }
   })
   async handle(
-    @Param("investorId") investorId: string,
     @Query("page") page: string,
+    @CurrentUser() user: UserPayload
   ): Promise<
     FetchAllInvestmentsByPortfolioIdResponseDto[]
   > {
+    const investorId = user.sub
+    
     const result = await this.fetchAllInvestmentsByPortfolioIdService.execute({
       investorId,
       page: page ? Number(page) : 1,
