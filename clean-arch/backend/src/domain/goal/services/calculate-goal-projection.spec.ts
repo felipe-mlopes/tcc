@@ -211,7 +211,7 @@ describe('Calculate Investment Goal Projection', () => {
             const minimum = result.value.analysis.minimumMonthlyContribution
 
             expect(recommended.getAmount()).toBeGreaterThan(minimum.getAmount())
-            expect(recommended.getAmount()).toBe(minimum.getAmount() * 1.1)
+            expect(recommended.getAmount()).toBeCloseTo(minimum.getAmount() * 1.1, 6)
         }
     })
 
