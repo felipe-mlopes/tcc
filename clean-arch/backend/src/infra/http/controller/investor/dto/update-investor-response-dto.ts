@@ -5,5 +5,5 @@ export class UpdateInvestorResponseDto {
         description: 'Mensagem de atualização do cadastro do investidor',
         example: 'O cadastro do investidor foi atualizado com sucesso'
     })
-    status: string;
+    message: string;
 }
