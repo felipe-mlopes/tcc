@@ -19,7 +19,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:debug": "node --inspect-brk -r ts-node/register vitest run --threads false",
-    "test:coverage": "vitest run --coverage"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "test:e2e:watch": "vitest --config ./vitest.config.e2e.ts",
+    "test:cov": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -51,16 +53,23 @@
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",
     "@nestjs/cli": "^11.0.10",
+    "@nestjs/testing": "^11.1.6",
     "@rocketseat/eslint-config": "^2.2.2",
+    "@swc/core": "^1.13.5",
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.17.2",
     "@types/passport-jwt": "^4.0.1",
+    "@types/supertest": "^6.0.3",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
+    "dotenv": "^17.2.1",
     "eslint": "^8.57.1",
+    "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
+    "unplugin-swc": "^1.5.7",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
     "vitest-tsconfig-paths": "^3.4.1"
   }
