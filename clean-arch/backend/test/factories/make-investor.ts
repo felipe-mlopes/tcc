@@ -1,11 +1,17 @@
+import { Injectable } from "@nestjs/common";
+import { Faker, faker, pt_BR } from '@faker-js/faker'
+
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { CPF } from "@/core/value-objects/cpf";
 import { DateOfBirth } from "@/core/value-objects/date-of-birth";
 import { Email } from "@/core/value-objects/email";
 import { Name } from "@/core/value-objects/name";
 import { Password } from "@/core/value-objects/password";
+
 import { Investor, InvestorProfile, InvestorProps } from "@/domain/investor/entities/investor";
-import { Faker, faker, pt_BR } from '@faker-js/faker'
+
+import { PrismaService } from "@/infra/database/prisma/prisma.service";
+import { PrismaInvestorMapper } from "@/infra/database/prisma/mappers/prisma-investor-mapper";
 
 export const customFaker = new Faker({
     locale: [pt_BR]
@@ -35,4 +41,19 @@ export function makeInvestor(
     )
 
     return investor
+}
+
+@Injectable()
+export class InvestorFactory {
+    constructor(private prisma: PrismaService) {}
+
+    async makePrismaInvestor(data: Partial<InvestorProps> = {}): Promise<Investor> {
+        const investor = makeInvestor(data)
+
+        await this.prisma.investor.create({
+            data: PrismaInvestorMapper.toPrisma(investor)
+        })
+
+        return investor
+    }
 }
