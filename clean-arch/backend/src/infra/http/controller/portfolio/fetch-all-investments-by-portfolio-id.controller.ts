@@ -70,7 +70,6 @@ export class FetchAllInvestmentsByPortfolioIdController {
             id: 'uuid-investment-123-456',
             assetId: 'uuid-asset-999-888',
             portfolioId: 'uuid-portfolio-789',
-            investorId: 'uuid-123-456-789',
             quantity: 150,
             currentPrice: 32.50
           },
@@ -78,7 +77,6 @@ export class FetchAllInvestmentsByPortfolioIdController {
             id: 'uuid-investment-456-123',
             assetId: 'uuid-asset-999-888',
             portfolioId: 'uuid-portfolio-789',
-            investorId: 'uuid-123-456-789',
             quantity: 200,
             currentPrice: 57.96
           }
@@ -96,7 +94,7 @@ export class FetchAllInvestmentsByPortfolioIdController {
         statusCode: 401,
         message: 'Unauthorized',
         timestamp: '2024-01-15T10:30:00Z',
-        path: '/portfolio'
+        path: '/portfolio/investments'
       }
   })
   @ApiNotFoundResponse({
@@ -109,7 +107,7 @@ export class FetchAllInvestmentsByPortfolioIdController {
           statusCode: 404,
           message: 'Investidor não encontrado',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/portfolio/investment/uuid-123-456-789'
+          path: '/portfolio/investments'
         }
       },
       portfolioNotFound: {
@@ -118,7 +116,7 @@ export class FetchAllInvestmentsByPortfolioIdController {
           statusCode: 404,
           message: 'Portfólio não encontrado para este investidor',
           timestamp: '2024-01-15T10:30:00Z',
-          path: '/portfolio/investment/uuid-123-456-789'
+          path: '/portfolio/investments'
         }
       }
     }
@@ -144,9 +142,9 @@ export class FetchAllInvestmentsByPortfolioIdController {
       throw new NotFoundException("Erro inesperado ao buscar investimentos");
     }
 
-    const { investment } = result.value;
+    const { investments } = result.value;
 
-    return investment.map((inv) => 
+    return investments.map((inv) => 
         InvestmentPresenter.toHTTP(inv)
     );
   }
