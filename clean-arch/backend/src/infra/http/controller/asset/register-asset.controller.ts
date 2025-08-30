@@ -69,7 +69,7 @@ export class RegisterAssetController {
         path: '/asset'
         }
     })
-    async handle(@Body() body: RegisterAssetDto): Promise<void> {
+    async handle(@Body() body: RegisterAssetDto): Promise<RegisterAssetResponseDto> {
         const { name, symbol, assetType, sector, exchange, currency } = body;
 
         const result = await this.registerAssetService.execute({
@@ -91,5 +91,9 @@ export class RegisterAssetController {
                     throw new BadRequestException();
             }
         }   
+
+        return {
+            message: result.value.message
+        }
     }
 }
