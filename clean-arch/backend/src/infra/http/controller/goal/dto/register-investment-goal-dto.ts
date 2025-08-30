@@ -18,12 +18,14 @@ const registerInvestmentGoalBodySchema = z.object({
     .positive('Valor alvo deve ser positivo'),
   
   targetDate: z
-    .iso
-    .date({ message: 'Data alvo deve estar em formato válido (ISO 8601)' })
-    .transform((val) => new Date(val))
-    .refine((date) => date > new Date(), {
+    .string()
+    .refine(
+      (val) => !isNaN(Date.parse(val)), { message: 'Data deve estar em formato válido (ISO 8601)' }
+    )
+    .refine((val) => new Date(val) > new Date(), {
       message: 'Data alvo deve ser no futuro'
-    }),
+    })
+    .transform((val) => new Date(val)),
   
   priority: z
     .enum(Object.values(Priority), {
