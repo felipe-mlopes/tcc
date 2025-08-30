@@ -37,8 +37,8 @@ export class PrismaInvestmentRepository implements InvestmentRepository {
     async findManyByPortfolio(portfolioId: string, params: PaginationParams): Promise<Investment[]> {
         const investments = await this.prisma.investment.findMany({
             where: { portfolioId },
-            skip: params.page * params.page,
-            take: params.page,
+            take: 20,
+            skip: (params.page - 1) * 20,
         });
 
         return investments.map(PrismaInvestmentMapper.toDomain);

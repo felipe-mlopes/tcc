@@ -24,8 +24,8 @@ export class PrismaTransactionRepository implements TransactionRepository {
     async findManyByPortfolioId(portfolioId: string, params: PaginationParams): Promise<Transaction[]> {
         const transactions = await this.prisma.transaction.findMany({
             where: { portfolioId },
-            skip: params.page * params.page,
-            take: params.page,
+            take: 20,
+            skip: (params.page - 1) * 20,
         });
 
         return transactions.map(PrismaTransactionMapper.toDomain);
@@ -34,8 +34,8 @@ export class PrismaTransactionRepository implements TransactionRepository {
     async findByManyPortfolioAndAsset(portfolioId: string, assetId: string, params: PaginationParams): Promise<Transaction[]> {
         const transactions = await this.prisma.transaction.findMany({
             where: { portfolioId, assetId },
-            skip: params.page * params.page,
-            take: params.page,
+            take: 20,
+            skip: (params.page - 1) * 20,
         });
 
         return transactions.map(PrismaTransactionMapper.toDomain);
