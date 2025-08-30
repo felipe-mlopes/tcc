@@ -1,6 +1,6 @@
+import { z } from "zod";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
-import { z } from "zod";
 
 const recordTransactionBodySchema = z.object({
   assetName: z
@@ -19,14 +19,16 @@ const recordTransactionBodySchema = z.object({
     .number()
     .positive('Taxas devem ser um número positivo')
     .optional(),
-  
+
   dateAt: z
-    .iso
-    .date({ message: 'Data da transação deve estar em formato válido (ISO 8601)' })
+    .string()
+    .refine(
+      (val) => !isNaN(Date.parse(val)), { message: 'Data deve estar em formato válido (ISO 8601)' }
+    )
+    .refine(
+      (val) => new Date(val) <= new Date(), { message: 'Data da transação não pode ser no futuro' }
+    )
     .transform((val) => new Date(val))
-    .refine((date) => date > new Date(), {
-      message: 'Data da transação não pode ser no futuro'
-    }),
 });
 
   
