@@ -1,7 +1,13 @@
+import { Injectable } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
+
 import { UniqueEntityID } from "@/core/entities/unique-entity-id"
-import { Goal, GoalProps, Priority, Status } from '@/domain/goal/entities/goal'
 import { Money } from '@/core/value-objects/money'
+
+import { Goal, GoalProps, Priority, Status } from '@/domain/goal/entities/goal'
+
+import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { PrismaGoalMapper } from '@/infra/database/prisma/mappers/prisma-goal-mapper'
 
 export function makeGoal(
     override: Partial<GoalProps> = {},
@@ -33,4 +39,19 @@ export function makeGoal(
     )
 
     return goal
+}
+
+@Injectable()
+export class GoalFactory {
+    constructor(private prisma: PrismaService) {}
+
+    async makePrismaGoal(data: Partial<GoalProps> = {}): Promise<Goal> {
+        const goal = makeGoal(data)
+
+        await this.prisma.goal.create({
+            data: PrismaGoalMapper.toPrisma(goal)
+        })
+
+        return goal
+    }
 }
