@@ -170,7 +170,7 @@ export class RecordDividendTransactionController {
       transactionType: TransactionType.Dividend,
       price,
       income,
-      dateAt: new Date(dateAt),
+      dateAt,
     });
 
     if (result.isLeft()) {
