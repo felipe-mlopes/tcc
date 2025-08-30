@@ -39,7 +39,9 @@ export class UpdateInvestorService {
             investor.updateName(name)
         }
 
-        if(email && email.trim().length > 0) {
+        const isEmailAlreadyRecord = await this.investorRepository.findByEmail(email) == null
+
+        if(email && email.trim().length > 0 && isEmailAlreadyRecord) {
             investor.updateEmail(email)
         }
 
