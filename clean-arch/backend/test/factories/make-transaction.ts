@@ -2,7 +2,10 @@ import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { Money } from "@/core/value-objects/money"
 import { Quantity } from "@/core/value-objects/quantity"
 import { Transaction, TransactionProps, TransactionType } from "@/domain/transaction/entities/transaction"
+import { PrismaTransactionMapper } from "@/infra/database/prisma/mappers/prisma-transaction-mapper"
+import { PrismaService } from "@/infra/database/prisma/prisma.service"
 import { faker } from "@faker-js/faker"
+import { Injectable } from "@nestjs/common"
 
 export function makeTransaction(
     override: Partial<TransactionProps> = {},
@@ -16,19 +19,28 @@ export function makeTransaction(
     let totalAmountFaker: Money
 
     const priceFaker = Money.create(faker.number.float({
+        min: 1,
+        max: 1000,
         fractionDigits: 2
     }))
 
     if (transactionType !== TransactionType.Dividend) {
-        quantityFaker = Quantity.create(faker.number.int())
+        quantityFaker = Quantity.create(faker.number.int({
+            min: 1,
+            max: 1000
+        }))
         incomeFaker = Money.zero()
         feesFaker = Money.create(faker.number.float({
+            min: 1,
+            max: 1000,
             fractionDigits: 2
         }))
         totalAmountFaker = priceFaker.multiply(quantityFaker.getValue())
     } else {
         quantityFaker = Quantity.zero()
         incomeFaker = Money.create(faker.number.float({
+            min: 1,
+            max: 1000,
             fractionDigits: 2
         }))
         feesFaker = Money.zero()
@@ -52,4 +64,22 @@ export function makeTransaction(
     )
 
     return transaction
+}
+
+@Injectable()
+export class TransactionFactory {
+    constructor(private prisma: PrismaService) {}
+
+    async makePrismaTransaction(
+        data: Partial<TransactionProps> = {},
+        transactionType: TransactionType = TransactionType.Buy
+    ): Promise<Transaction> {
+        const transaction = makeTransaction(data, transactionType)
+
+        await this.prisma.transaction.create({
+            data: PrismaTransactionMapper.toPrisma(transaction)
+        })
+
+        return transaction
+    }
 }
