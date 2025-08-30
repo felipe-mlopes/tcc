@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Post,
-  Param,
   BadRequestException,
   NotFoundException,
   HttpCode,
@@ -20,14 +19,16 @@ import {
 } from "@nestjs/swagger";
 
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+
 import { RecordBuyTransactionService } from "@/domain/transaction/services/record-buy-transaction";
 import { TransactionType } from "@/domain/transaction/entities/transaction";
-import { Public } from "@/infra/auth/public";
+
+import { CurrentUser } from "@/infra/auth/current-user.decorator";
+import { UserPayload } from "@/infra/auth/jwt.strategy";
+
 import { RecordTransactionDto } from "./dto/record-transaction-dto";
 import { RecordBuyTransactionResponseDto } from "./dto/record-buy-transaction-response-dto";
 import { RecordTransactionBusinessErrorDto, RecordTransactionValidationErrorDto } from "./dto/record-transaction-error-response-dto";
-import { CurrentUser } from "@/infra/auth/current-user.decorator";
-import { UserPayload } from "@/infra/auth/jwt.strategy";
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -92,10 +93,10 @@ export class RecordBuyTransactionController {
     }
   })
   @ApiCreatedResponse({
-    description: 'Transação de compra registrada com sucesso',
+    description: 'Transação de compra registrada',
     type: RecordBuyTransactionResponseDto,
     example: {
-      message: 'Transação de compra registrada com sucesso'
+      message: 'A transação de compra foi registrada com sucesso'
     }
   })
   @ApiUnauthorizedResponse({
@@ -171,7 +172,7 @@ export class RecordBuyTransactionController {
       quantity,
       price,
       fees,
-      dateAt: new Date(dateAt),
+      dateAt,
     });
 
     if (result.isLeft()) {
