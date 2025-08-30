@@ -13,7 +13,7 @@ interface FetchAllInvestmentsByPortfolioIdServiceRequest {
 }
 
 type FetchAllInvestmentsByPortfolioIdServiceResponse = Either<ResourceNotFoundError, {
-    investment: Investment[]
+    investments: Investment[]
 }>
 
 type ValidatorFetchAllInvestmentsServiceResponse = Either<ResourceNotFoundError, {
@@ -43,7 +43,7 @@ export class FetchAllInvestmentsByPortfolioIdService {
 
         const portfolioId = portfolioVerified.id.toValue().toString()
 
-        const investment = await this.investmentRepository.findManyByPortfolio(
+        const investments = await this.investmentRepository.findManyByPortfolio(
             portfolioId,
             {
                 page
@@ -51,7 +51,7 @@ export class FetchAllInvestmentsByPortfolioIdService {
         )
 
         return right({
-            investment
+            investments
         })
     }
 
@@ -63,9 +63,7 @@ export class FetchAllInvestmentsByPortfolioIdService {
             'Investor not found.'
         ))
 
-        const id = investor.id.toValue().toString()
-
-        const portfolioVerified = await this.portfolioRepository.findByInvestorId(id)
+        const portfolioVerified = await this.portfolioRepository.findByInvestorId(investorId)
         if (!portfolioVerified) return left(new ResourceNotFoundError(
             'Portfolio not found.'
         ))
