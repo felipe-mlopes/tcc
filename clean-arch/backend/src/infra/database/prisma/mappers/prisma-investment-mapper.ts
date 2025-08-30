@@ -23,7 +23,9 @@ export class PrismaInvestmentMapper {
             portfolioId: investiment.portfolioId.toValue().toString(),
             assetId: investiment.assetId.toValue().toString(),
             quantity: investiment.quantity.getValue(),
-            currentPrice: investiment.currentPrice.getAmount()
+            currentPrice: investiment.currentPrice.getAmount(),
+            createdAt: investiment.createdAt,
+            updatedAt: investiment.updatedAt || null
         }
     }
 }
