@@ -1,6 +1,12 @@
+import { Injectable } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
+
 import { UniqueEntityID } from "@/core/entities/unique-entity-id"
+
 import { Asset, AssetProps, AssetType } from "@/domain/asset/entities/asset"
+
+import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { PrismaAssetMapper } from '@/infra/database/prisma/mappers/prisma-asset-mapper'
 
 export function makeAsset(
     override: Partial<AssetProps> = {},
@@ -26,4 +32,19 @@ export function makeAsset(
     )
 
     return asset
+}
+
+@Injectable()
+export class AssetFactory {
+    constructor(private prisma: PrismaService) {}
+
+    async makePrismaAsset(data: Partial<AssetProps> = {}): Promise<Asset> {
+        const asset = makeAsset(data)
+
+        await this.prisma.asset.create({
+            data: PrismaAssetMapper.toPrisma(asset)
+        })
+
+        return asset
+    }
 }
