@@ -15,7 +15,7 @@ export class AuthenticateInvestorController {
     constructor(private authenticatetInvestorService: AuthenticateInvestorService) {}
     
     @Post()
-    @HttpCode(HttpStatus.OK)
+    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({
         summary: 'Autenticar investidor',
         description: `
