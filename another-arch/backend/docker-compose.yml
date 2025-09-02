@@ -1,5 +1,5 @@
 services:
-  postgres:
+  postgres_another:
     image: postgres:15-alpine
     container_name: investment_postgres
     restart: always
@@ -14,26 +14,18 @@ services:
     networks:
       - investment_network
 
-  # Opcional: PgAdmin para interface gráfica
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: investment_pgadmin
-    restart: always
+  jaeger_alt:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger-alt
     ports:
-      - '8080:80'
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@investment.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - investment_network
-    depends_on:
-      - postgres
+      - 17686:16686   # UI (alterado)
+      - 6931:6831     # UDP agent (alterado)
+      - 15268:14268   # Collector (alterado)
+      - 4417:4317     # OTLP gRPC (alterado)
+      - 4418:4318     # OTLP HTTP (alterado)
 
 volumes:
   postgres_data:
-  pgadmin_data:
 
 networks:
   investment_network:

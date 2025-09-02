@@ -3,20 +3,45 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { differenceInYears } from 'date-fns';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvestorDto } from './dto/create-investor.dto';
 import { UpdateInvestorDto } from './dto/update-investor.dto';
 import { DeactivateInvestorDto } from './dto/deactivate-investor.dto';
 import { Prisma } from '@prisma/client';
 
+enum InvestorProfile {
+  Aggressive = 'Aggressive',
+  Conservative = 'Conservative',
+  Moderate = 'Moderate',
+}
+
 @Injectable()
 export class InvestorService {
   constructor(private prisma: PrismaService) {}
 
   async create(createInvestorDto: CreateInvestorDto) {
+    const age = differenceInYears(
+      new Date(),
+      new Date(createInvestorDto.dateOfBirth),
+    );
+
+    let profile: InvestorProfile;
+
+    if (age < 25) {
+      profile = InvestorProfile.Aggressive;
+    } else if (age >= 25 && age < 50) {
+      profile = InvestorProfile.Conservative;
+    } else {
+      profile = InvestorProfile.Moderate;
+    }
+
     try {
       return await this.prisma.investor.create({
-        data: createInvestorDto,
+        data: {
+          ...createInvestorDto,
+          riskProfile: profile
+        }
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

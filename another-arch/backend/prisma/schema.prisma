@@ -12,6 +12,9 @@ model Investor {
   name      String
   email     String   @unique
   cpf       String   @unique
+  password  String
+  dateOfBirth DateTime        @map("date_of_birth")
+  riskProfile InvestorProfile @map("risk_profile") 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -136,4 +139,10 @@ enum GoalCategory {
   CAR_PURCHASE
   DEBT_PAYMENT
   OTHER
+}
+
+enum InvestorProfile {
+  Conservative
+  Moderate
+  Aggressive
 }
