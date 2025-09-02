@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { envSchema } from './env/env';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { EnvService } from './env/env.service';
+import './observability/opentelemetry/opentelemetry';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
