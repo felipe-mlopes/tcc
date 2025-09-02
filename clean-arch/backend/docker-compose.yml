@@ -1,5 +1,5 @@
 services:
-  postgres:
+  postgres_clean_invest:
     image: postgres:15-alpine
     container_name: investment_postgres_clean
     restart: always
@@ -13,6 +13,31 @@ services:
       - postgres_data_clean:/var/lib/postgresql/data
     networks:
       - investment_clean_network
+  
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger_clean
+    ports:
+      - 8081:16686 # Jagger UI
+      - 14268:14268
+      - 14250:14250
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "1888:1888"   # pprof extension
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # http gRPC receiver
+      - "55679:55679" # zpages extension
+    depends_on:
+      - jaeger
+    links:
+      - jaeger
 
 volumes:
   postgres_data_clean:
