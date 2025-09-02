@@ -1,0 +1,96 @@
+@startuml Diagrama de Pacotes
+!theme plain
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+package "src" {
+    
+    package "core" {
+        package "entities" {}
+        package "errors" {}
+        package "events" {}
+        package "repositories" {}
+        package "types" {}
+        package "value-objects" {}
+        file "either.ts" as either
+    }
+    
+    package "domain" {
+        package "asset" {
+            package "entities" as assetEntities {}
+            package "repositories" as assetRepos {}
+            package "services" as assetServices {}
+        }
+        package "goal" {
+            package "entities" as goalEntities {}
+            package "repositories" as goalRepos {}
+            package "services" as goalServices {}
+        }
+        package "investor" {
+            package "entities" as investorEntities {}
+            package "repositories" as investorRepos {}
+            package "services" as investorServices {}
+        }
+        package "transaction" {
+            package "entities" as transactionEntities {}
+            package "repositories" as transactionRepos {}
+            package "services" as transactionServices {}
+        }
+        package "portfolio" {
+            package "entities" as portfolioEntities {}
+            package "repositories" as portfolioRepos {}
+            package "services" as portfolioServices {}
+        }
+    }
+    
+    package "infra" {
+        package "auth" {}
+        package "cryptography" {}
+        package "database" {}
+        package "env" {}
+        package "http" {
+            package "controller" as httpController {
+                package "asset" as assetController {}
+                package "goal" as goalController {}
+                package "investor" as investorController {}
+                package "transaction" as transactionController {}
+                package "portfolio" as portfolioController {}
+            }
+            package "pipes" as httpPipes {}
+        }
+        package "observability" {}
+        package "presenters" {}
+        file "app.module.ts" as appModule
+        file "main.ts" as mainFile
+    }
+}
+
+' Dependencies
+domain ..> core : uses
+infra ..> domain : implements
+infra ..> core : uses
+
+' Notes
+note right of core
+  Camada central com:
+  - Entidades base
+  - Tipos compartilhados
+  - Value Objects
+  - Interfaces de repositórios
+end note
+
+note right of domain
+  Lógica de negócio:
+  - Casos de uso
+  - Entidades específicas
+  - Regras de domínio
+end note
+
+note right of infra
+  Implementações:
+  - Adaptadores externos
+  - Configurações
+  - Pontos de entrada
+end note
+
+@enduml
