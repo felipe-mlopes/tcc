@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssetType {
+  Stock
+  ETF
+  FIIs
+  Bond
+  Crypto
+  Others
+}
+
+enum InvestorProfile {
+  Conservative
+  Moderate
+  Aggressive
+}
+
+enum TransactionType {
+  Buy
+  Sell
+  Dividend
+}
+
+enum Priority {
+  High
+  Medium
+  Low
+}
+
+enum Status {
+  Active
+  Achieved
+  Cancelled
+}
+
+model Investor {
+  id          String           @id @default(uuid())
+  email       String           @unique
+  name        String
+  cpf         String           @unique
+  dateOfBirth DateTime
+  password    String
+  profile     InvestorProfile? @default(Moderate)
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  portfolios Portfolio[]
+  goals      Goal[]
+
+  @@map("investors")
+}
+
+model Asset {
+  id        String    @id @default(uuid())
+  symbol    String    @unique
+  name      String
+  assetType AssetType
+  sector    String?
+  exchange  String
+  currency  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  investments Investment[]
+  transactions Transaction[]
+
+  @@map("assets")
+}
+
+model Portfolio {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  investorId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  investor     Investor     @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  investments  Investment[]
+  transactions Transaction[]
+
+  @@map("portfolios")
+}
+
+model Investment {
+  id           String  @id @default(uuid())
+  portfolioId  String
+  assetId      String
+  quantity     Decimal @db.Decimal(18, 8)
+  averagePrice Decimal @db.Decimal(18, 2)
+  currentPrice Decimal @db.Decimal(18, 2)
+  totalValue   Decimal @db.Decimal(18, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  asset     Asset     @relation(fields: [assetId], references: [id])
+
+  @@unique([portfolioId, assetId])
+  @@map("investments")
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  portfolioId String
+  assetId     String
+  type        TransactionType
+  quantity    Decimal         @db.Decimal(18, 8)
+  price       Decimal         @db.Decimal(18, 2)
+  fees        Decimal?        @db.Decimal(18, 2) @default(0)
+  income      Decimal?        @db.Decimal(18, 2) @default(0)
+  dateAt      DateTime
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  asset     Asset     @relation(fields: [assetId], references: [id])
+
+  @@map("transactions")
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  investorId   String
+  name         String
+  description  String?
+  targetAmount Decimal  @db.Decimal(18, 2)
+  targetDate   DateTime
+  priority     Priority @default(Medium)
+  status       Status   @default(Active)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  investor Investor @relation(fields: [investorId], references: [id], onDelete: Cascade)
+
+  @@map("goals")
+}

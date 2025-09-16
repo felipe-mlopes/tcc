@@ -1,0 +1,248 @@
+@baseUrl = http://localhost:3000/api
+
+#--- INVESTOR ---#
+### Investor Register
+POST {{baseUrl}}/investors
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao.silva@example.com",
+  "cpf": "12345678901",
+  "dateOfBirth": "1990-01-01",
+  "password": "umaSenhaMuitoSegura123"
+}
+
+### Investor Login
+# Copie o token de autenticação (JWT) da resposta para usar nas rotas protegidas
+@investor_token = {{investor_token}}
+POST {{baseUrl}}/investors/auth
+Content-Type: application/json
+
+{
+  "email": "joao.silva@example.com",
+  "password": "umaSenhaMuitoSegura123"
+}
+
+### Get Investor Profile
+GET {{baseUrl}}/investors/profile
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+### Update Investor Profile
+# Replace {id} with the actual investor ID
+PATCH {{baseUrl}}/investors/{id}
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+  "name": "João Silva Updated",
+  "email": "joao.updated@example.com"
+}
+
+### Deactivate Account
+# Replace {id} with the actual investor ID
+PATCH {{baseUrl}}/investors/{id}/deactivate
+Authorization: Bearer {{investor_token}}
+
+
+#--- ASSET ---#
+### Criar um Ativo (Asset)
+POST {{baseUrl}}/api/assets
+Content-Type: application/json
+
+{
+"symbol": "ITUB4",
+"name": "Itaú Unibanco PN",
+"assetType": "STOCK",
+"sector": "FINANCIAL_SERVICES",
+"exchange": "B3",
+"currency": "BRL"
+}
+
+@assetId = {{assetId}}+
+
+### List Assets with Search
+GET {{baseUrl}}/assets?search=ITUB&page=1&limit=10
+Content-Type: application/json
+
+### Get Asset by ID
+# Replace {assetId} with actual asset ID
+GET {{baseUrl}}/assets/{assetId}
+Content-Type: application/json
+
+### Get Asset by Symbol
+GET {{baseUrl}}/assets/symbol/ITUB4
+Content-Type: application/json
+
+### Update Asset
+# Replace {assetId} with actual asset ID
+PATCH {{baseUrl}}/assets/{assetId}
+Content-Type: application/json
+
+{
+  "name": "Itaú Unibanco PN Updated",
+  "sector": "BANKING"
+}
+
+#--- PORTFÓLIO ---#
+### Criar um Portfólio
+# Você precisa de um token de autenticação para essa e as próximas rotas
+POST {{baseUrl}}/portfolios
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+  "name": "Meu Primeiro Portfólio",
+  "description": "Portfólio para investimentos em renda variável."
+}
+
+### Get All Portfolios
+GET {{baseUrl}}/portfolios
+Authorization: Bearer {{investor_token}}
+
+### Get Portfolio by ID
+# Replace {portfolioId} with actual portfolio ID
+GET {{baseUrl}}/portfolios/{portfolioId}
+Authorization: Bearer {{investor_token}}
+
+### Add Investment to Portfolio
+# Replace {assetId} with actual asset ID
+POST {{baseUrl}}/portfolios/investment/{assetId}
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+  "quantity": 100,
+  "currentPrice": 32.50
+}
+
+### Get Investment by Asset
+# Replace {assetId} with actual asset ID
+GET {{baseUrl}}/portfolios/investment/{assetId}
+Authorization: Bearer {{investor_token}}
+
+### Get All Investments with Pagination
+GET {{baseUrl}}/portfolios/investments?page=1&limit=10
+Authorization: Bearer {{investor_token}}
+
+### Update Investment After Transaction
+# Replace {transactionId} with actual transaction ID
+PATCH {{baseUrl}}/portfolios/investment/{transactionId}/update
+Authorization: Bearer {{investor_token}}
+
+#--- TRANSACTIONS ---#
+### Criar uma Transação de Compra (Buy)
+POST {{baseUrl}}/transactions/buy/{{assetId}}
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+"quantity": 100,
+"price": 32.50,
+"fees": 2.50,
+"dateAt": "2023-11-20T10:00:00Z"
+}
+
+### Criar uma Transação de Venda (Sell)
+POST {{baseUrl}}/transactions/sell/{{assetId}}
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+"quantity": 50,
+"price": 33.00,
+"fees": 1.50,
+"dateAt": "2023-11-25T11:00:00Z"
+}
+
+### Criar uma Transação de Dividendo (Dividend)
+POST {{baseUrl}}/transactions/dividend/{{assetId}}
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+"quantity": 50,
+"price": 33.00,
+"fees": 1.50,
+"dateAt": "2023-11-25T11:00:00Z"
+}
+
+### Get All Transactions with Pagination
+GET {{baseUrl}}/transactions?page=1&limit=10
+Authorization: Bearer {{investor_token}}
+
+### Get Transaction by ID
+# Replace {transactionId} with actual transaction ID
+GET {{baseUrl}}/transactions/{transactionId}
+Authorization: Bearer {{investor_token}}
+
+### Get Transaction Summary
+# Optional: add ?assetId={assetId} to filter by specific asset
+GET {{baseUrl}}/transactions/summary
+Authorization: Bearer {{investor_token}}
+
+### Get Transaction Summary by Asset
+# Replace {assetId} with actual asset ID
+GET {{baseUrl}}/transactions/summary?assetId={assetId}
+Authorization: Bearer {{investor_token}}
+
+### Update Transaction
+# Replace {transactionId} with actual transaction ID
+PUT {{baseUrl}}/transactions/{transactionId}
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+  "quantity": 75,
+  "price": 32.75,
+  "fees": 2.00
+}
+
+#--- GOAL ---#
+### Criar uma Meta (Goal)
+@goal_id = {{goal_id}}
+POST {{baseUrl}}/goals
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+  "name": "Comprar Carro",
+  "description": "Economizar para comprar um carro novo.",
+  "targetAmount": 50000,
+  "targetDate": "2025-12-31T23:59:59Z",
+  "priority": "High"
+}
+
+### Obter Todas as Metas
+GET {{baseUrl}}/goals
+Authorization: Bearer {{investor_token}}
+
+### Obter uma Meta Específica
+GET {{baseUrl}}/goals/{{goal_id}}
+Authorization: Bearer {{investor_token}}
+
+### Atualizar uma Meta
+PUT {{baseUrl}}/goals/{{goal_id}}
+Authorization: Bearer {{investor_token}}
+Content-Type: application/json
+
+{
+  "name": "Comprar Carro (Atualizado)",
+  "description": "Economizar para um carro mais econômico.",
+  "targetAmount": 45000,
+  "targetDate": "2025-12-31T23:59:59Z",
+  "priority": "Medium"
+}
+
+### Marcar Meta como Alcançada
+PATCH {{baseUrl}}/goals/{{goal_id}}/achieve
+Authorization: Bearer {{investor_token}}
+
+### Marcar Meta como Cancelada
+PATCH {{baseUrl}}/goals/{{goal_id}}/cancel
+Authorization: Bearer {{investor_token}}
+
+### Buscar Progresso da Meta
+GET {{baseUrl}}/goals/progress
+Authorization: Bearer {{investor_token}}
