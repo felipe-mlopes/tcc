@@ -32,7 +32,7 @@ export function makePortfolio(
 
 @Injectable()
 export class PortfolioFactory {
-    constructor(private prisma: PrismaService) {}
+    constructor(readonly prisma: PrismaService) {}
 
     async makePrismaPortfolio(data: Partial<PortfolioProps> = {}): Promise<Portfolio> {
         const portfolio = makePortfolio(data)

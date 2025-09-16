@@ -1,11 +1,11 @@
-import { Either, left, right } from "@/core/either"
-import { NotAllowedError } from "@/core/errors/not-allowed-error"
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
+import { Injectable } from "@nestjs/common"
+import { Either, left, right } from "@/shared/exceptions/either"
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error"
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error"
 import { Transaction } from "../entities/transaction"
 import { TransactionRepository } from "../repositories/transaction-repository"
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository"
 import { PortfolioRepository } from "@/domain/portfolio/repositories/portfolio-repository"
-import { Injectable } from "@nestjs/common"
 
 interface FetchTransactionsHistoryByAssetIdServiceRequest {
     investorId: string,
@@ -20,9 +20,9 @@ type FetchTransactionsHistoryByAssetIdServiceResponse = Either<ResourceNotFoundE
 @Injectable()
 export class FetchTransactionsHistoryByAssetIdService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private portfolioRepository: PortfolioRepository,
-        private transactionRepository: TransactionRepository
+        readonly investorRepository: InvestorRepository,
+        readonly portfolioRepository: PortfolioRepository,
+        readonly transactionRepository: TransactionRepository
     ) {}
 
     public async execute({

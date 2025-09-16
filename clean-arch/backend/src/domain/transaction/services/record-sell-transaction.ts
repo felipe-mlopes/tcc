@@ -1,15 +1,14 @@
-import { Either, left, right } from "@/core/either"
+import { Either, left, right } from "@/shared/exceptions/either"
 import { Transaction, TransactionType } from "../entities/transaction"
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
-import { NotAllowedError } from "@/core/errors/not-allowed-error"
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error"
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error"
 import { TransactionRepository } from "../repositories/transaction-repository"
-import { UniqueEntityID } from "@/core/entities/unique-entity-id"
 import { TransactionValidatorService } from "./transaction-validator"
 import { Injectable } from "@nestjs/common"
 
 interface RecordSellTransactionServiceRequest {
     investorId: string,
-    assetName: string,
+    assetId: string,
     transactionType: TransactionType,
     quantity: number,
     price: number,
@@ -18,19 +17,20 @@ interface RecordSellTransactionServiceRequest {
 }
 
 type RecordSellTransactionServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
+    id: string
     message: string
 }>
 
 @Injectable()
 export class RecordSellTransactionService {
     constructor(
-        private transactionRepository: TransactionRepository,
-        private validator: TransactionValidatorService
+        readonly transactionRepository: TransactionRepository,
+        readonly validator: TransactionValidatorService
     ) {}
 
     public async execute({
         investorId,
-        assetName,
+        assetId,
         transactionType,
         quantity,
         price,
@@ -43,7 +43,7 @@ export class RecordSellTransactionService {
 
         const validationResult = await this.validator.validate({
             investorId,
-            assetName,
+            assetId,
             quantity,
             price,
             fees
@@ -76,6 +76,7 @@ export class RecordSellTransactionService {
         await this.transactionRepository.create(newSellTransaction)
 
         return right({
+            id: newSellTransaction.id.toValue().toString(),
             message: 'A transação de venda foi registrada com sucesso'
         })
     }

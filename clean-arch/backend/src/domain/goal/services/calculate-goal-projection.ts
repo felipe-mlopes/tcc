@@ -1,6 +1,6 @@
-import { Either, left, right } from "@/core/either"
-import { NotAllowedError } from "@/core/errors/not-allowed-error"
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
+import { Either, left, right } from "@/shared/exceptions/either"
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error"
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error"
 import { Money } from "@/core/value-objects/money";
 import { Goal, Status } from "../entities/goal";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
@@ -54,8 +54,8 @@ type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
 @Injectable()
 export class CalculateGoalProjectionService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private goalRepository: GoalRepository
+        readonly investorRepository: InvestorRepository,
+        readonly goalRepository: GoalRepository
     ) {}
 
     public async execute({
@@ -95,7 +95,7 @@ export class CalculateGoalProjectionService {
             'No scenarios available to proceed.'
         ))
 
-        for (const [idx, scenario] of scenarios.entries()) {
+        for (const [_, scenario] of scenarios.entries()) {
             if (!scenario.monthlyContribution) return left(new NotAllowedError(
                 'You must provide at least one scenario to continue.'
             ))

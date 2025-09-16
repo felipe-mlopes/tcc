@@ -1,5 +1,5 @@
-import { Either, right } from "@/core/either";
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { Either, right } from "@/shared/exceptions/either";
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error";
 import { Asset, AssetType } from "../entities/asset";
 import { AssetRepository } from "../repositories/asset-repository";
 import { Injectable } from "@nestjs/common";
@@ -14,12 +14,13 @@ interface RegisterAssetServiceRequest {
 }
 
 type RegisterAssetServiceResponse = Either<ResourceNotFoundError, {
+    id: string,
     message: string
 }>
 
 @Injectable()
 export class RegisterAssetService {
-    constructor(private assetRepository: AssetRepository) {}
+    constructor(readonly assetRepository: AssetRepository) {}
 
     public async execute({
         symbol,
@@ -41,6 +42,7 @@ export class RegisterAssetService {
         await this.assetRepository.create(newAsset)
 
         return right({
+            id: newAsset.id.toValue().toString(),
             message: 'O cadastro do ativo foi realizado com sucesso'
         })
     }

@@ -43,7 +43,7 @@ export function makeGoal(
 
 @Injectable()
 export class GoalFactory {
-    constructor(private prisma: PrismaService) {}
+    constructor(readonly prisma: PrismaService) {}
 
     async makePrismaGoal(data: Partial<GoalProps> = {}): Promise<Goal> {
         const goal = makeGoal(data)

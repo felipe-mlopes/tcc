@@ -1,8 +1,7 @@
-import { Either, left, right } from "@/core/either"
-import { Investor } from "../entities/investor"
+import { Either, left, right } from "@/shared/exceptions/either"
 import { InvestorRepository } from "../repositories/investor-repository"
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
-import { NotAllowedError } from "@/core/errors/not-allowed-error"
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error"
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error"
 import { Injectable } from "@nestjs/common"
 
 interface UpdateInvestorServiceRequest {
@@ -17,7 +16,7 @@ type UpdateInvestorServiceResponse = Either<ResourceNotFoundError | NotAllowedEr
 
 @Injectable()
 export class UpdateInvestorService {
-    constructor(private investorRepository: InvestorRepository) {}
+    constructor(readonly investorRepository: InvestorRepository) {}
 
     public async execute({
         investorId,

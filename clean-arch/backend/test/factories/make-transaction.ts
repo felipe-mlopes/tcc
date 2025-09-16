@@ -68,7 +68,7 @@ export function makeTransaction(
 
 @Injectable()
 export class TransactionFactory {
-    constructor(private prisma: PrismaService) {}
+    constructor(readonly prisma: PrismaService) {}
 
     async makePrismaTransaction(
         data: Partial<TransactionProps> = {},

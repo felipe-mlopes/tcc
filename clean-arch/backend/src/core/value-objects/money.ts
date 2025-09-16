@@ -1,4 +1,4 @@
-import { NotAllowedError } from "../errors/not-allowed-error"
+import { NotAllowedError } from "../../shared/exceptions/errors/not-allowed-error"
 
 export class Money {
     private constructor(    

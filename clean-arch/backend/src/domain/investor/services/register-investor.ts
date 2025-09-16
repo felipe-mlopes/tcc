@@ -1,8 +1,8 @@
 import { Investor, InvestorProfile } from "../entities/investor";
-import { Either, left, right } from "@/core/either";
+import { Either, left, right } from "@/shared/exceptions/either";
 
 import { InvestorRepository } from "../repositories/investor-repository";
-import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error";
 import { DateOfBirth } from "@/core/value-objects/date-of-birth";
 import { Email } from "@/core/value-objects/email";
 import { Name } from "@/core/value-objects/name";
@@ -26,8 +26,8 @@ type RegisterInvestorServiceResponse = Either<NotAllowedError, {
 @Injectable()
 export class RegisterInvestorService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private hashGenerator: HashGenerator
+        readonly investorRepository: InvestorRepository,
+        readonly hashGenerator: HashGenerator
     ) {}
 
     public async execute({

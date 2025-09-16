@@ -1,14 +1,14 @@
 import { TransactionRepository } from "../repositories/transaction-repository"
-import { Either, left, right } from "@/core/either"
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
+import { Either, left, right } from "@/shared/exceptions/either"
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error"
 import { Transaction, TransactionType } from "../entities/transaction"
-import { NotAllowedError } from "@/core/errors/not-allowed-error"
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error"
 import { TransactionValidatorService } from "./transaction-validator"
 import { Injectable } from "@nestjs/common"
 
 interface RecordBuyTransactionServiceRequest {
     investorId: string,
-    assetName: string,
+    assetId: string,
     transactionType: TransactionType,
     quantity: number,
     price: number,
@@ -17,19 +17,20 @@ interface RecordBuyTransactionServiceRequest {
 }
 
 type RecordBuyTransactionServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
+    id: string,
     message: string
 }>
 
 @Injectable()
 export class RecordBuyTransactionService {
     constructor(
-        private transactionRepository: TransactionRepository,
-        private validator: TransactionValidatorService
+        readonly transactionRepository: TransactionRepository,
+        readonly validator: TransactionValidatorService
     ) {}
 
     public async execute({
         investorId,
-        assetName,
+        assetId,
         transactionType,
         quantity,
         price,
@@ -42,7 +43,7 @@ export class RecordBuyTransactionService {
 
         const validationResult = await this.validator.validate({
             investorId,
-            assetName,
+            assetId,
             quantity,
             price,
             fees
@@ -75,6 +76,7 @@ export class RecordBuyTransactionService {
         await this.transactionRepository.create(newBuyTransaction)
 
         return right({
+            id: newBuyTransaction.id.toValue().toString(),
             message: 'A transação de compra foi registrada com sucesso'
         })
     }

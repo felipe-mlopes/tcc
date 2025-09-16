@@ -41,7 +41,7 @@ export function makeInvestment(
 
 @Injectable()
 export class InvestmentFactory {
-    constructor(private prisma: PrismaService) {}
+    constructor(readonly prisma: PrismaService) {}
 
     async makePrismaInvestment(data: Partial<InvestmentProps> = {}): Promise<Investment> {
         const investment = makeInvestment(data)

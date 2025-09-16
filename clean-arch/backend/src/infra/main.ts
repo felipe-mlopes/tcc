@@ -2,7 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { EnvService } from './env/env.service';
-import './observability/opentelemetry/opentelemetry';
+import '../presentation/observability/opentelemetry/opentelemetry';
+import { MonitoringService } from './monitoring/monitoring.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,9 +29,10 @@ async function bootstrap() {
     ],
   });
 
+  app.get(MonitoringService);
   const envService = app.get(EnvService)
-  const port = envService.get('PORT')
-  
+
+  const port = envService.get('PORT')  
   await app.listen(port);
 }
 bootstrap();

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="src/domain/asset/services/register-asset.unit.spec.ts">
+    <testCase name="Register Asset - should be able to register a asset" duration="6" />
+  </file>
+  <file path="src/domain/goal/services/calculate-goal-projection.unit.spec.ts">
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate goal projection" duration="26" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate projection with sufficient monthly contribution" duration="5" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate projection with zero monthly contribution" duration="5" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate projection with insufficient monthly contribution" duration="3" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate recommended contribution with buffer" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate projection for goal already completed" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate projection for goal with surplus" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should be able to handle goal with zero target amount" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should be able to handle goal with past target date" duration="4" />
+    <testCase name="Calculate Investment Goal Projection - should not be able to calculate projection for non-existent investor" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should not be able to calculate projection for non-existent goal" duration="1" />
+    <testCase name="Calculate Investment Goal Projection - should not be able to calculate projection for inactive goal" duration="1" />
+    <testCase name="Calculate Investment Goal Projection - should not be able to calculate projection with empty scenarios" duration="1" />
+    <testCase name="Calculate Investment Goal Projection - should not be able to calculate projection with negative monthly contribution" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should not be able to calculate projection with wrong currency" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should not be able to calculate projection for goal from different investor" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate projection with multiple scenarios" duration="2" />
+    <testCase name="Calculate Investment Goal Projection - should be able to calculate projection and verify date calculations" duration="1" />
+  </file>
+  <file path="src/domain/goal/services/goal-projection-scenarios.unit.spec.ts">
+    <testCase name="Investment Goal Projection Scenarios - should create a conservative scenario with correct properties" duration="8" />
+    <testCase name="Investment Goal Projection Scenarios - should handle different currencies in conservative scenario" duration="1" />
+    <testCase name="Investment Goal Projection Scenarios - should handle zero amount" duration="5" />
+    <testCase name="Investment Goal Projection Scenarios - should create a moderate scenario with correct properties" duration="7" />
+    <testCase name="Investment Goal Projection Scenarios - should handle different currencies in moderate scenario" duration="4" />
+    <testCase name="Investment Goal Projection Scenarios - should create an aggressive scenario with correct properties" duration="3" />
+    <testCase name="Investment Goal Projection Scenarios - should handle large amounts in aggressive scenario" duration="5" />
+    <testCase name="Investment Goal Projection Scenarios - should create multiple scenarios with different amounts" duration="12" />
+    <testCase name="Investment Goal Projection Scenarios - should handle same amounts for all scenarios" duration="10" />
+    <testCase name="Investment Goal Projection Scenarios - should handle different currencies consistently" duration="11" />
+    <testCase name="Investment Goal Projection Scenarios - should handle negative amounts in conservative scenario" duration="4" />
+    <testCase name="Investment Goal Projection Scenarios - should handle decimal amounts in moderate scenario" duration="3" />
+    <testCase name="Investment Goal Projection Scenarios - should handle decimal amounts in aggressive scenario" duration="3" />
+    <testCase name="Investment Goal Projection Scenarios - should handle very large amounts" duration="3" />
+    <testCase name="Investment Goal Projection Scenarios - should handle mixed positive and negative amounts in multiple scenarios" duration="3" />
+    <testCase name="Investment Goal Projection Scenarios - should return objects with correct structure for individual scenarios" duration="6" />
+    <testCase name="Investment Goal Projection Scenarios - should return array with correct structure for multiple scenarios" duration="10" />
+  </file>
+  <file path="src/domain/goal/services/mark-goal-as-achieved.unit.spec.ts">
+    <testCase name="Mark Investment Goal As Achieved - should be able to mark investment goal as achieved" duration="4" />
+    <testCase name="Mark Investment Goal As Achieved - should not be able to mark investment goal with non-existent investor" duration="1" />
+    <testCase name="Mark Investment Goal As Achieved - should not be able to mark a non-existent goal" duration="1" />
+    <testCase name="Mark Investment Goal As Achieved - should not be able to mark when goal status is not Active" duration="2" />
+    <testCase name="Mark Investment Goal As Achieved - should not be able to mark when goal belongs to different user" duration="2" />
+    <testCase name="Mark Investment Goal As Achieved - should not be able to mark when goal status is Canceled" duration="1" />
+    <testCase name="Mark Investment Goal As Achieved - should handle optional reason parameter" duration="1" />
+    <testCase name="Mark Investment Goal As Achieved - should not affect other goals when marking one as achieved" duration="5" />
+  </file>
+  <file path="src/domain/goal/services/register-investment-goal.unit.spec.ts">
+    <testCase name="Register Goal - should be able to register a investment goal" duration="10" />
+    <testCase name="Register Goal - should be not able to register a investment goal without recorded investor" duration="5" />
+  </file>
+  <file path="src/domain/goal/services/update-goal-progess.unit.spec.ts">
+    <testCase name="Update Investment Goal Progress - should be able to update investment goal progress" duration="7" />
+    <testCase name="Update Investment Goal Progress - should not be able to edit a goal with non-existent investor" duration="5" />
+    <testCase name="Update Investment Goal Progress - should not be able to edit a non-existent goal" duration="3" />
+  </file>
+  <file path="src/domain/goal/services/update-investment-goal.unit.spec.ts">
+    <testCase name="Update Investment Goal - should be able to update a investment goal with all fields" duration="24" />
+    <testCase name="Update Investment Goal - should be able to update only name" duration="3" />
+    <testCase name="Update Investment Goal - should be able to update only description" duration="7" />
+    <testCase name="Update Investment Goal - should be able to update only target amount" duration="6" />
+    <testCase name="Update Investment Goal - should be able to update only target date" duration="6" />
+    <testCase name="Update Investment Goal - should be able to update only priority" duration="6" />
+    <testCase name="Update Investment Goal - should be able to mark goal as achieved" duration="4" />
+    <testCase name="Update Investment Goal - should be able to cancel a goal" duration="3" />
+    <testCase name="Update Investment Goal - should be able to reactivate a goal" duration="7" />
+    <testCase name="Update Investment Goal - should not be able to update a goal with non-existent investor" duration="8" />
+    <testCase name="Update Investment Goal - should not be able to update a non-existent goal" duration="4" />
+    <testCase name="Update Investment Goal - should not be able to update a goal without providing any field" duration="3" />
+    <testCase name="Update Investment Goal - should not update priority if it is the same as current" duration="4" />
+    <testCase name="Update Investment Goal - should not update status if it is the same as current" duration="2" />
+    <testCase name="Update Investment Goal - should be able to update multiple fields at once" duration="7" />
+  </file>
+  <file path="src/domain/investor/services/authenticate-investor.unit.spec.ts">
+    <testCase name="Authenticate Investor - should be able to authenticate an investor with valid credentials" duration="7" />
+    <testCase name="Authenticate Investor - should be not able to authenticate with wrong email" duration="4" />
+    <testCase name="Authenticate Investor - should be not able to authenticate with wrong password" duration="2" />
+    <testCase name="Authenticate Investor - should be able to call encrypter with investor id" duration="18" />
+  </file>
+  <file path="src/domain/investor/services/deactivate-investor.unit.spec.ts">
+    <testCase name="Desactive Investor - should be able to desactive investor record" duration="2" />
+    <testCase name="Desactive Investor - should be not able to desactive investor without recorded investor" duration="1" />
+  </file>
+  <file path="src/domain/investor/services/register-investor.unit.spec.ts">
+    <testCase name="Register Investor - should be able to register a investor" duration="42" />
+    <testCase name="Register Investor - should be able to hash the password before saving the investor" duration="8" />
+    <testCase name="Register Investor - should create an investor with correct value objects (Email, Name, CPF, Password)" duration="2" />
+    <testCase name="Register Investor - should be able to assign the Conservative risk profile to users aged 25-49 during registration" duration="4" />
+    <testCase name="Register Investor - should be able to assign the Conservative risk profile when user age is exactly 25" duration="6" />
+    <testCase name="Register Investor - should be able to assign the Aggressive risk profile to users under 25 during registration" duration="2" />
+    <testCase name="Register Investor - should be able to assign the Moderate risk profile to users 50 years or older during registration" duration="3" />
+    <testCase name="Register Investor - should be able to assign the Moderate risk profile when user age is exactly 50" duration="3" />
+    <testCase name="Register Investor - should be not able to register a new investor with email is already in use" duration="22" />
+    <testCase name="Register Investor - should be not able to register a new investor with cpf is already in use" duration="7" />
+    <testCase name="Register Investor - should be not able to register a new investor with invalid date of birth" duration="6" />
+    <testCase name="Register Investor - should be not able to register a new investor with date of birth is in the future" duration="6" />
+  </file>
+  <file path="src/domain/investor/services/update-investor.unit.spec.ts">
+    <testCase name="Update Investor - should be able to update investor record with new name and new email" duration="6" />
+    <testCase name="Update Investor - should be able to update investor record with new name only" duration="4" />
+    <testCase name="Update Investor - should be able to update investor record with new email only" duration="6" />
+    <testCase name="Update Investor - should be not able to update investor without recorded investor" duration="3" />
+    <testCase name="Update Investor - should be not able to update investor without having informed anything" duration="4" />
+  </file>
+  <file path="src/domain/portfolio/services/add-investment-to-portfolio.unit.spec.ts">
+    <testCase name="Add Investment to Portfolio - should be able to add investment to portfolio" duration="9" />
+    <testCase name="Add Investment to Portfolio - should update portfolio allocations after adding investment" duration="2" />
+    <testCase name="Add Investment to Portfolio - should not be able to add investment with non-existent investor" duration="2" />
+    <testCase name="Add Investment to Portfolio - should not be able to add investment with non-existent asset" duration="9" />
+    <testCase name="Add Investment to Portfolio - should not be able to add investment without portfolio" duration="4" />
+  </file>
+  <file path="src/domain/portfolio/services/create-portfolio.unit.spec.ts">
+    <testCase name="Create Portfolio - should be able to create a portfolio with all fields" duration="9" />
+    <testCase name="Create Portfolio - should be able to create a portfolio without description" duration="2" />
+    <testCase name="Create Portfolio - should not be able to create a portfolio with non-existent investor" duration="2" />
+  </file>
+  <file path="src/domain/portfolio/services/fetch-all-investments-by-portfolio-id.unit.spec.ts">
+    <testCase name="Fetch All Investments By PortfolioId - should be able to fetch all investiments by portfolio id" duration="15" />
+    <testCase name="Fetch All Investments By PortfolioId - should be able to fetch investments, returning an empty list if no investments are found" duration="4" />
+    <testCase name="Fetch All Investments By PortfolioId - should be able to paginated all investiments by portfolio id" duration="28" />
+    <testCase name="Fetch All Investments By PortfolioId - should be not able to get investment with non-existent investor" duration="4" />
+    <testCase name="Fetch All Investments By PortfolioId - should be not able to get investment without portfolio" duration="4" />
+  </file>
+  <file path="src/domain/portfolio/services/get-investment-by-asset-id.unit.spec.ts">
+    <testCase name="Get Investment By AssetId - should be able to get investment by asset id" duration="12" />
+    <testCase name="Get Investment By AssetId - should be able to get null by asset id" duration="3" />
+    <testCase name="Get Investment By AssetId - should be not able to get investment with non-existent investor" duration="5" />
+    <testCase name="Get Investment By AssetId - should be not able to get investment with non-existent asset" duration="4" />
+    <testCase name="Get Investment By AssetId - should be not able to get investment without portfolio" duration="13" />
+  </file>
+  <file path="src/domain/portfolio/services/update-investment-after-transaction.unit.spec.ts">
+    <testCase name="Update Investment After Transaction - should be able to update an existing investment after a buy transaction" duration="22" />
+    <testCase name="Update Investment After Transaction - should be able to update an existing investment after a sell transaction" duration="3" />
+    <testCase name="Update Investment After Transaction - should be able to update an existing investment after a dividend transaction" duration="3" />
+    <testCase name="Update Investment After Transaction - should be able to create new investment after a buy transaction when none exists" duration="2" />
+    <testCase name="Update Investment After Transaction - should be not able to update an investment with non-existent investor" duration="12" />
+    <testCase name="Update Investment After Transaction - should be not able to update an investment with non-existent transaction" duration="2" />
+    <testCase name="Update Investment After Transaction - should be not able to update an investment with non-existent asset" duration="2" />
+    <testCase name="Update Investment After Transaction - should be not able to update an investment when transaction type is not supported" duration="2" />
+    <testCase name="Update Investment After Transaction - should be not able to update an investment when calculation method fails" duration="12" />
+  </file>
+  <file path="src/domain/transaction/services/fetch-transactions-history-by-asset-id.unit.spec.ts">
+    <testCase name="Fetch Transactions History By AssetId Service - should be able to fetch transactions history by asset id" duration="7" />
+    <testCase name="Fetch Transactions History By AssetId Service - should be able to fetch transaction history, returning an empty list if no transactions are found for a given asset" duration="2" />
+    <testCase name="Fetch Transactions History By AssetId Service - should be able to paginated all transactions history by asset id" duration="9" />
+    <testCase name="Fetch Transactions History By AssetId Service - should be not able to fetch transaction history if investor does not exist" duration="2" />
+    <testCase name="Fetch Transactions History By AssetId Service - should be not able to fetch transaction history if portfolio does not exist" duration="2" />
+  </file>
+  <file path="src/domain/transaction/services/fetch-transactions-history-by-portfolio-id.unit.spec.ts">
+    <testCase name="Fetch Transactions History By PortfolioId Service - should be able to fetch transactions history by portfolio id" duration="12" />
+    <testCase name="Fetch Transactions History By PortfolioId Service - should be able to fetch transaction history, returning an empty list if no transactions are found" duration="3" />
+    <testCase name="Fetch Transactions History By PortfolioId Service - should be able to paginated all transactions history by portfolio id" duration="30" />
+    <testCase name="Fetch Transactions History By PortfolioId Service - should be not able to fetch transaction history if investor does not exist" duration="5" />
+    <testCase name="Fetch Transactions History By PortfolioId Service - should be not able to fetch transaction history if portfolio does not exist" duration="9" />
+  </file>
+  <file path="src/domain/transaction/services/record-buy-transaction.unit.spec.ts">
+    <testCase name="Record Buy Transaction Service - should be able to record buy transaction" duration="21" />
+    <testCase name="Record Buy Transaction Service - should be not able to record with transaction type other than buy" duration="8" />
+    <testCase name="Record Buy Transaction Service - should be not able to record if investor does not exist" duration="2" />
+    <testCase name="Record Buy Transaction Service - should be not able to record if asset does not exist" duration="2" />
+    <testCase name="Record Buy Transaction Service - should be not able to record if portfolio does not exist" duration="4" />
+    <testCase name="Record Buy Transaction Service - should be not able to record if quantity is zero" duration="2" />
+    <testCase name="Record Buy Transaction Service - should be not able to record if price is zero" duration="2" />
+    <testCase name="Record Buy Transaction Service - should be not able to record if fees is zero" duration="1" />
+  </file>
+  <file path="src/domain/transaction/services/record-dividend-transaction.unit.spec.ts">
+    <testCase name="Record Dividend Transaction Service - should be able to record dividend transaction" duration="19" />
+    <testCase name="Record Dividend Transaction Service - should be not able to record dividend with transaction type other than dividend" duration="2" />
+    <testCase name="Record Dividend Transaction Service - should be not able to record dividend if investor does not exist" duration="2" />
+    <testCase name="Record Dividend Transaction Service - should be not able to record dividend if asset does not exist" duration="2" />
+    <testCase name="Record Dividend Transaction Service - should be not able to record dividend if portfolio does not exist" duration="2" />
+    <testCase name="Record Dividend Transaction Service - should be not able to record dividend if price is zero" duration="9" />
+    <testCase name="Record Dividend Transaction Service - should be not able to record dividend if income is zero" duration="4" />
+  </file>
+  <file path="src/domain/transaction/services/record-sell-transaction.unit.spec.ts">
+    <testCase name="Record Sell Transaction Service - should be able to record sell transaction" duration="34" />
+    <testCase name="Record Sell Transaction Service - should be not able to record sell with transaction type other than sell" duration="11" />
+    <testCase name="Record Sell Transaction Service - should be not able to record sell if investor does not exist" duration="16" />
+    <testCase name="Record Sell Transaction Service - should be not able to record sell if asset does not exist" duration="11" />
+    <testCase name="Record Sell Transaction Service - should be not able to record sell if portfolio does not exist" duration="8" />
+    <testCase name="Record Sell Transaction Service - should be not able to record sell if quantity is zero" duration="5" />
+    <testCase name="Record Sell Transaction Service - should be not able to record sell if price is zero" duration="3" />
+    <testCase name="Record Sell Transaction Service - should be not able to record sell if fees is zero" duration="3" />
+  </file>
+  <file path="src/domain/transaction/services/transaction-validator.unit.spec.ts">
+    <testCase name="Transaction Validator Service - should be able to validate transaction with positive quantity, price and fees" duration="10" />
+    <testCase name="Transaction Validator Service - should be not able to validate transaction if investor does not exist" duration="1" />
+    <testCase name="Transaction Validator Service - should be not able to validate transaction if asset does not exist" duration="2" />
+    <testCase name="Transaction Validator Service - should be not able to validate transaction if portfolio does not exist" duration="2" />
+    <testCase name="Transaction Validator Service - should be not able to validate transaction if price is zero" duration="2" />
+  </file>
+  <file path="src/domain/transaction/services/update-transaction.unit.spec.ts">
+    <testCase name="Edit Transaction Service - should be able to edit a transaction when all fields are filled" duration="18" />
+    <testCase name="Edit Transaction Service - should be able to edit a transaction when at least one field is filled" duration="4" />
+    <testCase name="Edit Transaction Service - should be able to edit a transaction when only type is changed" duration="3" />
+    <testCase name="Edit Transaction Service - should be able to edit a transaction when quantity entered was negative" duration="2" />
+    <testCase name="Edit Transaction Service - should be able to edit a transaction when price entered was negative" duration="2" />
+    <testCase name="Edit Transaction Service - should be able to edit a transaction when fees entered was negative" duration="1" />
+    <testCase name="Edit Transaction Service - should be not able to edit a transaction if investor does not exist" duration="1" />
+    <testCase name="Edit Transaction Service - should be not able to edit a transaction if investor does not exist" duration="1" />
+    <testCase name="Edit Transaction Service - should be not able to edit a transaction if no updatable fields are provided" duration="2" />
+    <testCase name="Edit Transaction Service - should be not able to edit a transaction if quantity is zero" duration="1" />
+    <testCase name="Edit Transaction Service - should be not able to edit a transaction if price is zero" duration="2" />
+    <testCase name="Edit Transaction Service - should be not able to edit a transaction if fees is zero" duration="2" />
+  </file>
+</testExecutions>

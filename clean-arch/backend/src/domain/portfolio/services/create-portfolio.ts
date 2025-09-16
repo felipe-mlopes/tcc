@@ -1,6 +1,6 @@
-import { Either, left, right } from "@/core/either";
+import { Either, left, right } from "@/shared/exceptions/either";
 import { PortfolioRepository } from "../repositories/portfolio-repository";
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { Portfolio } from "../entities/portfolio";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
@@ -19,8 +19,8 @@ type CreatePortfolioServiceResponse = Either<ResourceNotFoundError, {
 @Injectable()
 export class CreatePortfolioService {
     constructor(
-        private portfolioRepository: PortfolioRepository,
-        private investorRepository: InvestorRepository
+        readonly portfolioRepository: PortfolioRepository,
+        readonly investorRepository: InvestorRepository
     ) {}
 
     public async execute({

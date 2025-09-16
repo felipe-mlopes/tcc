@@ -1,6 +1,6 @@
-import { Either, left, right } from "@/core/either"
+import { Either, left, right } from "@/shared/exceptions/either"
 import { Investment } from "../entities/investment"
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error"
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository"
 import { PortfolioRepository } from "../repositories/portfolio-repository"
 import { InvestmentRepository } from "../repositories/investment-repository"
@@ -23,9 +23,9 @@ type ValidatorFetchAllInvestmentsServiceResponse = Either<ResourceNotFoundError,
 @Injectable()
 export class FetchAllInvestmentsByPortfolioIdService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private portfolioRepository: PortfolioRepository,
-        private investmentRepository: InvestmentRepository
+        readonly investorRepository: InvestorRepository,
+        readonly portfolioRepository: PortfolioRepository,
+        readonly investmentRepository: InvestmentRepository
     ) {}
 
     public async execute({

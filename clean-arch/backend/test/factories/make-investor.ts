@@ -12,6 +12,7 @@ import { Investor, InvestorProfile, InvestorProps } from "@/domain/investor/enti
 
 import { PrismaService } from "@/infra/database/prisma/prisma.service";
 import { PrismaInvestorMapper } from "@/infra/database/prisma/mappers/prisma-investor-mapper";
+import { generateCPF } from "test/utils/gerenate-cpf";
 
 export const customFaker = new Faker({
     locale: [pt_BR]
@@ -21,10 +22,12 @@ export function makeInvestor(
     override: Partial<InvestorProps> = {},
     id?: UniqueEntityID
 ) {
+    const cpf = generateCPF()
+
     const fakerName = Name.create(faker.person.fullName())
     const fakerEmail = Email.create(faker.internet.email())
-    const fakerCpf = CPF.create("111.444.689-35")
-    const fakerpassword = Password.create(faker.internet.password({ prefix: '@' }))
+    const fakerCpf = CPF.create(cpf)
+    const fakerpassword = Password.create(faker.internet.password({ prefix: '@Pass123' }))
     const fakerDate = DateOfBirth.create(faker.date.birthdate())
 
     const investor = Investor.create(
@@ -45,7 +48,7 @@ export function makeInvestor(
 
 @Injectable()
 export class InvestorFactory {
-    constructor(private prisma: PrismaService) {}
+    constructor(readonly prisma: PrismaService) {}
 
     async makePrismaInvestor(data: Partial<InvestorProps> = {}): Promise<Investor> {
         const investor = makeInvestor(data)

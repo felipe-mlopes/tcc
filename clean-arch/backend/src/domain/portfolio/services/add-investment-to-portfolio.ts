@@ -1,8 +1,8 @@
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { InvestmentRepository } from "../repositories/investment-repository";
 import { PortfolioRepository } from "../repositories/portfolio-repository";
-import { Either, left, right } from "@/core/either";
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { Either, left, right } from "@/shared/exceptions/either";
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error";
 import { AssetRepository } from "@/domain/asset/repositories/asset-repository";
 import { Investment } from "../entities/investment";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
@@ -36,10 +36,10 @@ type ValidateServiceResponse = Either<ResourceNotFoundError, {
 @Injectable()
 export class AddInvestmentToPortfolioService {
     constructor(
-        private portfolioRepository: PortfolioRepository,
-        private assetRepository: AssetRepository,
-        private investmentRepository: InvestmentRepository,
-        private investorRepository: InvestorRepository
+        readonly portfolioRepository: PortfolioRepository,
+        readonly assetRepository: AssetRepository,
+        readonly investmentRepository: InvestmentRepository,
+        readonly investorRepository: InvestorRepository
     ) {}
 
     public async execute({

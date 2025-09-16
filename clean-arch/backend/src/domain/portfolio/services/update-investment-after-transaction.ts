@@ -2,10 +2,10 @@ import { TransactionRepository } from "@/domain/transaction/repositories/transac
 import { InvestmentRepository } from "../repositories/investment-repository";
 import { AssetRepository } from "@/domain/asset/repositories/asset-repository";
 import { Transaction, TransactionType } from "@/domain/transaction/entities/transaction";
-import { Either, left, right } from "@/core/either";
-import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { Either, left, right } from "@/shared/exceptions/either";
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error";
 import { Investment } from "../entities/investment";
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
 import { Injectable } from "@nestjs/common";
@@ -36,10 +36,10 @@ type CalculateImpactResponse = Either<NotAllowedError, {
 @Injectable()
 export class UpdateInvestmentAfterTransactionService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private investmentRepository: InvestmentRepository,
-        private transactionRepository: TransactionRepository,
-        private assetRepository: AssetRepository
+        readonly investorRepository: InvestorRepository,
+        readonly investmentRepository: InvestmentRepository,
+        readonly transactionRepository: TransactionRepository,
+        readonly assetRepository: AssetRepository
     ) {}
 
     public async execute({
@@ -158,7 +158,7 @@ export class UpdateInvestmentAfterTransactionService {
     }: CalculateImpactRequest): Promise<CalculateImpactResponse> {        
         currentInvestment.includeYield({
             yieldId: new UniqueEntityID(),
-            incomeValue: transaction.income!,
+            incomeValue: transaction.income,
             date: transaction.dateAt
         })
         

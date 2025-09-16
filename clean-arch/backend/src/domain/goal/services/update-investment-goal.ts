@@ -1,8 +1,8 @@
-import { Either, left, right } from "@/core/either";
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { Either, left, right } from "@/shared/exceptions/either";
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { GoalRepository } from "../repositories/goal-repository";
-import { NotAllowedError } from "@/core/errors/not-allowed-error";
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error";
 import { Goal, Priority, Status } from "../entities/goal";
 import { Money } from "@/core/value-objects/money";
 import { Injectable } from "@nestjs/common";
@@ -29,8 +29,8 @@ type ValidateServiceResponse = Either<ResourceNotFoundError | NotAllowedError, {
 @Injectable()
 export class UpdateInvestmentGoalService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private goalRepository: GoalRepository
+        readonly investorRepository: InvestorRepository,
+        readonly goalRepository: GoalRepository
     ) {}
 
     public async execute({

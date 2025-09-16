@@ -36,7 +36,7 @@ export function makeAsset(
 
 @Injectable()
 export class AssetFactory {
-    constructor(private prisma: PrismaService) {}
+    constructor(readonly prisma: PrismaService) {}
 
     async makePrismaAsset(data: Partial<AssetProps> = {}): Promise<Asset> {
         const asset = makeAsset(data)

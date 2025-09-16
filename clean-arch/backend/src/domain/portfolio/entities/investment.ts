@@ -1,6 +1,6 @@
 import { Entity } from "@/core/entities/entity";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
-import { Optional } from "@/core/types/optional";
+import { Optional } from "@/shared/types/optional";
 import { Money } from "@/core/value-objects/money";
 import { Percentage } from "@/core/value-objects/percentage";
 import { Quantity } from "@/core/value-objects/quantity";

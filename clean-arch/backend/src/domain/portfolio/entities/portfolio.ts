@@ -1,5 +1,5 @@
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
-import { Optional } from "@/core/types/optional";
+import { Optional } from "@/shared/types/optional";
 import { AggregateRoot } from "@/core/entities/aggregate-root";
 import { TotalValue } from "@/core/value-objects/total-value";
 

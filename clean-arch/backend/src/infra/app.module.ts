@@ -1,11 +1,14 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { envSchema } from './env/env';
-import { EnvModule } from './env/env.module';
-import { HttpModule } from './http/http.module';
-import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
+
+import { envSchema } from './env/env';
+import { AuthModule } from './auth/auth.module';
+import { EnvModule } from './env/env.module';
+import { HttpModule } from '../presentation/http/http.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { MonitoringMiddleware } from './monitoring/monitoring.middleware';
 
 @Module({
   imports: [
@@ -15,7 +18,8 @@ import { ZodValidationPipe } from 'nestjs-zod';
     }),
     AuthModule,
     EnvModule,
-    HttpModule
+    HttpModule,
+    MonitoringModule
   ],
   providers: [
     {
@@ -24,4 +28,8 @@ import { ZodValidationPipe } from 'nestjs-zod';
     }
   ]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MonitoringMiddleware).forRoutes('*')
+  }
+}

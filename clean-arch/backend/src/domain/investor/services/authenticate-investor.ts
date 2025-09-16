@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common"
 
-import { Either, left, right } from "@/core/either"
-import { WrongCredentialsError } from "@/core/errors/wrong-credentials-error"
+import { Either, left, right } from "@/shared/exceptions/either"
+import { WrongCredentialsError } from "@/shared/exceptions/errors/wrong-credentials-error"
 import { InvestorRepository } from "../repositories/investor-repository"
 import { HashComparer } from "../cryptography/hash-comparer"
 import { Encrypter } from "../cryptography/encrypter"
@@ -21,9 +21,9 @@ type AuthenticateInvestorServiceResponse = Either<
 @Injectable()
 export class AuthenticateInvestorService {
   constructor(
-    private investorRepository: InvestorRepository,
-    private hashComparer: HashComparer,
-    private encrypter: Encrypter,
+    readonly investorRepository: InvestorRepository,
+    readonly hashComparer: HashComparer,
+    readonly encrypter: Encrypter,
   ) {}
 
   async execute({

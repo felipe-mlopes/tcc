@@ -1,5 +1,5 @@
-import { Either, left, right } from "@/core/either";
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
+import { Either, left, right } from "@/shared/exceptions/either";
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error";
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository";
 import { GoalRepository } from "../repositories/goal-repository";
 import { Percentage } from "@/core/value-objects/percentage";
@@ -17,8 +17,8 @@ type UpdateGoalProgressServiceResponse = Either<ResourceNotFoundError, {
 Injectable()
 export class UpdateGoalProgressService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private goalRepository: GoalRepository
+        readonly investorRepository: InvestorRepository,
+        readonly goalRepository: GoalRepository
     ) {}
 
     public async execute({

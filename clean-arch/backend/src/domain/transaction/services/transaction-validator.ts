@@ -1,9 +1,9 @@
-import { Either, left, right } from "@/core/either"
+import { Either, left, right } from "@/shared/exceptions/either"
 import { Investor } from "@/domain/investor/entities/investor"
 import { Asset } from "@/domain/asset/entities/asset"
 import { Portfolio } from "@/domain/portfolio/entities/portfolio"
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error"
-import { NotAllowedError } from "@/core/errors/not-allowed-error"
+import { ResourceNotFoundError } from "@/shared/exceptions/errors/resource-not-found-error"
+import { NotAllowedError } from "@/shared/exceptions/errors/not-allowed-error"
 import { InvestorRepository } from "@/domain/investor/repositories/investor-repository"
 import { AssetRepository } from "@/domain/asset/repositories/asset-repository"
 import { PortfolioRepository } from "@/domain/portfolio/repositories/portfolio-repository"
@@ -13,7 +13,7 @@ import { Injectable } from "@nestjs/common"
 
 interface TransactionValidatorServiceRequest {
     investorId: string
-    assetName: string
+    assetId: string
     quantity?: number
     price: number
     fees?: number
@@ -33,14 +33,14 @@ type TransactionValidatorServiceResponse = Either<ResourceNotFoundError | NotAll
 @Injectable()
 export class TransactionValidatorService {
     constructor(
-        private investorRepository: InvestorRepository,
-        private assetRepository: AssetRepository,
-        private portfolioRepository: PortfolioRepository
+        readonly investorRepository: InvestorRepository,
+        readonly assetRepository: AssetRepository,
+        readonly portfolioRepository: PortfolioRepository
     ) {}
 
     async validate({
         investorId,
-        assetName,
+        assetId,
         quantity,
         price,
         fees,
@@ -51,7 +51,7 @@ export class TransactionValidatorService {
             'Investor not found.'
         ))
 
-        const asset = await this.assetRepository.findByName(assetName)
+        const asset = await this.assetRepository.findById(assetId)
         if (!asset) return left(new ResourceNotFoundError(
             'Asset not found.'
         ))
