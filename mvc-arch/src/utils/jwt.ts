@@ -1,19 +1,29 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
-export interface JWTPayload {
-  investorId: string;
-  email: string;
-}
+export class JWTService {
+  readonly secret: string;
+  readonly expiresIn: string;
 
-export class JWTUtil {
-  private static secret = process.env.JWT_SECRET || 'fallback-secret';
-  private static expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-
-  static generateToken(payload: JWTPayload): string {
-    return jwt.sign(payload, this.secret, { expiresIn: this.expiresIn });
+  constructor() {
+    this.secret = process.env.JWT_SECRET || 'your-secret-key';
+    this.expiresIn = process.env.JWT_EXPIRES_IN || '7';
   }
 
-  static verifyToken(token: string): JWTPayload {
-    return jwt.verify(token, this.secret) as JWTPayload;
+  generateToken(payload: string | object | Buffer): string {
+    const options: SignOptions = {
+      expiresIn: Number(this.expiresIn)
+    };
+    
+    return jwt.sign(payload, this.secret, options);
+  }
+
+  verifyToken(token: string): any {
+    try {
+      return jwt.verify(token, this.secret);
+    } catch (error) {
+      throw new Error('Token inválido');
+    }
   }
 }
+
+export const jwtService = new JWTService();

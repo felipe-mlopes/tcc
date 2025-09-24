@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="8" failures="0" errors="0" time="8.768424659">
+    <testsuite name="tests/e2e/goal.controller.e2e.spec.ts" timestamp="2025-09-21T18:56:46.101Z" hostname="LAPTOP-8A33DPQ3" tests="8" failures="0" errors="0" skipped="0" time="8.768424659">
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; POST /e2e/goals -&gt; cria meta do investidor" time="0.93102272">
+        </testcase>
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; PATCH /e2e/goals/:goalId -&gt; atualiza meta" time="0.663855991">
+        </testcase>
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; GET /e2e/goals/:goalId -&gt; busca meta por ID" time="0.628902688">
+        </testcase>
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; GET /e2e/goals -&gt; lista metas do investidor sem filtros" time="1.663854167">
+        </testcase>
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; GET /e2e/goals -&gt; lista metas com filtros de status e prioridade" time="0.614106941">
+        </testcase>
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; GET /e2e/goals-progress -&gt; obtém progresso das metas" time="0.582575231">
+        </testcase>
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; PATCH /e2e/goals/:goalId/achieve -&gt; marca meta como alcançada" time="0.603459558">
+        </testcase>
+        <testcase classname="tests/e2e/goal.controller.e2e.spec.ts" name="GoalController (E2E) &gt; PATCH /e2e/goals/:goalId/cancel -&gt; marca meta como cancelada" time="0.602079797">
+        </testcase>
+    </testsuite>
+</testsuites>

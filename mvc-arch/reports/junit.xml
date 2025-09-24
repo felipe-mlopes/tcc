@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="10" failures="0" errors="0" time="0.19109475">
+    <testsuite name="tests/unit/asset.service.spec.ts" timestamp="2025-09-20T14:00:33.726Z" hostname="LAPTOP-8A33DPQ3" tests="2" failures="0" errors="0" skipped="0" time="0.038515727">
+        <testcase classname="tests/unit/asset.service.spec.ts" name="AssetService &gt; createAsset: uppercases symbol e retorna asset criado" time="0.019747039">
+        </testcase>
+        <testcase classname="tests/unit/asset.service.spec.ts" name="AssetService &gt; searchAssets: retorna paginação e totalPages correto" time="0.016041451">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/goal.service.spec.ts" timestamp="2025-09-20T14:00:33.772Z" hostname="LAPTOP-8A33DPQ3" tests="2" failures="0" errors="0" skipped="0" time="0.039411815">
+        <testcase classname="tests/unit/goal.service.spec.ts" name="GoalService &gt; getGoalsProgress: soma valor total dos portfolios e calcula progresso" time="0.01880693">
+        </testcase>
+        <testcase classname="tests/unit/goal.service.spec.ts" name="GoalService &gt; markGoalAsAchieved: delega para updateGoal com Status.Achieved" time="0.017529842">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/investor.service.spec.ts" timestamp="2025-09-20T14:00:33.791Z" hostname="LAPTOP-8A33DPQ3" tests="1" failures="0" errors="0" skipped="0" time="0.009282207">
+        <testcase classname="tests/unit/investor.service.spec.ts" name="InvestorService.createInvestor &gt; hashea a senha, cria o investor e não devolve password" time="0.008811126">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/portfolio.service.spec.ts" timestamp="2025-09-20T14:00:33.795Z" hostname="LAPTOP-8A33DPQ3" tests="3" failures="0" errors="0" skipped="0" time="0.0607771">
+        <testcase classname="tests/unit/portfolio.service.spec.ts" name="PortfolioService &gt; createPortfolio: cria e retorna com investor incluso" time="0.01869429">
+        </testcase>
+        <testcase classname="tests/unit/portfolio.service.spec.ts" name="PortfolioService &gt; addInvestment (com portfolioId): exige portfolio existente e usa o MESMO id no investimento" time="0.017405202">
+        </testcase>
+        <testcase classname="tests/unit/portfolio.service.spec.ts" name="PortfolioService &gt; addInvestment (sem portfolioId): cria antes e usa o PRIMEIRO portfolio do investidor" time="0.021961378">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/transaction.service.spec.ts" timestamp="2025-09-20T14:00:33.804Z" hostname="LAPTOP-8A33DPQ3" tests="2" failures="0" errors="0" skipped="0" time="0.043107901">
+        <testcase classname="tests/unit/transaction.service.spec.ts" name="TransactionService &gt; createBuyTransaction: cria transação e investimento quando não existe" time="0.023146974">
+        </testcase>
+        <testcase classname="tests/unit/transaction.service.spec.ts" name="TransactionService &gt; createSellTransaction: lança erro se quantidade insuficiente" time="0.017197665">
+        </testcase>
+    </testsuite>
+</testsuites>

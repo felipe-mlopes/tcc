@@ -2,37 +2,42 @@
 
 #--- INVESTOR ---#
 ### Investor Register
-POST {{baseUrl}}/investors
+POST {{baseUrl}}/investor
 Content-Type: application/json
 
 {
   "name": "João Silva",
   "email": "joao.silva@example.com",
-  "cpf": "12345678901",
+  "cpf": "05886689745",
   "dateOfBirth": "1990-01-01",
-  "password": "umaSenhaMuitoSegura123"
+  "password": "#umaSenhaMuitoSegura123"
 }
 
 ### Investor Login
-# Copie o token de autenticação (JWT) da resposta para usar nas rotas protegidas
-@investor_token = {{investor_token}}
-POST {{baseUrl}}/investors/auth
+# @name login
+POST {{baseUrl}}/investor/auth
 Content-Type: application/json
 
 {
   "email": "joao.silva@example.com",
-  "password": "umaSenhaMuitoSegura123"
+  "password": "#umaSenhaMuitoSegura123"
 }
 
+###
+@accessToken = {{login.response.body.accessToken}}
+
 ### Get Investor Profile
-GET {{baseUrl}}/investors/profile
-Authorization: Bearer {{investor_token}}
+# @name profile
+GET {{baseUrl}}/investor/profile
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
+###
+@investorId = {{profile.response.body.data.id}}
+
 ### Update Investor Profile
-# Replace {id} with the actual investor ID
-PATCH {{baseUrl}}/investors/{id}
-Authorization: Bearer {{investor_token}}
+PATCH {{baseUrl}}/investor/{{investorId}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -41,43 +46,44 @@ Content-Type: application/json
 }
 
 ### Deactivate Account
-# Replace {id} with the actual investor ID
-PATCH {{baseUrl}}/investors/{id}/deactivate
-Authorization: Bearer {{investor_token}}
+PATCH {{baseUrl}}/investor/{{investorId}}/deactivate
+Authorization: Bearer {{accessToken}}
 
 
 #--- ASSET ---#
 ### Criar um Ativo (Asset)
-POST {{baseUrl}}/api/assets
+POST {{baseUrl}}/asset
 Content-Type: application/json
 
 {
 "symbol": "ITUB4",
 "name": "Itaú Unibanco PN",
-"assetType": "STOCK",
+"assetType": "Stock",
 "sector": "FINANCIAL_SERVICES",
 "exchange": "B3",
 "currency": "BRL"
 }
 
-@assetId = {{assetId}}+
+###
+@assetId = {{ITUB4.response.body.data.id}}
 
 ### List Assets with Search
-GET {{baseUrl}}/assets?search=ITUB&page=1&limit=10
+GET {{baseUrl}}/asset?search=ITUB&page=1&limit=10
 Content-Type: application/json
 
 ### Get Asset by ID
 # Replace {assetId} with actual asset ID
-GET {{baseUrl}}/assets/{assetId}
+GET {{baseUrl}}/asset/{assetId}
 Content-Type: application/json
 
 ### Get Asset by Symbol
-GET {{baseUrl}}/assets/symbol/ITUB4
+# @name ITUB4
+GET {{baseUrl}}/asset/symbol/ITUB4
 Content-Type: application/json
 
 ### Update Asset
 # Replace {assetId} with actual asset ID
-PATCH {{baseUrl}}/assets/{assetId}
+PATCH {{baseUrl}}/asset/{assetId}
 Content-Type: application/json
 
 {
@@ -88,8 +94,8 @@ Content-Type: application/json
 #--- PORTFÓLIO ---#
 ### Criar um Portfólio
 # Você precisa de um token de autenticação para essa e as próximas rotas
-POST {{baseUrl}}/portfolios
-Authorization: Bearer {{investor_token}}
+POST {{baseUrl}}/portfolio
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -98,18 +104,21 @@ Content-Type: application/json
 }
 
 ### Get All Portfolios
-GET {{baseUrl}}/portfolios
-Authorization: Bearer {{investor_token}}
+GET {{baseUrl}}/portfolio
+Authorization: Bearer {{accessToken}}
+
+###
+@portfolioId = 5ab27abc-783b-4dc2-b3c6-eab58a1d458c
 
 ### Get Portfolio by ID
 # Replace {portfolioId} with actual portfolio ID
-GET {{baseUrl}}/portfolios/{portfolioId}
-Authorization: Bearer {{investor_token}}
+GET {{baseUrl}}/portfolio/{{portfolioId}}
+Authorization: Bearer {{accessToken}}
 
 ### Add Investment to Portfolio
 # Replace {assetId} with actual asset ID
-POST {{baseUrl}}/portfolios/investment/{assetId}
-Authorization: Bearer {{investor_token}}
+POST {{baseUrl}}/portfolio/investment/{{assetId}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -119,22 +128,26 @@ Content-Type: application/json
 
 ### Get Investment by Asset
 # Replace {assetId} with actual asset ID
-GET {{baseUrl}}/portfolios/investment/{assetId}
-Authorization: Bearer {{investor_token}}
+GET {{baseUrl}}/portfolio/investment/{assetId}
+Authorization: Bearer {{accessToken}}
 
 ### Get All Investments with Pagination
-GET {{baseUrl}}/portfolios/investments?page=1&limit=10
-Authorization: Bearer {{investor_token}}
+GET {{baseUrl}}/portfolio/investments?page=1&limit=10
+Authorization: Bearer {{accessToken}}
 
 ### Update Investment After Transaction
 # Replace {transactionId} with actual transaction ID
-PATCH {{baseUrl}}/portfolios/investment/{transactionId}/update
-Authorization: Bearer {{investor_token}}
+PATCH {{baseUrl}}/portfolio/investment/{{transactionIdOnly}}/update
+Authorization: Bearer {{accessToken}}
 
 #--- TRANSACTIONS ---#
+@transactionId = {{Transaction.response.headers.Location}}
+@transactionIdOnly = 25becd0b-0049-4185-a54f-6107ae33544b
+
 ### Criar uma Transação de Compra (Buy)
+# @name Transaction
 POST {{baseUrl}}/transactions/buy/{{assetId}}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -146,7 +159,7 @@ Content-Type: application/json
 
 ### Criar uma Transação de Venda (Sell)
 POST {{baseUrl}}/transactions/sell/{{assetId}}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -158,7 +171,7 @@ Content-Type: application/json
 
 ### Criar uma Transação de Dividendo (Dividend)
 POST {{baseUrl}}/transactions/dividend/{{assetId}}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -170,27 +183,27 @@ Content-Type: application/json
 
 ### Get All Transactions with Pagination
 GET {{baseUrl}}/transactions?page=1&limit=10
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Get Transaction by ID
 # Replace {transactionId} with actual transaction ID
 GET {{baseUrl}}/transactions/{transactionId}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Get Transaction Summary
 # Optional: add ?assetId={assetId} to filter by specific asset
 GET {{baseUrl}}/transactions/summary
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Get Transaction Summary by Asset
 # Replace {assetId} with actual asset ID
 GET {{baseUrl}}/transactions/summary?assetId={assetId}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Update Transaction
 # Replace {transactionId} with actual transaction ID
 PUT {{baseUrl}}/transactions/{transactionId}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -203,7 +216,7 @@ Content-Type: application/json
 ### Criar uma Meta (Goal)
 @goal_id = {{goal_id}}
 POST {{baseUrl}}/goals
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -216,15 +229,15 @@ Content-Type: application/json
 
 ### Obter Todas as Metas
 GET {{baseUrl}}/goals
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Obter uma Meta Específica
 GET {{baseUrl}}/goals/{{goal_id}}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Atualizar uma Meta
 PUT {{baseUrl}}/goals/{{goal_id}}
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -237,12 +250,12 @@ Content-Type: application/json
 
 ### Marcar Meta como Alcançada
 PATCH {{baseUrl}}/goals/{{goal_id}}/achieve
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Marcar Meta como Cancelada
 PATCH {{baseUrl}}/goals/{{goal_id}}/cancel
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}
 
 ### Buscar Progresso da Meta
 GET {{baseUrl}}/goals/progress
-Authorization: Bearer {{investor_token}}
+Authorization: Bearer {{accessToken}}

@@ -11,7 +11,6 @@ router.post('/', GoalController.createGoal);
 router.get('/', GoalController.getGoals);
 router.get('/:goalId', GoalController.getGoalById);
 router.put('/:goalId', GoalController.updateGoal);
-router.delete('/:goalId', GoalController.deleteGoal);
 router.patch('/:goalId/achieve', GoalController.markGoalAsAchieved);
 router.patch('/:goalId/cancel', GoalController.markGoalAsCancelled);
 

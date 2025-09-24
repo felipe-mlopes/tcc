@@ -1,32 +1,22 @@
 services:
-  postgres:
-    image: postgres:15
-    container_name: financial_postgres
-    environment:
-      POSTGRES_DB: financial_api
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+  postgres_mvc_invest:
+    image: postgres:15-alpine
+    container_name: investment_postgres_mvc
+    restart: always
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  app:
-    build: .
-    container_name: financial_api
-    ports:
-      - "3000:3000"
     environment:
-      DATABASE_URL: "postgresql://postgres:password@postgres:5432/financial_api"
-      JWT_SECRET: "your-super-secret-jwt-key-here"
-      JWT_EXPIRES_IN: "7d"
-      PORT: 3000
-      NODE_ENV: production
-    depends_on:
-      - postgres
+      POSTGRES_DB: investment_mvc_db
+      POSTGRES_USER: investment_mvc_user
+      POSTGRES_PASSWORD: investment_mvc_password
     volumes:
-      - .:/app
-      - /app/node_modules
+      - postgres_data_mvc:/var/lib/postgresql/data
+    networks:
+      - investment_mvc_network
 
 volumes:
-  postgres_data:
+  postgres_data_mvc:
+
+networks:
+  investment_mvc_network:
+    driver: bridge

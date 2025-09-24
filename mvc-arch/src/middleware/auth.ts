@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { JWTUtil } from '../utils/jwt';
+import { jwtService } from '../utils/jwt';
 
 export interface AuthenticatedRequest extends Request {
   investor?: {
@@ -17,7 +17,7 @@ export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: N
     }
 
     const token = authHeader.substring(7);
-    const decoded = JWTUtil.verifyToken(token);
+    const decoded = jwtService.verifyToken(token);
 
     req.investor = {
       id: decoded.investorId,

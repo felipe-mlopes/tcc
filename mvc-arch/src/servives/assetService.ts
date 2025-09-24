@@ -99,27 +99,4 @@ export class AssetService {
       },
     };
   }
-
-  static async updateAsset(assetId: string, data: {
-    name?: string;
-    assetType?: AssetType;
-    sector?: string;
-    exchange?: string;
-    currency?: string;
-  }) {
-    const updateData: any = {};
-
-    if (data.name) updateData.name = data.name;
-    if (data.assetType) updateData.assetType = data.assetType;
-    if (data.sector) updateData.sector = data.sector;
-    if (data.exchange) updateData.exchange = data.exchange.toUpperCase();
-    if (data.currency) updateData.currency = data.currency.toUpperCase();
-
-    const asset = await prisma.asset.update({
-      where: { id: assetId },
-      data: updateData,
-    });
-
-    return asset;
-  }
 }

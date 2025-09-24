@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { EncryptionUtil } from '../utils/encryption';
-import { JWTUtil } from '../utils/jwt';
+import { jwtService } from '../utils/jwt';
 
 const prisma = new PrismaClient();
 
@@ -53,7 +53,7 @@ export class InvestorService {
       throw new Error('Credenciais inválidas');
     }
 
-    const token = JWTUtil.generateToken({
+    const token = jwtService.generateToken({
       investorId: investor.id,
       email: investor.email,
     });

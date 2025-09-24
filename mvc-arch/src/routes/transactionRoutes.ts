@@ -12,7 +12,6 @@ router.post('/buy/:assetId', TransactionController.createBuyTransaction);
 router.post('/sell/:assetId', TransactionController.createSellTransaction);
 router.post('/dividend/:assetId', TransactionController.createDividendTransaction);
 router.get('/:transactionId', TransactionController.getTransactionById);
-router.get('/summary', TransactionController.getTransactionSummary);
 router.get('/', validatePagination, TransactionController.getTransactions);
 
 export default router;

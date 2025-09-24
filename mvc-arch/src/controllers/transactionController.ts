@@ -38,13 +38,15 @@ export class TransactionController {
         });
       }
 
-      await TransactionService.createBuyTransaction(investorId, {
+      const created = await TransactionService.createBuyTransaction(investorId, {
         assetId,
         quantity,
         price,
         fees,
         dateAt,
       });
+
+      res.setHeader('Location', `/transaction/${created.id}`)
 
       res.status(201).json({
         success: true,
@@ -99,13 +101,15 @@ export class TransactionController {
         });
       }
 
-      await TransactionService.createSellTransaction(investorId, {
+      const created = await TransactionService.createSellTransaction(investorId, {
         assetId,
         quantity,
         price,
         fees,
         dateAt,
       });
+
+      res.setHeader('Location', `/transaction/${created.id}`)
 
       res.status(201).json({
         success: true,
@@ -167,13 +171,15 @@ export class TransactionController {
         });
       }
 
-      await TransactionService.createDividendTransaction(investorId, {
+      const created = await TransactionService.createDividendTransaction(investorId, {
         assetId,
         quantity,
         price,
         income,
         dateAt,
       });
+
+      res.setHeader('Location', `/transaction/${created.id}`)
 
       res.status(201).json({
         success: true,
@@ -335,32 +341,6 @@ export class TransactionController {
       res.status(200).json({
         success: true,
         data: transaction,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: 'Erro interno do servidor',
-      });
-    }
-  }
-
-  static async getTransactionSummary(req: AuthenticatedRequest, res: Response) {
-    try {
-      const investorId = req.investor?.id;
-      const { assetId } = req.query;
-
-      if (!investorId) {
-        return res.status(401).json({
-          success: false,
-          error: 'Token inválido',
-        });
-      }
-
-      const summary = await TransactionService.getTransactionSummary(investorId, assetId as string);
-
-      res.status(200).json({
-        success: true,
-        data: summary,
       });
     } catch (error) {
       res.status(500).json({

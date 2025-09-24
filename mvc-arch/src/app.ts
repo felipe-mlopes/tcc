@@ -31,14 +31,16 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // máximo 100 requests por IP por janela de tempo
+  max: process.env.NODE_ENV === 'test' ? 10000 : 100, // 10000 para testes
   message: {
     success: false,
     error: 'Muitas tentativas, tente novamente em 15 minutos',
   },
 });
 
-app.use(limiter);
+if (process.env.NODE_ENV !== 'test') {
+  app.use(limiter);
+}
 
 // Middlewares para parsing
 app.use(express.json({ limit: '10mb' }));

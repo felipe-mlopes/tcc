@@ -23,7 +23,7 @@ export class AssetController {
         });
       }
 
-      await AssetService.createAsset({
+      const created = await AssetService.createAsset({
         symbol,
         name,
         assetType,
@@ -31,6 +31,8 @@ export class AssetController {
         exchange,
         currency,
       });
+
+      res.setHeader('Location', `/asset/${created.id}`)
 
       res.status(201).json({
         success: true,
@@ -120,54 +122,6 @@ export class AssetController {
         data: result,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: 'Erro interno do servidor',
-      });
-    }
-  }
-
-  static async updateAsset(req: Request, res: Response) {
-    try {
-      const { assetId } = req.params;
-      const { name, assetType, sector, exchange, currency } = req.body;
-
-      if (!name && !assetType && !sector && !exchange && !currency) {
-        return res.status(400).json({
-          success: false,
-          error: 'Pelo menos um campo deve ser informado para atualização',
-        });
-      }
-
-      // Valida se o assetType é válido (se fornecido)
-      if (assetType && !Object.values(AssetType).includes(assetType)) {
-        return res.status(400).json({
-          success: false,
-          error: 'Tipo de ativo inválido. Valores válidos: ' + Object.values(AssetType).join(', '),
-        });
-      }
-
-      const asset = await AssetService.updateAsset(assetId, {
-        name,
-        assetType,
-        sector,
-        exchange,
-        currency,
-      });
-
-      res.setHeader('Location', `/api/assets/${asset.id}`);
-      res.status(200).json({
-        success: true,
-        message: 'Ativo atualizado com sucesso',
-      });
-    } catch (error: any) {
-      if (error.code === 'P2025') {
-        return res.status(404).json({
-          success: false,
-          error: 'Ativo não encontrado',
-        });
-      }
-
       res.status(500).json({
         success: false,
         error: 'Erro interno do servidor',

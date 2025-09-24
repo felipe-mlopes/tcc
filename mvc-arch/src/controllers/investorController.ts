@@ -7,13 +7,15 @@ export class InvestorController {
     try {
       const { email, name, cpf, dateOfBirth, password } = req.body;
 
-      await InvestorService.createInvestor({
+      const created = await InvestorService.createInvestor({
         email,
         name,
         cpf,
         dateOfBirth,
         password,
       });
+
+      res.setHeader('Location', `/investor/${created.id}`)
 
       res.status(201).json({
         success: true,
@@ -53,11 +55,15 @@ export class InvestorController {
         });
       }
 
-      await InvestorService.authenticateInvestor(email, password);
+      const create = await InvestorService.authenticateInvestor(email, password);
+
+      const accessToken = create.accessToken
 
       res.status(200).json({
         success: true,
         message: 'Autenticação realizada com sucesso',
+        accessToken
+
       });
     } catch (error: any) {
       res.status(401).json({

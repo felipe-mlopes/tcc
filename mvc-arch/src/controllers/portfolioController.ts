@@ -22,10 +22,12 @@ export class PortfolioController {
         });
       }
 
-      await PortfolioService.createPortfolio(investorId, {
+      const created = await PortfolioService.createPortfolio(investorId, {
         name,
         description,
       });
+
+      res.setHeader('Location', `/portfolio/${created.id}`)
 
       res.status(201).json({
         success: true,
@@ -41,7 +43,8 @@ export class PortfolioController {
 
   static async addInvestment(req: AuthenticatedRequest, res: Response) {
     try {
-      const { assetId, quantity, currentPrice } = req.body;
+      const { assetId } = req.params;
+      const { quantity, currentPrice } = req.body;
       const investorId = req.investor?.id;
 
       if (!investorId) {

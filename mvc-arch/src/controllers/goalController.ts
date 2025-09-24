@@ -45,13 +45,15 @@ export class GoalController {
         });
       }
 
-      await GoalService.createGoal(investorId, {
+      const created = await GoalService.createGoal(investorId, {
         name,
         description,
         targetAmount,
         targetDate,
         priority,
       });
+
+      res.setHeader('Location', `/goal/${created.id}`)
 
       res.status(201).json({
         success: true,
@@ -214,38 +216,6 @@ export class GoalController {
         data: goals,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: 'Erro interno do servidor',
-      });
-    }
-  }
-
-  static async deleteGoal(req: AuthenticatedRequest, res: Response) {
-    try {
-      const { goalId } = req.params;
-      const investorId = req.investor?.id;
-
-      if (!investorId) {
-        return res.status(401).json({
-          success: false,
-          error: 'Token inválido',
-        });
-      }
-
-      await GoalService.deleteGoal(investorId, goalId);
-
-      res.status(200).json({
-        success: true
-      });
-    } catch (error: any) {
-      if (error.message.includes('não encontrada')) {
-        return res.status(404).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
       res.status(500).json({
         success: false,
         error: 'Erro interno do servidor',

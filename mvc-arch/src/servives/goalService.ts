@@ -113,23 +113,6 @@ export class GoalService {
     return goals;
   }
 
-  static async deleteGoal(investorId: string, goalId: string) {
-    // Verifica se a meta pertence ao investidor
-    const existingGoal = await prisma.goal.findUnique({
-      where: { id: goalId },
-    });
-
-    if (!existingGoal || existingGoal.investorId !== investorId) {
-      throw new Error('Meta não encontrada');
-    }
-
-    await prisma.goal.delete({
-      where: { id: goalId },
-    });
-
-    return { message: 'Meta excluída com sucesso' };
-  }
-
   static async getGoalsProgress(investorId: string) {
     const goals = await prisma.goal.findMany({
       where: { 
