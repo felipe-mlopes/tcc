@@ -44,9 +44,8 @@ describe('Record Dividend Transaction (E2E)', () => {
         const investorId = investor.id.toValue().toString()
         const accessToken = jwt.sign({ sub: investorId })
 
-        const asset = await assetFactory.makePrismaAsset({
-            name: 'PETR4'
-        })
+        const asset = await assetFactory.makePrismaAsset()
+        const assetId = asset.id.toValue().toString()
 
         const portfolio = await portfolioFactory.makePrismaPortfolio({
             investorId: investor.id
@@ -57,18 +56,20 @@ describe('Record Dividend Transaction (E2E)', () => {
             .post('/transactions/dividend')
             .set('Authorization', `Bearer ${accessToken}`)
             .send({
-                assetName: asset.name,
+                assetId,
                 quantity: 20,
                 price: 50,
                 income: 100,
                 dateAt: "2025-07-31T14:30:00Z"
             })
 
-        console.log(response.body)
         expect(response.statusCode).toBe(201)
         expect(response.body).toEqual({
             message: 'A transação de dividendo foi registrada com sucesso',
         })
+
+        expect(response.headers.location).toBeDefined()
+        expect(response.headers.location).toMatch(/^\/transactions\/dividend\/[a-zA-Z0-9-]+$/)
 
         const transactionOnDatabase = await prisma.transaction.findFirst({
             where: {

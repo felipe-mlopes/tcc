@@ -44,9 +44,8 @@ describe('Record Buy Transaction (E2E)', () => {
         const investorId = investor.id.toValue().toString()
         const accessToken = jwt.sign({ sub: investorId })
 
-        const asset = await assetFactory.makePrismaAsset({
-            name: 'PETR4'
-        })
+        const asset = await assetFactory.makePrismaAsset()
+        const assetId = asset.id.toValue().toString()
 
         const portfolio = await portfolioFactory.makePrismaPortfolio({
             investorId: investor.id
@@ -57,7 +56,7 @@ describe('Record Buy Transaction (E2E)', () => {
             .post('/transactions/buy')
             .set('Authorization', `Bearer ${accessToken}`)
             .send({
-                assetName: asset.name,
+                assetId,
                 quantity: 20,
                 price: 50,
                 fees: 1,
@@ -70,7 +69,7 @@ describe('Record Buy Transaction (E2E)', () => {
         })
 
         expect(response.headers.location).toBeDefined()
-        expect(response.headers.location).toMatch(/^\/asset\/[a-zA-Z0-9-]+$/)
+        expect(response.headers.location).toMatch(/^\/transactions\/buy\/[a-zA-Z0-9-]+$/)
 
         const transactionOnDatabase = await prisma.transaction.findFirst({
             where: {

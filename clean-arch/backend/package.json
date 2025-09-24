@@ -22,8 +22,7 @@
     "test:debug": "node --inspect-brk -r ts-node/register vitest run --threads false",
     "test:unit": "vitest run --config ./vitest.config.unit.ts",
     "test:unit:watch": "vitest --config ./vitest.config.unit.ts",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "test:e2e:watch": "vitest --config ./vitest.config.e2e.ts",
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts --reporter=verbose --reporter=junit",
     "test:performance": "./run-performance-test.sh",
     "load:test": "docker run --rm -i grafana/k6 run - < metrics/performance/k6/load-test.js",
     "profile:doctor": "npm run build && npx clinic doctor --dest metrics/performance/clinic --autocannon [ -c 50 -d 20 -T 'Load Test - Standard' ] -- node dist/src/infra/main.js",
@@ -35,7 +34,8 @@
     "profile:flame": "npm run build && npx clinic flame --dest metrics/performance/clinic --open -- node dist/src/infra/main.js",
     "profile:bubble": "npm run build && npx clinic bubbleprof --dest metrics/performance/clinic --open -- node dist/src/infra/main.js",
     "profile:heap": "npm run build && npx clinic heapprofiler --dest metrics/performance/clinic --open -- node dist/src/infra/main.js",
-    "profile:clean": "npx clinic clean metrics/performance/clinic"
+    "profile:clean": "npx clinic clean metrics/performance/clinic",
+    "analyze": "ts-node metrics/quality/ts-morph/usage_example.ts"
   },
   "keywords": [],
   "author": "",
@@ -81,7 +81,7 @@
     "@swc/core": "^1.13.5",
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^22.17.2",
+    "@types/node": "^22.18.5",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.3",
     "@vitest/coverage-v8": "^3.2.4",

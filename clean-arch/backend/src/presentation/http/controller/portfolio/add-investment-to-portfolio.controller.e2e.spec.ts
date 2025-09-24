@@ -71,7 +71,6 @@ describe('Add Investment to Portfolio (E2E)', () => {
             },
         })
 
-        console.log(investmentOnDatabase)
         expect(investmentOnDatabase).toBeTruthy()
     })
 })

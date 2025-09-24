@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="src/presentation/http/controller/investor/authenticate-investor.controller.e2e.spec.ts">
+    <testCase name="Auth Investor (E2E) - [POST] /investor/auth" duration="527" />
+  </file>
+  <file path="src/presentation/http/controller/investor/deactivate-investor.controller.e2e.spec.ts">
+    <testCase name="Deactivate Investor (E2E) - [PATCH] /investor/:id/desactive" duration="523" />
+  </file>
+  <file path="src/presentation/http/controller/investor/register-investor.controller.e2e.spec.ts">
+    <testCase name="Register Investor (E2E) - [POST] /investor" duration="514" />
+  </file>
+  <file path="src/presentation/http/controller/investor/update-investor.controller.e2e.spec.ts">
+    <testCase name="Update Investor (E2E) - [PATCH] /investor/:id" duration="474" />
+  </file>
+</testExecutions>
